@@ -467,7 +467,10 @@ class ValidateTest(unittest.TestCase):
                 self.assertIn("pessoas", errors[0])
         data = example_input()
         data["store"]["days_open_per_week"] = 5
-        self.assertTrue(any("days_open_per_week" in e or "dias abertos" in e.lower() for e in calc.validate(data)))
+        self.assertEqual(
+            [e for e in calc.validate(data) if "days_open_per_week" in e],
+            ["Dias abertos por semana (days_open_per_week) precisa ser 6 ou 7."],
+        )
         data = example_input()
         data["sectors"][2]["avg_monthly_salary"] = -100
         errors = calc.validate(data)
@@ -632,6 +635,72 @@ class CliTest(unittest.TestCase):
         p = self.call(args=("--input", "/nao/existe.json"))
         self.assertEqual(p.returncode, 2)
         self.assertNotIn("Traceback", p.stderr)
+
+
+class FixRound1Test(unittest.TestCase):
+    script = str(SKILL / "scripts" / "calc.py")
+
+    def cli(self, data):
+        return subprocess.run(
+            [sys.executable, self.script], input=json.dumps(data), capture_output=True, text=True, encoding="utf-8"
+        )
+
+    def assert_clean_rejection(self, data):
+        p = self.cli(data)
+        self.assertEqual(p.returncode, 2, p.stdout + p.stderr)
+        self.assertNotIn("Traceback", p.stderr)
+        self.assertTrue(json.loads(p.stdout)["errors"])
+
+    def test_bad_params_override_values(self):
+        for bad in (
+            {"daily_hours_limit": "x"},
+            {"daily_hours_limit": 0},
+            {"phases": []},
+            {"phases": [PARAMS["phases"][0]]},
+            {"phases": [{**PARAMS["phases"][0], "starts_on": "x"}, PARAMS["phases"][1]]},
+            {"phases": [{**PARAMS["phases"][0], "weekly_hours": 0}, PARAMS["phases"][1]]},
+            {"phases": [{**PARAMS["phases"][0], "max_work_days": 8}, PARAMS["phases"][1]]},
+            {"overtime_divisor_per_weekly_hour": 0},
+            {"weeks_per_month": "a"},
+            {"current": {"weekly_hours": 0, "max_work_days": 6}},
+        ):
+            with self.subTest(bad=bad):
+                self.assert_clean_rejection(example_input(params_override=bad))
+
+    def test_bad_top_level_overrides_in_network_mode(self):
+        data = {
+            "today": TODAY,
+            "overrides": "abc",
+            "stores": [{"name": "A", "store": dict(STORE), "sectors": copy.deepcopy(EXAMPLE_SECTORS)}],
+        }
+        self.assertTrue(calc.validate(data))
+        self.assert_clean_rejection(data)
+
+    def test_max_work_days_override_range(self):
+        for bad in (0.5, 8, 5.5, "5"):
+            with self.subTest(bad=bad):
+                self.assertTrue(calc.validate(example_input(overrides={"max_work_days_override": bad})))
+        self.assertEqual(calc.validate(example_input(overrides={"max_work_days_override": 6})), [])
+
+    def test_current_work_days_and_null_hours(self):
+        data = example_input()
+        data["sectors"][0]["current_work_days"] = 9
+        self.assertTrue(any("Setor 1" in e and "dias" in e for e in calc.validate(data)))
+        data = example_input()
+        data["sectors"][0]["current_weekly_hours"] = None
+        self.assertTrue(any("Setor 1" in e for e in calc.validate(data)))
+
+    def test_main_catch_all(self):
+        import io
+        from unittest import mock
+
+        out = io.StringIO()
+        with mock.patch.object(calc, "run", side_effect=RuntimeError("boom")), \
+                mock.patch.object(sys, "stdin", io.StringIO(json.dumps(example_input()))), \
+                mock.patch.object(sys, "stdout", out):
+            code = calc.main([])
+        self.assertEqual(code, 2)
+        self.assertEqual(json.loads(out.getvalue()), {"errors": ["Erro inesperado ao calcular: RuntimeError."]})
 
 
 if __name__ == "__main__":

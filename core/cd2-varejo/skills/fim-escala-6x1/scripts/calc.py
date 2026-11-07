@@ -413,10 +413,12 @@ def _validate_overrides(overrides, prefix, errors):
     if not isinstance(overrides, dict):
         errors.append(f"{prefix}overrides precisa ser um objeto.")
         return
-    for key in ("weekly_hours_override", "max_work_days_override"):
-        value = overrides.get(key)
-        if value is not None and not (_is_number(value) and 0 <= value <= 168):
-            errors.append(f"{prefix}{key} precisa ser um número maior ou igual a zero (0 ou vazio usa a regra geral).")
+    value = overrides.get("weekly_hours_override")
+    if value is not None and not (_is_number(value) and 0 <= value <= 168):
+        errors.append(f"{prefix}weekly_hours_override precisa ser um número maior ou igual a zero (0 ou vazio usa a regra geral).")
+    value = overrides.get("max_work_days_override")
+    if value is not None and not (_is_int(value) and 0 <= value <= 7):
+        errors.append(f"{prefix}max_work_days_override precisa ser um número inteiro de 1 a 7 (0 ou vazio usa a regra geral).")
     cap = overrides.get("overtime_cap_hours_per_day")
     if cap is not None and not (_is_number(cap) and cap >= 0):
         errors.append(f"{prefix}overtime_cap_hours_per_day precisa ser um número maior ou igual a zero.")
@@ -463,11 +465,69 @@ def _validate_store_block(store, sectors, overrides, prefix, errors):
         posts = sec.get("min_simultaneous_staff")
         if posts is not None and not (_is_int(posts) and posts >= 0):
             errors.append(f"{label}: postos abertos ao mesmo tempo precisa ser um número inteiro maior ou igual a zero.")
+        if "current_work_days" in sec:
+            cwd = sec["current_work_days"]
+            if not (_is_int(cwd) and 1 <= cwd <= 7):
+                errors.append(f"{label}: dias de trabalho atuais precisa ser um número inteiro de 1 a 7.")
         cur = sec.get("current_weekly_hours", 44)
         if cur is None or not (_is_number(cur) and 0 < cur <= 168):
             errors.append(f"{label}: jornada semanal atual precisa ser um número maior que zero.")
     if not any_people and not errors:
         errors.append(f"{prefix}Preencha as pessoas de pelo menos um setor.")
+
+
+_POSITIVE_PARAMS = ("weeks_per_month", "overtime_divisor_per_weekly_hour", "daily_hours_limit")
+_NON_NEGATIVE_PARAMS = (
+    "default_charges_factor", "overtime_multiplier", "default_overtime_cap_hours_per_day",
+    "red_person_equivalent", "amber_person_equivalent",
+)
+_BOOL_PARAMS = ("sunday_rest_preferred", "salary_reduction_allowed", "collective_bargaining_override",
+                "verified_against_official_text")
+
+
+def _validate_rule_block(block, label, errors):
+    if not isinstance(block, dict):
+        errors.append(f"params_override: {label} precisa ser um objeto.")
+        return
+    hours = block.get("weekly_hours")
+    if not (_is_number(hours) and 0 < hours <= 168):
+        errors.append(f"params_override: {label}.weekly_hours precisa ser um número maior que zero.")
+    days = block.get("max_work_days")
+    if not (_is_int(days) and 1 <= days <= 7):
+        errors.append(f"params_override: {label}.max_work_days precisa ser um número inteiro de 1 a 7.")
+
+
+def _validate_params_override(po, errors):
+    for key in _POSITIVE_PARAMS:
+        if key in po and not (_is_number(po[key]) and po[key] > 0):
+            errors.append(f"params_override: {key} precisa ser um número maior que zero.")
+    for key in _NON_NEGATIVE_PARAMS:
+        if key in po and not (_is_number(po[key]) and po[key] >= 0):
+            errors.append(f"params_override: {key} precisa ser um número maior ou igual a zero.")
+    for key in _BOOL_PARAMS:
+        if key in po and not isinstance(po[key], bool):
+            errors.append(f"params_override: {key} precisa ser verdadeiro ou falso.")
+    for key in ("version", "source"):
+        if key in po and not (isinstance(po[key], str) and po[key].strip()):
+            errors.append(f"params_override: {key} precisa ser um texto.")
+    if "current" in po:
+        _validate_rule_block(po["current"], "current", errors)
+    if "phases" in po:
+        phases = po["phases"]
+        if not isinstance(phases, list) or len(phases) < 2:
+            errors.append("params_override: phases precisa ser uma lista com pelo menos 2 fases.")
+            return
+        starts = []
+        for i, phase in enumerate(phases, start=1):
+            label = f"phases[{i}]"
+            _validate_rule_block(phase, label, errors)
+            ok = isinstance(phase, dict) and _valid_date(phase.get("starts_on"))
+            if not ok:
+                errors.append(f"params_override: {label}.starts_on precisa ser uma data no formato AAAA-MM-DD.")
+            else:
+                starts.append(phase["starts_on"])
+        if len(starts) == len(phases) and starts != sorted(starts):
+            errors.append("params_override: phases precisa estar em ordem de data de início.")
 
 
 def validate(data) -> list:
@@ -487,7 +547,10 @@ def validate(data) -> list:
                 load_params(po)
             except ValueError as exc:
                 errors.append(f"params_override: {exc}.")
+            else:
+                _validate_params_override(po, errors)
     if "stores" in data:
+        _validate_overrides(data.get("overrides"), "", errors)
         stores = data["stores"]
         if not isinstance(stores, list) or not stores:
             errors.append("stores precisa ser uma lista com pelo menos uma loja.")
@@ -523,10 +586,8 @@ def _normalize_sector(sec: dict) -> dict:
     out = dict(sec)
     out.setdefault("name", "")
     out["min_simultaneous_staff"] = sec.get("min_simultaneous_staff") or None
-    if out.get("current_weekly_hours") is None:
-        out["current_weekly_hours"] = 44
-    if out.get("current_work_days") is None:
-        out["current_work_days"] = 6
+    out.setdefault("current_weekly_hours", 44)
+    out.setdefault("current_work_days", 6)
     return out
 
 
@@ -621,10 +682,14 @@ def main(argv=None) -> int:
         data = json.loads(raw)
     except ValueError as exc:
         return _fail([f"JSON inválido: {exc}."])
-    errors = validate(data)
-    if errors:
-        return _fail(errors)
-    print(json.dumps(run(data), ensure_ascii=False, indent=2))
+    try:
+        errors = validate(data)
+        if errors:
+            return _fail(errors)
+        output = json.dumps(run(data), ensure_ascii=False, indent=2)
+    except Exception as exc:  # rede de seguranca: a validacao e quem deve barrar entrada ruim
+        return _fail([f"Erro inesperado ao calcular: {type(exc).__name__}."])
+    print(output)
     return 0
 
 
