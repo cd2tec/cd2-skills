@@ -8,6 +8,8 @@ sys.path.insert(0, str(ROOT / "core" / "cd2-varejo" / "shared" / "scripts"))
 
 import brand  # noqa: E402
 
+EM = chr(0x2014)
+EN = chr(0x2013)
 REGRA = "Decreto 12.712/2025"
 DATA = "07/11/2026"
 
@@ -84,8 +86,8 @@ class BrandTest(unittest.TestCase):
 
     def test_no_dash_in_disclaimer(self):
         text = brand.disclaimer(REGRA, DATA)
-        self.assertNotIn("—", text)
-        self.assertNotIn("–", text)
+        self.assertNotIn(EM, text)
+        self.assertNotIn(EN, text)
         self.assertIn("nossa leitura de Decreto 12.712/2025 em 07/11/2026,", text)
 
     def test_tokens_and_css(self):
@@ -95,13 +97,13 @@ class BrandTest(unittest.TestCase):
         self.assertIn("prefers-color-scheme: dark", css)
         self.assertIn("Manrope", css)
         self.assertIn("1200px", css)
-        self.assertNotIn("—", css)
-        self.assertNotIn("–", css)
+        self.assertNotIn(EM, css)
+        self.assertNotIn(EN, css)
 
     def test_brand_sources_have_no_dash(self):
         src = (ROOT / "core/cd2-varejo/shared/scripts/brand.py").read_text()
-        self.assertNotIn("—", src)
-        self.assertNotIn("–", src)
+        self.assertNotIn(EM, src)
+        self.assertNotIn(EN, src)
 
 
 if __name__ == "__main__":
