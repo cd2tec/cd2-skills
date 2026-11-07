@@ -1,0 +1,31 @@
+{
+  "version": "2026-11-02",
+  "source": "Emenda Constitucional 141, de 16/10/2026, publicada no DOU de 16/10/2026",
+  "verified_against_official_text": true,
+  "official_text_url": "https://www.planalto.gov.br/ccivil_03/constituicao/emendas/emc/emc141.htm",
+  "current": { "weekly_hours": 44, "max_work_days": 6, "rest_days": 1 },
+  "daily_hours_limit": 8,
+  "phases": [
+    {
+      "id": "phase1",
+      "starts_on": "2026-12-16",
+      "weekly_hours": 42,
+      "max_work_days": 5,
+      "rest_days": 2,
+      "start_date_uncertain": false,
+      "requires_collective_agreement": true
+    },
+    {
+      "id": "phase2",
+      "starts_on": "2027-12-16",
+      "weekly_hours": 40,
+      "max_work_days": 5,
+      "rest_days": 2,
+      "start_date_uncertain": false,
+      "requires_collective_agreement": false
+    }
+  ],
+  "sunday_rest_preferred": true,
+  "salary_reduction_allowed": false,
+  "collective_bargaining_override": true
+}

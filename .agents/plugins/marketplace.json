@@ -1,0 +1,20 @@
+{
+  "name": "cd2-skills",
+  "interface": {
+    "displayName": "CD2 Skills (CD2 Tech)"
+  },
+  "plugins": [
+    {
+      "name": "cd2-varejo",
+      "source": {
+        "source": "local",
+        "path": "./plugins/codex/cd2-varejo"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

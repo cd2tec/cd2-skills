@@ -23,7 +23,10 @@ from pathlib import Path
 # brand.py fica ao lado deste arquivo no pacote final (o sync copia). No
 # repositorio (layout core) ele mora em cd2-varejo/shared/scripts.
 _HERE = Path(__file__).resolve().parent
-for _p in (_HERE, _HERE.parents[2] / "shared" / "scripts"):
+_PATHS = [_HERE]
+if len(_HERE.parents) > 2:
+    _PATHS.append(_HERE.parents[2] / "shared" / "scripts")
+for _p in _PATHS:
     if _p.is_dir() and str(_p) not in sys.path:
         sys.path.append(str(_p))
 
@@ -36,8 +39,16 @@ SCENARIO_ORDER = ("without_agreement", "with_agreement")
 
 # ---------------------------------------------------------------- parametros
 
+def _find_reference(name: str) -> Path:
+    # references/ ao lado de scripts/, ou tudo na mesma pasta (conhecimento do GPT).
+    for path in (REFERENCES / name, _HERE / name):
+        if path.is_file():
+            return path
+    raise FileNotFoundError(name)
+
+
 def _read_json(name: str) -> dict:
-    with open(REFERENCES / name, encoding="utf-8") as fh:
+    with open(_find_reference(name), encoding="utf-8") as fh:
         return json.load(fh)
 
 

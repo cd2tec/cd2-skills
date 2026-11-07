@@ -1,0 +1,9 @@
+{
+  "default_charges_factor": 0.7,
+  "weeks_per_month": 4.33,
+  "overtime_multiplier": 1.5,
+  "overtime_divisor_per_weekly_hour": 5,
+  "default_overtime_cap_hours_per_day": 2,
+  "red_person_equivalent": 0.5,
+  "amber_person_equivalent": 0.25
+}

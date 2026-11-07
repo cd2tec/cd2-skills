@@ -1,0 +1,16 @@
+{
+  "name": "CD2 Escala 6x1",
+  "description": "Calcula o impacto do fim da escala 6x1 (EC 141/2026) na sua loja: quantas pessoas contratar, quanto custa por mês e por ano, setores no semáforo e o que fazer primeiro, com e sem acordo coletivo. Da CD2 Tech.",
+  "conversation_starters": [
+    "Quantas pessoas vou precisar contratar com o fim da escala 6x1?",
+    "Quanto a jornada de 40 horas vai custar para o meu supermercado?",
+    "Tenho a convenção coletiva aqui. Muda alguma coisa com 42 horas?",
+    "Quero calcular o fim da 6x1 para as lojas da minha rede"
+  ],
+  "capabilities": {
+    "web_browsing": true,
+    "code_interpreter": true,
+    "image_generation": false
+  },
+  "profile_picture": "knowledge/assets/brand/simbolo.svg"
+}

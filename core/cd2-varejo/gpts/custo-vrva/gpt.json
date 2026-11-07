@@ -1,0 +1,16 @@
+{
+  "name": "CD2 VR/VA: quanto custa",
+  "description": "Mostra quanto o vale-refeição e o vale-alimentação custam de verdade para a sua loja, frente ao Decreto 12.712/2025: taxa acima do teto de 3,6%, dinheiro parado além dos 15 dias, bandeiras no semáforo e o que fazer primeiro. Da CD2 Tech.",
+  "conversation_starters": [
+    "Quanto eu pago a mais de taxa no vale-refeição e no vale-alimentação?",
+    "A taxa da minha operadora de vale passa do teto de 3,6%?",
+    "Tenho o extrato da Alelo e da Ticket. Pode conferir para mim?",
+    "O que a maquininha que aceita todos os vales muda para a minha loja?"
+  ],
+  "capabilities": {
+    "web_browsing": true,
+    "code_interpreter": true,
+    "image_generation": false
+  },
+  "profile_picture": "knowledge/assets/brand/simbolo.svg"
+}

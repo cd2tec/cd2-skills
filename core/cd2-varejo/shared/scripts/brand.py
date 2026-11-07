@@ -2,7 +2,8 @@
 
 So biblioteca padrao. O sync copia este arquivo para scripts/ de cada skill e
 os logos para assets/brand/, por isso os logos sao lidos de ../assets/brand/
-relativo a este arquivo.
+relativo a este arquivo. No conhecimento de um GPT o ChatGPT poe todos os
+arquivos numa pasta so; nesse caso os logos ficam ao lado deste arquivo.
 """
 import html
 import re
@@ -10,7 +11,21 @@ import urllib.parse
 from decimal import ROUND_HALF_UP, Decimal
 from pathlib import Path
 
-_ASSETS = Path(__file__).resolve().parent.parent / "assets" / "brand"
+_HERE = Path(__file__).resolve().parent
+
+
+def _assets_dir() -> Path:
+    for path in (_HERE.parent / "assets" / "brand", _HERE / "assets" / "brand", _HERE):
+        if (path / "cd2tech-horizontal.svg").is_file():
+            return path
+    return _HERE.parent / "assets" / "brand"
+
+
+_ASSETS = _assets_dir()
+
+# Texto puro, sem f-string: o sync troca o placeholder pelo utm_source de cada
+# plataforma e o valor chega intacto ao link.
+UTM_SOURCE = "{{UTM_SOURCE}}"
 
 TOKENS = {
     "blue-retail": "#0000ff",
@@ -84,10 +99,7 @@ def format_date_br(iso: str) -> str:
 
 def link(url: str, campaign: str) -> str:
     sep = "&" if "?" in url else "?"
-    return (
-        f"{url}{sep}utm_source={{{{UTM_SOURCE}}}}&utm_medium=skill"
-        f"&utm_campaign={campaign}"
-    )
+    return url + sep + "utm_source=" + UTM_SOURCE + "&utm_medium=skill&utm_campaign=" + campaign
 
 
 def whatsapp_link(skill_title: str, platform_title: str) -> str:

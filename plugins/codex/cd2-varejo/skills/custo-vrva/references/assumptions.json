@@ -1,0 +1,8 @@
+{
+  "money_cost_month_percent": 2,
+  "days_per_month": 30,
+  "red_excess_rate_points": 1,
+  "red_days": 30,
+  "max_rate_percent": 30,
+  "max_days": 120
+}

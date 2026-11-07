@@ -1,0 +1,21 @@
+{
+  "name": "cd2-varejo",
+  "version": "0.1.0",
+  "description": "Skills da CD2 Tech para o DeepSeek Harness (DSH): fim-escala-6x1 calcula o impacto do fim da escala 6x1 (EC 141/2026) na folha e na operação da loja; custo-vrva mostra quanto o VR e o VA custam de verdade frente ao Decreto 12.712/2025. Calculadoras gerenciais para decidir com números.",
+  "author": {
+    "name": "CD2 Tech",
+    "url": "https://cd2.com.br"
+  },
+  "homepage": "https://cd2tec.github.io/cd2-skills/",
+  "repository": "https://github.com/cd2tec/cd2-skills",
+  "license": "CC-BY-NC-ND-4.0",
+  "keywords": ["cd2", "varejo", "supermercado", "escala-6x1", "jornada", "vale-refeicao", "vale-alimentacao", "calculadora", "deepseek", "dsh"],
+  "harness": "dsh",
+  "layout": "flat-skills",
+  "skillsDir": "skills",
+  "install": {
+    "script": "install.py",
+    "defaultTarget": "~/.agents/skills",
+    "note": "O DSH não lê este arquivo. Ele registra nome, versão e licença do pacote (conferidos por scripts/sync_plugins.py) e descreve o layout para quem instala à mão."
+  }
+}
