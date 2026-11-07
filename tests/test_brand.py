@@ -29,6 +29,31 @@ class BrandTest(unittest.TestCase):
         self.assertNotEqual(brand.logo_svg("light"), brand.logo_svg("dark"))
         self.assertIn("#ffffff", brand.logo_svg("dark").lower())
 
+    def test_footer_html_auto_has_both_logos(self):
+        html = brand.footer_html(REGRA, DATA)
+        self.assertEqual(html.count("<svg"), 2)
+        self.assertIn("cd2-logo--light", html)
+        self.assertIn("cd2-logo--dark", html)
+
+    def test_footer_html_forced_theme_has_single_logo(self):
+        dark = brand.footer_html(REGRA, DATA, theme="dark")
+        self.assertEqual(dark.count("<svg"), 1)
+        self.assertIn("#ffffff", dark.lower())
+        self.assertNotIn("cd2-logo--light", dark)
+        light = brand.footer_html(REGRA, DATA, theme="light")
+        self.assertEqual(light.count("<svg"), 1)
+        self.assertNotIn("cd2-logo--dark", light)
+        self.assertNotEqual(light, dark)
+
+    def test_css_toggles_logos(self):
+        css = brand.base_css()
+        self.assertIn(".cd2-logo--dark { display: none; }", css)
+        self.assertIn(".cd2-logo--light { display: none; }", css)
+        self.assertIn('[data-theme="light"] .cd2-logo--dark', css)
+        self.assertIn('[data-theme="dark"] .cd2-logo--light', css)
+        dark_media = css.split("prefers-color-scheme: dark", 1)[1]
+        self.assertIn(".cd2-logo--dark", dark_media)
+
     def test_footer_text_uses_literal_name(self):
         self.assertTrue(brand.footer_text(REGRA, DATA).startswith("CD2 Tech\n"))
 

@@ -102,24 +102,38 @@ def disclaimer(regra: str, data_br: str) -> str:
     return _DISCLAIMER.format(regra=regra, data=data_br)
 
 
-def logo_svg(theme: str = "light") -> str:
+def _logo(theme: str, css_class: str) -> str:
     name = "cd2tech-horizontal-white.svg" if theme == "dark" else "cd2tech-horizontal.svg"
     svg = (_ASSETS / name).read_text(encoding="utf-8")
     svg = re.sub(r"^\s*<\?xml[^>]*\?>\s*", "", svg)
+
     # Remove width/height fixos da tag raiz para o logo escalar pelo CSS (viewBox mantido).
     def fix_root(m):
         tag = re.sub(r'\s(?:width|height)="[^"]*"', "", m.group(0))
         return tag.replace(
-            "<svg", '<svg class="cd2-logo" role="img" aria-label="CD2 Tech"', 1
+            "<svg", f'<svg class="{css_class}" role="img" aria-label="CD2 Tech"', 1
         )
 
     return re.sub(r"<svg\b[^>]*>", fix_root, svg, count=1).strip()
 
 
-def footer_html(regra: str, data_br: str, theme: str = "light") -> str:
+def logo_svg(theme: str = "light") -> str:
+    return _logo("dark" if theme == "dark" else "light", "cd2-logo")
+
+
+def logo_pair_html() -> str:
+    """Os dois logos inline; o base_css() mostra um conforme o tema do leitor."""
+    return (
+        _logo("light", "cd2-logo cd2-logo--light")
+        + _logo("dark", "cd2-logo cd2-logo--dark")
+    )
+
+
+def footer_html(regra: str, data_br: str, theme: str = "auto") -> str:
+    logo = logo_svg(theme) if theme in ("light", "dark") else logo_pair_html()
     return (
         '<footer class="cd2-assinatura">'
-        f'<div class="cd2-assinatura-logo">{logo_svg(theme)}</div>'
+        f'<div class="cd2-assinatura-logo">{logo}</div>'
         f'<p class="cd2-assinatura-aviso">{esc(disclaimer(regra, data_br))}</p>'
         "</footer>"
     )
@@ -202,6 +216,15 @@ a {{ color: var(--link); }}
 }}
 .cd2-botao:hover {{ background: var(--action-hover); }}
 .cd2-logo {{ height: 32px; width: auto; display: block; }}
+.cd2-logo--dark {{ display: none; }}
+@media (prefers-color-scheme: dark) {{
+  :root:not([data-theme="light"]) .cd2-logo--dark {{ display: block; }}
+  :root:not([data-theme="light"]) .cd2-logo--light {{ display: none; }}
+}}
+[data-theme="dark"] .cd2-logo--dark {{ display: block; }}
+[data-theme="dark"] .cd2-logo--light {{ display: none; }}
+[data-theme="light"] .cd2-logo--dark {{ display: none; }}
+[data-theme="light"] .cd2-logo--light {{ display: block; }}
 .cd2-assinatura {{
   display: flex;
   gap: 24px;
