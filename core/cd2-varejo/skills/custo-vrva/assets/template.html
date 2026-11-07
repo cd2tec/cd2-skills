@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="pt-BR"{{THEME_ATTR}}>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="{{COLOR_SCHEME}}">
+<title>{{TITLE}}</title>
+<style>
+{{FONT_FACE}}
+{{BASE_CSS}}
+
+/* Entrega da skill custo-vrva. Tokens da marca vêm do base_css(); aqui só o que é desta página.
+   Cores de situação ficam fora da paleta da CD2, como na calculadora, e só servem ao semáforo. */
+:root {
+  --hairline: #a1a6ae;
+  --red: #c4281c; --on-red: #ffffff;
+  --amber: #ffb800; --on-amber: #000000;
+  --green: #13804a; --on-green: #ffffff;
+  --highlight: #dbff2a; --on-highlight: #000000;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --hairline: #464a53; color-scheme: dark; }
+}
+:root[data-theme="dark"] { --hairline: #464a53; color-scheme: dark; }
+
+html { -webkit-text-size-adjust: 100%; }
+body { overflow-x: hidden; }
+h1, h2, h3, h4, p, ol, ul, dl, dd { margin: 0; }
+main.pagina { max-width: 1120px; display: flex; flex-direction: column; gap: 24px; padding-top: 8px; padding-bottom: 8px; }
+@media (min-width: 768px) { main.pagina { gap: 32px; padding-left: 48px; padding-right: 48px; } }
+
+/* tipografia do design system */
+.eyebrow { font-size: 12px; line-height: 16px; font-weight: 700; letter-spacing: .12em; }
+.display-lg { font-size: clamp(30px, 8vw, 40px); line-height: 1.1; font-weight: 800; letter-spacing: -.015em; text-wrap: balance; }
+.heading-md { font-size: 28px; line-height: 34px; font-weight: 700; letter-spacing: -.01em; text-wrap: balance; }
+.heading-sm { font-size: 22px; line-height: 28px; font-weight: 700; }
+.body-sm { font-size: 14px; line-height: 20px; }
+.caption { font-size: 12px; line-height: 16px; font-weight: 500; color: var(--ink-muted); }
+.mut { color: var(--ink-muted); }
+.label { font-size: 14px; line-height: 20px; font-weight: 600; }
+.stat { font-size: clamp(36px, 10vw, 48px); line-height: 1.08; font-weight: 800; letter-spacing: -.02em; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.stat-sm { font-size: clamp(28px, 7vw, 34px); line-height: 1.12; font-weight: 800; letter-spacing: -.015em; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.stat-line { font-size: 14px; line-height: 20px; color: var(--ink-muted); }
+.num { font-variant-numeric: tabular-nums; }
+.nw { white-space: nowrap; }
+
+/* cabeçalho */
+.topo { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; min-height: 72px; padding-top: 16px; }
+.topo .cd2-logo { height: 28px; }
+.topo-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; text-align: right; min-width: 0; }
+.topo-meta .eyebrow { color: var(--link); }
+.topo-meta .para { font-size: 14px; line-height: 20px; font-weight: 600; overflow-wrap: anywhere; }
+@media (max-width: 480px) { .topo-meta { align-items: flex-start; text-align: left; } }
+
+/* blocos de conexão */
+.bloco { border-radius: var(--radius-lg); padding: 24px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.b-raised { background: var(--surface-raised); border: 1px solid var(--hairline); }
+.b-brand { background: var(--surface-brand); color: var(--ink-on-brand); }
+@media (min-width: 768px) { .bloco { padding: 32px; } }
+
+/* veredito */
+.veredito { gap: 16px; }
+.v-red { background: var(--red); color: var(--on-red); }
+.v-amber { background: var(--amber); color: var(--on-amber); }
+.v-green { background: var(--green); color: var(--on-green); }
+.veredito .stat-line { color: inherit; opacity: .92; }
+.veredito-sub { font-size: 18px; line-height: 28px; max-width: 52ch; }
+.veredito-numeros { display: grid; gap: 16px; padding-top: 16px; border-top: 1.5px solid currentColor; }
+@media (min-width: 768px) { .veredito-numeros { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px; } }
+.veredito-numeros > div { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.selo { align-self: flex-start; display: inline-flex; align-items: center; gap: 6px; border-radius: var(--radius-pill); padding: 4px 12px; font-size: 14px; line-height: 20px; font-weight: 700; border: 1.5px solid currentColor; }
+.selo svg, .pill svg { width: 12px; height: 12px; flex: none; }
+
+/* pílulas do semáforo: sempre com texto */
+.pill { display: inline-flex; align-items: center; gap: 4px; border-radius: var(--radius-pill); padding: 2px 10px; font-size: 12px; line-height: 18px; font-weight: 700; white-space: nowrap; }
+.pill.red { background: var(--red); color: var(--on-red); }
+.pill.amber { background: var(--amber); color: var(--on-amber); }
+.pill.green { background: var(--green); color: var(--on-green); }
+
+/* aviso de parâmetro atualizado */
+.aviso { display: grid; grid-template-columns: 24px minmax(0, 1fr); gap: 12px; padding: 16px; border: 2px solid var(--ink); border-radius: var(--radius-md); background: var(--surface-raised); }
+.aviso svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.aviso b { display: block; font-weight: 800; }
+.aviso p { font-size: 14px; line-height: 20px; }
+
+/* seções */
+.secao { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.secao-topo { display: flex; flex-direction: column; gap: 4px; }
+
+/* os dois custos */
+.custos { display: grid; gap: 16px; }
+@media (min-width: 768px) { .custos { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; } }
+.custo { gap: 8px; }
+.custo h2 { font-weight: 700; }
+
+/* bandeiras */
+.tabela { width: 100%; border-collapse: separate; border-spacing: 0; background: var(--surface-raised); border: 1px solid var(--hairline); border-radius: var(--radius-md); overflow: hidden; font-size: 14px; line-height: 20px; }
+.tabela th, .tabela td { text-align: left; vertical-align: top; padding: 14px 12px; border-bottom: 1px solid var(--hairline); }
+.tabela td.n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.tabela tbody tr:last-child > *, .tabela tfoot tr:last-child > * { border-bottom: 0; }
+.tabela thead th { font-size: 12px; line-height: 16px; font-weight: 700; letter-spacing: .04em; color: var(--ink-muted); background: var(--surface); }
+.tabela thead th.n { text-align: right; }
+.tabela tbody th { font-size: 16px; line-height: 22px; font-weight: 700; overflow-wrap: anywhere; }
+.tabela tfoot th, .tabela tfoot td { font-weight: 800; background: var(--surface); border-top: 1.5px solid var(--border); }
+@media (max-width: 860px) {
+  .tabela, .tabela tbody, .tabela tfoot, .tabela tr, .tabela th, .tabela td { display: block; width: 100%; }
+  .tabela { background: none; border: 0; border-radius: 0; }
+  .tabela thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .tabela tbody, .tabela tfoot { display: flex; flex-direction: column; gap: 8px; }
+  .tabela tfoot { margin-top: 8px; }
+  .tabela tr { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); background: var(--surface-raised); border: 1px solid var(--hairline); border-radius: var(--radius-md); padding: 4px 0; }
+  .tabela tfoot tr { background: var(--surface); border-color: var(--border); }
+  .tabela th, .tabela td, .tabela tfoot th, .tabela tfoot td { border: 0; padding: 8px 16px; background: none; }
+  .tabela th[scope="row"] { grid-column: 1 / -1; order: -2; }
+  .tabela td[data-label="Situação"], .tabela td[data-label="Total por mês"] { order: -1; }
+  .tabela td.n { text-align: left; white-space: normal; }
+  .tabela td:empty { display: none; }
+  .tabela td::before { content: attr(data-label); display: block; font-size: 12px; line-height: 16px; font-weight: 700; color: var(--ink-muted); margin-bottom: 2px; }
+}
+.legenda { font-size: 14px; line-height: 20px; color: var(--ink-muted); }
+
+/* o que fazer */
+.acoes { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 16px; counter-reset: a; }
+.acoes li { counter-increment: a; display: grid; grid-template-columns: 32px minmax(0, 1fr); gap: 12px; align-items: start; }
+.acoes li::before { content: counter(a); width: 32px; height: 32px; border-radius: var(--radius-pill); background: var(--action); color: var(--ink-on-brand); font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+.acoes li span { padding-top: 4px; overflow-wrap: anywhere; }
+
+/* listas simples */
+.lista { padding-left: 20px; display: flex; flex-direction: column; gap: 10px; }
+.lista li { overflow-wrap: anywhere; }
+
+/* leitura da CD2 */
+.leitura .grifo { align-self: flex-start; background: var(--highlight); color: var(--on-highlight); border-radius: var(--radius-pill); padding: 4px 12px; font-size: 12px; line-height: 16px; font-weight: 700; letter-spacing: .12em; }
+.leitura ul { padding-left: 20px; display: flex; flex-direction: column; gap: 10px; font-size: 18px; line-height: 28px; }
+.leitura li { overflow-wrap: anywhere; }
+
+/* situação na Justiça */
+.justica .data { align-self: flex-start; border: 1.5px solid var(--border); border-radius: var(--radius-pill); padding: 2px 10px; font-size: 12px; line-height: 18px; font-weight: 700; }
+.justica .texto { font-size: 18px; line-height: 28px; font-weight: 700; overflow-wrap: anywhere; }
+
+/* como calculamos */
+.conta { display: flex; flex-direction: column; gap: 10px; font-size: 14px; line-height: 21px; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.conta b { font-weight: 700; }
+.fora { padding-left: 20px; display: flex; flex-direction: column; gap: 4px; font-size: 14px; line-height: 20px; color: var(--ink-muted); }
+
+/* fontes */
+.fontes { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.fontes li { display: flex; flex-direction: column; gap: 2px; overflow-wrap: anywhere; }
+.fontes a { font-weight: 600; }
+
+/* comercial e pontes */
+.botoes { display: flex; flex-wrap: wrap; gap: 8px; }
+.cd2-botao { min-height: 48px; display: inline-flex; align-items: center; justify-content: center; text-align: center; padding: 12px 24px; }
+.cd2-botao.sec { background: transparent; color: var(--ink); border: 1.5px solid var(--border); }
+.cd2-botao.sec:hover { background: var(--surface); }
+.extras { display: grid; gap: 12px; padding-top: 16px; border-top: 1px solid var(--hairline); }
+.extras p { font-size: 14px; line-height: 20px; }
+.extras a { font-weight: 700; }
+.pontes { display: grid; gap: 16px; }
+@media (min-width: 768px) { .pontes { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; } }
+.ponte .tag { align-self: flex-start; border: 1.5px solid var(--border); border-radius: var(--radius-pill); padding: 2px 10px; font-size: 12px; line-height: 18px; font-weight: 700; }
+.ponte a { font-weight: 700; margin-top: auto; }
+
+/* lojas da rede */
+.loja { gap: 16px; }
+.loja-linha { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-weight: 700; }
+.loja .tabela { background: var(--surface); }
+.loja h4 { margin-top: 4px; }
+
+/* erro de entrada */
+.erros { padding-left: 20px; display: flex; flex-direction: column; gap: 6px; }
+
+.cd2-assinatura { margin-top: 16px; }
+@media print { body { background: #ffffff; } .bloco, .tabela tr { break-inside: avoid; } }
+</style>
+</head>
+<body>
+<main class="pagina">
+<header class="topo">
+<div class="topo-logo">{{LOGO}}</div>
+<div class="topo-meta">{{HEADER_META}}</div>
+</header>
+{{HERO}}
+{{NOTICES}}
+{{COSTS}}
+{{BRANDS}}
+{{ACTIONS}}
+{{INTEROP}}
+{{INSIGHTS}}
+{{JUDICIAL}}
+{{HOW}}
+{{SOURCES}}
+{{COMMERCIAL}}
+{{BRIDGES}}
+{{FOOTER}}
+</main>
+</body>
+</html>

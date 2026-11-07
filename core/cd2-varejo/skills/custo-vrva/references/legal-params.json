@@ -1,0 +1,20 @@
+{
+  "version": "2026-11-06",
+  "checked_at": "2026-11-06",
+  "decree": "Decreto 12.712, de 11/11/2025, publicado no DOU de 12/11/2025",
+  "official_text_url": "https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2025/decreto/D12712.htm",
+  "verified_against_official_text": true,
+  "mdr_cap_percent": 3.6,
+  "settlement_max_days": 15,
+  "rate_cap_since": "2026-02-10",
+  "interoperability_starts_on": "2026-11-07",
+  "judicial_status": {
+    "text": "As grandes operadoras ainda contestam o decreto na Justiça.",
+    "checked_at": "2026-11-06",
+    "sources": [
+      "https://www.congressoemfoco.com.br/noticia/116224/mudancas-no-vale-alimentacao-entram-em-vigor-sob-pressao-de-liminares",
+      "https://www.bloomberglinea.com.br/negocios/justica-derruba-liminares-e-abre-caminho-para-novas-regras-a-empresas-de-vale-refeicao/",
+      "https://atarde.com.br/economia/vale-alimentacao-nao-sera-aceito-em-todas-as-maquininhas-a-partir-de-sabado-entenda-1408507"
+    ]
+  }
+}
