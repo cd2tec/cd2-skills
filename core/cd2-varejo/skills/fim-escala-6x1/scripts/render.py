@@ -37,8 +37,7 @@ from brand import esc, format_brl_compact, format_date_br  # noqa: E402
 
 SKILL = "fim-escala-6x1"
 SKILL_TITLE = "Fim da escala 6x1"
-# Entra no aviso do brand.py ("a nossa leitura de {regra} em {data}"). Sem artigo de propósito:
-# "a Emenda" daria "leitura de a Emenda".
+# Nome da regra no aviso do brand.py: "a nossa leitura da regra em {data} ({regra})".
 REGRA = "Emenda Constitucional 141/2026"
 FORMATS = ("html", "csv", "whatsapp", "markdown")
 THEMES = ("light", "dark", "auto")
@@ -93,8 +92,11 @@ _NOT_COUNTED = (
     "Movimento da loja por dia e por hora.",
     "Horas devolvidas ao time por agentes de IA ou outra automação.",
     "Regime compensatório por norma coletiva, com média de 2 folgas no mês.",
+    "Cláusulas coletivas incompatíveis com a emenda, que perdem efeito em 16/12/2026.",
     "Empregado com diploma de nível superior e salário alto, que fica fora das regras de jornada.",
     "Medidas para MEI, microempresa e empresa de pequeno porte, que dependem de lei complementar ainda não publicada.",
+    "Terceirizados da administração pública, que têm regra própria.",
+    "Ganho de escala entre lojas. Em rede, cada loja tem a sua conta e a rede soma as faixas.",
 )
 
 
@@ -422,7 +424,7 @@ def _how_items(ctx):
             average = single["monthly_payroll"] / single["total_headcount"] if single["total_headcount"] else 0
             cost = (
                 f"salário médio × (1 + {enc}% de encargos), já com 13º e férias. No limite de baixo, quem falta "
-                "para fechar os postos custa o salário do próprio setor, e o restante usa o custo médio da loja: "
+                "para fechar os postos custa o custo por pessoa do próprio setor, e o restante usa o custo médio da loja: "
                 f"{format_brl_compact(average)}."
             )
     items.append(("Custo por pessoa:", cost))
@@ -454,7 +456,7 @@ _SITE_TEXT = "A calculadora gratuita da CD2 faz em menos de 5 minutos, sem cadas
 _VRVA_TITLE = "Quanto o VR e o VA custam de verdade"
 _VRVA_TEXT = (
     "Veja se a sua loja paga acima do teto de 3,6% no vale-refeição e no vale-alimentação, e quanto dinheiro "
-    "fica parado com as operadoras. É só pedir nesta conversa: a skill custo-vrva faz a conta."
+    "fica parado com as operadoras. A CD2 também tem a skill custo-vrva e a calculadora gratuita de VR e VA."
 )
 _AGENTS_TITLE = "Menos tarefa manual, menos hora apertada"
 _AGENTS_TEXT = (
@@ -913,7 +915,15 @@ def _render_whatsapp(ctx) -> str:
         lines.append(_summary_line(ctx, k))
         lines += _red_lines(ctx, k)
         lines.append("")
-    if not ctx.multi:
+    if ctx.multi:
+        lines.append("*Primeiro passo em cada loja*")
+        for name, scenarios in ctx.units:
+            keys = [k for k in ctx.keys if k in scenarios]
+            actions = scenarios[keys[0]]["actions"] if keys else []
+            if actions:
+                lines.append(f"- {name}: {actions[0]}")
+        lines.append("")
+    else:
         actions = ctx.units[0][1][key]["actions"][:3]
         lines.append("*O que fazer primeiro*")
         lines += [f"{i}. {a}" for i, a in enumerate(actions, 1)]
@@ -1129,6 +1139,8 @@ def main(argv=None) -> int:
     for stream in (sys.stdin, sys.stdout):
         if hasattr(stream, "reconfigure"):
             stream.reconfigure(encoding="utf-8")
+    if args.result is None and sys.stdin.isatty():
+        return _fail(["Informe a saída do calc.py com --result saida.json, ou mande o JSON pela entrada padrão."])
     try:
         output = _read_json(args.result, "o resultado")
         insights = _read_json(args.insights, "os insights") if args.insights else []
@@ -1150,7 +1162,8 @@ def main(argv=None) -> int:
     try:
         text = render(output, args.format, insights=insights, profile=profile, sources=sources,
                       theme=args.theme, platform=args.platform)
-    except Exception as exc:  # rede de segurança: nada de traceback para a pessoa
+    except Exception as exc:  # rede de segurança: JSON limpo no stdout, detalhe no stderr, sem traceback
+        print(f"render.py: {type(exc).__name__}: {exc}", file=sys.stderr)
         return _fail([f"Erro inesperado ao montar a entrega: {type(exc).__name__}."])
     if args.output:
         with open(args.output, "w", encoding="utf-8", newline="") as fh:

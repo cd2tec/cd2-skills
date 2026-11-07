@@ -7,7 +7,7 @@ description: Calcula o impacto do fim da escala 6x1 (Emenda Constitucional 141/2
 
 Esta skill é da CD2 Tech. Ela leva o dono, o gerente ou o RH de um supermercado do impacto da nova jornada até um plano de ação, com os números da loja dele. A conta é a mesma da calculadora gratuita da CD2 (https://calc-fim-escala6x1.cd2.com.br/?utm_source={{UTM_SOURCE}}&utm_medium=skill&utm_campaign=fim-escala-6x1).
 
-Os caminhos abaixo são relativos à pasta desta skill.
+Os caminhos entre crases abaixo são relativos à pasta desta skill. Rode os comandos sempre a partir da pasta de trabalho da pessoa (a pasta da conversa ou do projeto), chamando os scripts pelo caminho completo, como em python3 <pasta da skill>/scripts/calc.py. Assim a entrada e as entregas ficam na pasta de trabalho, nunca dentro da pasta do plugin.
 
 ## Como conduzir
 
@@ -47,7 +47,7 @@ Peça só o que falta. Dê o exemplo e o padrão. Explique em uma frase por que 
 
 Onde a plataforma roda código, a conta sai sempre do script. Nunca faça a conta de cabeça.
 
-Grave a entrada num arquivo JSON. Uma loja:
+Grave a entrada num arquivo JSON na pasta de trabalho. Uma loja:
 
 ```json
 {
@@ -68,7 +68,7 @@ Grave a entrada num arquivo JSON. Uma loja:
 Rode:
 
 ```bash
-python3 scripts/calc.py --input entrada.json > saida.json
+python3 <pasta da skill>/scripts/calc.py --input entrada.json > saida.json
 ```
 
 Se o script sair com código 2, ele devolve `{"errors": [...]}` em português. Mostre os erros com suas palavras, peça o dado certo e rode de novo. Se a pessoa preferir ver a mensagem na entrega, o `scripts/render.py` também aceita esse JSON de erros.
@@ -105,13 +105,13 @@ Comentário genérico ("planeje com antecedência") não vale. Sem emoji, sem tr
 
 ## Montar a entrega
 
-Grave os insights numa lista JSON, as fontes em outra e, se quiser, o perfil (`{"name": "Mercado Bom Preço", "role": "dono"}`). Rode no formato que a pessoa escolheu na etapa 1:
+Na pasta de trabalho, grave os insights numa lista JSON, as fontes em outra e, se quiser, o perfil (`{"name": "Mercado Bom Preço", "role": "dono"}`). Rode no formato que a pessoa escolheu na etapa 1:
 
 ```bash
-python3 scripts/render.py --result saida.json --format html --insights insights.json --sources fontes.json --profile perfil.json --theme auto --platform "Claude" --output entrega-escala-6x1.html
-python3 scripts/render.py --result saida.json --format whatsapp --insights insights.json
-python3 scripts/render.py --result saida.json --format csv --output entrega-escala-6x1.csv
-python3 scripts/render.py --result saida.json --format markdown --insights insights.json
+python3 <pasta da skill>/scripts/render.py --result saida.json --format html --insights insights.json --sources fontes.json --profile perfil.json --theme auto --platform "Claude" --output entrega-escala-6x1.html
+python3 <pasta da skill>/scripts/render.py --result saida.json --format whatsapp --insights insights.json
+python3 <pasta da skill>/scripts/render.py --result saida.json --format csv --output entrega-escala-6x1.csv
+python3 <pasta da skill>/scripts/render.py --result saida.json --format markdown --insights insights.json
 ```
 
 - `--format`: `html` (página visual), `csv` (planilha), `whatsapp` (resumo curto) ou `markdown` (texto).
@@ -128,7 +128,7 @@ python3 scripts/render.py --result saida.json --format markdown --insights insig
 
 ```text
 CD2 Tech
-Estas contas e informações são apenas gerenciais, uma referência. Elas usam os números informados e a nossa leitura de Emenda Constitucional 141/2026 em 02/11/2026, que pode mudar. A CD2 Tech não tem nenhuma responsabilidade sobre estes resultados nem sobre decisões tomadas com base neles. Confira com seu contador e seu advogado antes de agir.
+Estas contas e informações são apenas gerenciais, uma referência. Elas usam os números informados e a nossa leitura da regra em 02/11/2026 (Emenda Constitucional 141/2026), que pode mudar. A CD2 Tech não tem nenhuma responsabilidade sobre estes resultados nem sobre decisões tomadas com base neles. Confira com seu contador e seu advogado antes de agir.
 ```
 
 ## Fechamento
@@ -151,6 +151,7 @@ Diga na entrega que a conta não considera:
 - cláusulas coletivas incompatíveis com a emenda, que perdem efeito em 16/12/2026;
 - empregado com diploma de nível superior e salário de pelo menos 2,5 vezes o teto do RGPS, que fica fora das regras de jornada;
 - medidas para MEI, microempresa e empresa de pequeno porte, que dependem de lei complementar;
-- ganho de escala entre lojas de uma rede.
+- terceirizados da administração pública, que têm regra própria;
+- ganho de escala entre lojas de uma rede: cada loja tem a sua conta, e a rede soma as faixas.
 
 É uma estimativa gerencial, não um parecer jurídico, trabalhista ou contábil. A convenção coletiva do sindicato prevalece.

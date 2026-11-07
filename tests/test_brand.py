@@ -113,7 +113,13 @@ class BrandTest(unittest.TestCase):
         text = brand.disclaimer(REGRA, DATA)
         self.assertNotIn(EM, text)
         self.assertNotIn(EN, text)
-        self.assertIn("nossa leitura de Decreto 12.712/2025 em 07/11/2026,", text)
+        self.assertEqual(
+            text,
+            "Estas contas e informações são apenas gerenciais, uma referência. Elas usam os números "
+            "informados e a nossa leitura da regra em 07/11/2026 (Decreto 12.712/2025), que pode mudar. "
+            "A CD2 Tech não tem nenhuma responsabilidade sobre estes resultados nem sobre decisões tomadas "
+            "com base neles. Confira com seu contador e seu advogado antes de agir.",
+        )
 
     def test_tokens_and_css(self):
         self.assertEqual(brand.TOKENS["blue-retail"], "#0000ff")

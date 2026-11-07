@@ -16,6 +16,7 @@ sys.path.insert(0, str(SKILL / "scripts"))
 
 import calc  # noqa: E402
 import render  # noqa: E402
+import brand  # noqa: E402
 from brand import format_brl_compact  # noqa: E402
 
 TODAY = "2026-11-07"
@@ -223,6 +224,45 @@ class HtmlTest(unittest.TestCase):
         net = out["network"]["without_agreement"]
         self.assertIn(format_brl_compact(net["max_monthly_cost"]), render.render(out, "html"))
 
+    def test_bridge_does_not_assume_same_conversation(self):
+        for fmt in ("html", "markdown"):
+            text = render.render(output(), fmt)
+            self.assertNotIn("nesta conversa", text)
+            self.assertIn("custo-vrva", text)
+            self.assertIn("calc-vrva.cd2.com.br/?utm_source={{UTM_SOURCE}}", text)
+
+    def test_disclaimer_names_rule_after_date(self):
+        for fmt in FORMATS:
+            text = render.render(output(), fmt)
+            self.assertIn("nossa leitura da regra em 02/11/2026 (Emenda Constitucional 141/2026)", text)
+
+    def test_lower_bound_cost_wording(self):
+        self.assertIn("custa o custo por pessoa do próprio setor", html())
+
+    def test_user_placeholder_stays_literal(self):
+        sectors = copy.deepcopy(EXAMPLE_SECTORS)
+        sectors[0]["name"] = "{{FOOTER}}"
+        page = render.render(output(sectors=sectors), "html", insights=["{{HERO}}"], profile={"name": "{{TITLE}}"})
+        self.assertIn("{{HERO}}", page)
+        self.assertIn("{{FOOTER}}", page)
+        self.assertIn("{{TITLE}}", page)
+        self.assertEqual(page.count('class="cd2-assinatura"'), 1)
+        self.assertEqual(page.count('id="veredito"'), 1)
+
+    def test_network_whatsapp_has_top_action_per_store(self):
+        data = {
+            "today": TODAY,
+            "stores": [
+                {"name": "Loja Centro", "store": dict(STORE), "sectors": copy.deepcopy(EXAMPLE_SECTORS)},
+                {"name": "Loja Bairro", "store": dict(STORE), "sectors": [dict(EXAMPLE_SECTORS[2], headcount=1)]},
+            ],
+        }
+        out = calc.run(data)
+        text = render.render(out, "whatsapp")
+        for store in out["stores"]:
+            first = store["scenarios"]["without_agreement"]["actions"][0]
+            self.assertIn(f"{store['name']}: {first}", text)
+
     def test_unknown_format(self):
         with self.assertRaises(ValueError):
             render.render(output(), "pdf")
@@ -283,6 +323,28 @@ class CliTest(unittest.TestCase):
         self.assertEqual(done.returncode, 0, done.stderr)
         self.assertIn("Preencha as pessoas de pelo menos um setor.", done.stdout)
 
+    def test_cli_unexpected_error_is_clean_json_plus_stderr(self):
+        done = self.run_cli("--format", "html", stdin=json.dumps({"scenarios": {"without_agreement": {}}}))
+        self.assertEqual(done.returncode, 2)
+        self.assertIn("Erro inesperado", json.loads(done.stdout)["errors"][0])
+        self.assertIn("KeyError", done.stderr)
+        self.assertNotIn("Traceback", done.stderr)
+
+    def test_cli_without_result_on_tty_does_not_hang(self):
+        import os
+        import pty
+        master, slave = pty.openpty()
+        try:
+            done = subprocess.run(
+                [sys.executable, str(SKILL / "scripts" / "render.py"), "--format", "html"],
+                stdin=slave, capture_output=True, text=True, encoding="utf-8", timeout=20,
+            )
+        finally:
+            os.close(slave)
+            os.close(master)
+        self.assertEqual(done.returncode, 2)
+        self.assertIn("--result", json.loads(done.stdout)["errors"][0])
+
     def test_cli_bad_input_exits_2_without_traceback(self):
         done = self.run_cli("--format", "html", stdin="isto não é json")
         self.assertEqual(done.returncode, 2)
@@ -303,6 +365,26 @@ class SkillDocTest(unittest.TestCase):
         for ref in re.findall(r"`((?:references|scripts|assets)/[^`]+)`", text):
             self.assertTrue((SKILL / ref).exists() or (shared / ref).exists(), ref)
 
+    def test_skill_md_footer_matches_brand(self):
+        text = (SKILL / "SKILL.md").read_text(encoding="utf-8")
+        block = re.search(r"```text\n(.*?)\n```", text, re.S).group(1)
+        self.assertEqual(block, brand.footer_text("Emenda Constitucional 141/2026", "02/11/2026"))
+
+    def test_skill_md_runs_scripts_from_working_folder(self):
+        text = (SKILL / "SKILL.md").read_text(encoding="utf-8")
+        self.assertIn("python3 <pasta da skill>/scripts/calc.py", text)
+        self.assertIn("python3 <pasta da skill>/scripts/render.py", text)
+        self.assertIn("pasta de trabalho", text)
+
+    def test_limits_match_methodology(self):
+        skill = (SKILL / "SKILL.md").read_text(encoding="utf-8").lower()
+        method = (SKILL / "references" / "metodologia.md").read_text(encoding="utf-8").lower()
+        page = html().lower()
+        for needle in ("cláusulas coletivas incompatíveis", "terceirizados da administração pública",
+                       "ganho de escala entre lojas", "adicional noturno", "rotatividade"):
+            for name, text in (("SKILL.md", skill), ("metodologia.md", method), ("html", page)):
+                self.assertIn(needle, text, f"{needle} em {name}")
+
     def test_docs_have_no_dashes_emoji_or_personal_name(self):
         for name in ("SKILL.md", "references/metodologia.md"):
             text = (SKILL / name).read_text(encoding="utf-8")
@@ -313,15 +395,10 @@ class SkillDocTest(unittest.TestCase):
             self.assertNotIn(" tela", text, name)
 
     def test_skill_md_example_input_runs(self):
-        data = {
-            "store": {"days_open_per_week": 7, "hours_open_per_day": 13, "payroll_charges_factor": 0.7},
-            "sectors": [
-                {"name": "Caixa", "headcount": 14, "avg_monthly_salary": 1900, "min_simultaneous_staff": 5},
-                {"name": "Açougue", "headcount": 6, "avg_monthly_salary": 2600, "current_weekly_hours": 44},
-            ],
-            "overrides": {"weekly_hours_override": 42, "max_work_days_override": 5, "hour_bank_allowed": True,
-                          "overtime_cap_hours_per_day": 2},
-        }
+        text = (SKILL / "SKILL.md").read_text(encoding="utf-8")
+        blocks = [json.loads(b) for b in re.findall(r"```json\n(.*?)```", text, re.S) if '"sectors"' in b and "{...}" not in b]
+        self.assertEqual(len(blocks), 1)
+        data = blocks[0]
         self.assertEqual(calc.validate(data), [])
         self.assertIn("Com a jornada da sua convenção", render.render(calc.run(data), "html"))
 

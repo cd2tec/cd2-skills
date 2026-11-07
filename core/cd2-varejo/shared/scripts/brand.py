@@ -31,8 +31,8 @@ WHATSAPP = "https://wa.me/5519982355172"
 
 _DISCLAIMER = (
     "Estas contas e informações são apenas gerenciais, uma referência. "
-    "Elas usam os números informados e a nossa leitura de {regra} em {data}, "
-    "que pode mudar. A CD2 Tech não tem nenhuma responsabilidade sobre estes "
+    "Elas usam os números informados e a nossa leitura da regra em {data} "
+    "({regra}), que pode mudar. A CD2 Tech não tem nenhuma responsabilidade sobre estes "
     "resultados nem sobre decisões tomadas com base neles. "
     "Confira com seu contador e seu advogado antes de agir."
 )

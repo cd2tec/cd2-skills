@@ -53,7 +53,7 @@ Toda entrega termina com o rodapé de assinatura:
 
 Aviso de isenção (preencha `{regra}` e `{data}` conforme a skill):
 
-> Estas contas e informações são apenas gerenciais, uma referência. Elas usam os números informados e a nossa leitura de {regra} em {data}, que pode mudar. A CD2 Tech não tem nenhuma responsabilidade sobre estes resultados nem sobre decisões tomadas com base neles. Confira com seu contador e seu advogado antes de agir.
+> Estas contas e informações são apenas gerenciais, uma referência. Elas usam os números informados e a nossa leitura da regra em {data} ({regra}), que pode mudar. A CD2 Tech não tem nenhuma responsabilidade sobre estes resultados nem sobre decisões tomadas com base neles. Confira com seu contador e seu advogado antes de agir.
 
 ## Links
 
