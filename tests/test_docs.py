@@ -1,10 +1,12 @@
 """Testes do README, do site do GitHub Pages e dos guias do repositório."""
+import codecs
 import re
 import unittest
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlparse
 
 ROOT = Path(__file__).resolve().parent.parent
+PERSON = codecs.decode("Tnoevry", "rot13")  # nome próprio que nenhum arquivo pode citar
 DOCS = ROOT / "docs"
 EM, EN = chr(0x2014), chr(0x2013)
 EMOJI = re.compile("[\U0001F300-\U0001FAFF☀-➿]")
@@ -84,6 +86,66 @@ class ReadmeTest(unittest.TestCase):
             self.assertIn("utm_source=github&utm_medium=skill&utm_campaign=", url, url)
 
 
+class ReadmeExampleTest(unittest.TestCase):
+    """Os números dos exemplos de conversa saem das contas dos scripts, com os dados ao lado."""
+
+    def load(self, skill):
+        import importlib.util
+        import sys
+        shared = str(ROOT / "core" / "cd2-varejo" / "shared" / "scripts")
+        if shared not in sys.path:
+            sys.path.insert(0, shared)
+        name = f"readme_example_{skill.replace('-', '_')}"
+        spec = importlib.util.spec_from_file_location(name, ROOT / "core" / "cd2-varejo" / "skills" / skill / "scripts" / "calc.py")
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        return module
+
+    def test_6x1_example_inputs_give_readme_numbers(self):
+        calc = self.load("fim-escala-6x1")
+        import brand
+        data = {
+            "today": "2026-11-07",
+            "store": {"days_open_per_week": 7, "hours_open_per_day": 13},
+            "sectors": [
+                {"name": "Caixa", "headcount": 14, "avg_monthly_salary": 1900, "min_simultaneous_staff": 5},
+                {"name": "Açougue", "headcount": 6, "avg_monthly_salary": 2600},
+                {"name": "Padaria", "headcount": 5, "avg_monthly_salary": 2200},
+            ],
+        }
+        self.assertEqual(calc.validate(data), [])
+        out = calc.run(data)["scenarios"]
+        without = out["without_agreement"]["result"]
+        with_agreement = out["with_agreement"]["result"]
+        text = read("README.md")
+        self.assertIn(f"você precisa de {without['min_additional']} a {without['max_additional']} pessoas a mais", text)
+        self.assertIn(f"de {brand.format_brl(without['min_monthly_cost'])} a {brand.format_brl(without['max_monthly_cost'])} por mês", text)
+        self.assertEqual([s["status"] for s in without["sectors"]], ["red", "red", "red"])
+        self.assertIn(f"cai para {with_agreement['min_additional']} a {with_agreement['max_additional']} pessoas", text)
+        for needle in ("7 dias abertos, 13h por dia", "Caixa: 14 pessoas, R$ 1.900,00", "5 postos",
+                       "Açougue: 6 pessoas, R$ 2.600,00", "Padaria: 5 pessoas, R$ 2.200,00", "encargos de 70%"):
+            self.assertIn(needle, text)
+
+    def test_vrva_example_annual_with_cents(self):
+        calc = self.load("custo-vrva")
+        import brand
+        data = {
+            "today": "2026-11-07",
+            "brands": [
+                {"name": "Alelo", "sales": 18000, "rate": 6.5, "days": 30},
+                {"name": "Pluxee (Sodexo)", "sales": 12000, "rate": 5.9, "days": 30},
+                {"name": "Ticket", "sales": 10000, "rate": 6.0, "days": 32},
+                {"name": "VR", "sales": 8000, "rate": 4.5, "days": 25},
+            ],
+            "money_cost_month_percent": 2,
+        }
+        result = calc.run(data)["result"]
+        for rel in ("README.md", "docs/index.html"):
+            text = read(rel)
+            self.assertIn(f"{brand.format_brl(result['total_month'])} por mês acima do permitido, "
+                          f"ou {brand.format_brl(result['total_year'])} por ano", text, rel)
+
+
 class SiteTest(unittest.TestCase):
     def setUp(self):
         self.html = read("docs/index.html")
@@ -158,12 +220,12 @@ class SiteTest(unittest.TestCase):
 class CopyRulesTest(unittest.TestCase):
     FILES = ("README.md", "docs/index.html", "AGENTS.md", "CLAUDE.md", "CHANGELOG.md", "index.html")
 
-    def test_no_dash_no_gabriel(self):
+    def test_no_dash_no_personal_name(self):
         for rel in self.FILES:
             text = read(rel)
             self.assertNotIn(EM, text, rel)
             self.assertNotIn(EN, text, rel)
-            self.assertNotIn("Gabriel", text, rel)
+            self.assertNotIn(PERSON, text, rel)
             self.assertIsNone(EMOJI.search(text), rel)
 
     def test_generated_block_untouched_by_hand(self):

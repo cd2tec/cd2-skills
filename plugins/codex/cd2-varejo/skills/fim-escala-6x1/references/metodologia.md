@@ -22,7 +22,7 @@ Base: [Emenda Constitucional 141/2026](https://www.planalto.gov.br/ccivil_03/con
 
 - **Loja:** dias abertos por semana, horas abertas por dia e encargos sobre o salário.
 - **Setor:** pessoas e salário médio. Opcionais: postos abertos ao mesmo tempo e jornada atual, que começa em 44h.
-- **Convenção (opcional):** jornada semanal, dias máximos, banco de horas e limite de hora extra por dia.
+- **Convenção (opcional):** jornada semanal, dias máximos e limite de hora extra por dia.
 
 ## As contas
 

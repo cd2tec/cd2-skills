@@ -352,8 +352,8 @@ _LIMITS = (
 
 _COMMERCIAL_TITLE = "Quer ir além da estimativa?"
 _COMMERCIAL_TEXT = (
-    "Esta avaliação é livre: use quanto quiser para entender a sua loja. Para usar no dia a dia da empresa, "
-    "a skill é para clientes CD2, que ganham suporte, manutenção e responsabilidade da CD2."
+    "Avaliar na sua operação é livre por até 90 dias. Para usar no dia a dia da empresa, "
+    "com suporte e responsabilidade, fale com a CD2."
 )
 _ERP_TITLE = "Seu ERP concilia isso sozinho?"
 _ERP_TEXT = (
@@ -464,7 +464,7 @@ def _html_header(ctx) -> str:
     if ctx.profile_line:
         meta.append(f'<p class="para">Preparado para {esc(ctx.profile_line)}</p>')
     if ctx.today and not ctx.errors:
-        meta.append(f'<p class="caption">Calculado em {_date(ctx.today)}. Regras conferidas em {ctx.checked}.</p>')
+        meta.append(f'<p class="caption">Calculado em {esc(_date(ctx.today))}. Regras conferidas em {esc(ctx.checked)}.</p>')
     return "".join(meta)
 
 

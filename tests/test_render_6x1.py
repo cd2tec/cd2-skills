@@ -1,4 +1,5 @@
 """Testes da entrega da skill fim-escala-6x1 (render.py e template.html)."""
+import codecs
 import copy
 import json
 import re
@@ -10,6 +11,7 @@ import urllib.parse
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+PERSON = codecs.decode("Tnoevry", "rot13")  # nome próprio que nenhum arquivo pode citar
 SKILL = ROOT / "core" / "cd2-varejo" / "skills" / "fim-escala-6x1"
 sys.path.insert(0, str(ROOT / "core" / "cd2-varejo" / "shared" / "scripts"))
 sys.path.insert(0, str(SKILL / "scripts"))
@@ -199,7 +201,7 @@ class HtmlTest(unittest.TestCase):
                     self.assertNotIn(EM, text)
                     self.assertNotIn(EN, text)
                     self.assertIsNone(EMOJI.search(text))
-                    self.assertNotIn("Gabriel", text)
+                    self.assertNotIn(PERSON, text)
 
     def test_convention_hours_single_scenario(self):
         page = html(overrides={"weekly_hours_override": 38})
@@ -223,6 +225,33 @@ class HtmlTest(unittest.TestCase):
                 self.assertIn("Loja Bairro", text)
         net = out["network"]["without_agreement"]
         self.assertIn(format_brl_compact(net["max_monthly_cost"]), render.render(out, "html"))
+
+    def test_network_mixed_agreements_note(self):
+        data = {
+            "today": TODAY,
+            "stores": [
+                {"name": "Loja Centro", "store": dict(STORE), "sectors": copy.deepcopy(EXAMPLE_SECTORS),
+                 "overrides": {"weekly_hours_override": 42}},
+                {"name": "Loja Bairro", "store": dict(STORE), "sectors": copy.deepcopy(EXAMPLE_SECTORS)},
+            ],
+        }
+        out = calc.run(data)
+        note = "Loja Centro entra com a jornada da própria convenção (42h)."
+        for fmt in FORMATS:
+            with self.subTest(fmt=fmt):
+                self.assertIn(note, render.render(out, fmt))
+        # Os setores no vermelho listados batem com a contagem da soma, loja substituída incluída.
+        text = render.render(out, "whatsapp")
+        without = text.split("Sem acordo coletivo (40h)")[1].split("Com acordo coletivo")[0]
+        self.assertIn("Loja Centro, setores no vermelho:", without)
+        self.assertIn("Loja Bairro, setores no vermelho:", without)
+        self.assertNotIn("entra com a jornada", render.render(calc.run({
+            "today": TODAY,
+            "stores": [
+                {"name": "Loja A", "store": dict(STORE), "sectors": copy.deepcopy(EXAMPLE_SECTORS)},
+                {"name": "Loja B", "store": dict(STORE), "sectors": copy.deepcopy(EXAMPLE_SECTORS)},
+            ],
+        }), "html"))
 
     def test_bridge_does_not_assume_same_conversation(self):
         for fmt in ("html", "markdown"):
@@ -262,6 +291,38 @@ class HtmlTest(unittest.TestCase):
         for store in out["stores"]:
             first = store["scenarios"]["without_agreement"]["actions"][0]
             self.assertIn(f"{store['name']}: {first}", text)
+
+    def test_commercial_text_states_90_day_evaluation(self):
+        for fmt in ("html", "markdown"):
+            with self.subTest(fmt=fmt):
+                text = render.render(output(), fmt)
+                self.assertNotIn("quanto quiser", text)
+                self.assertIn("Avaliar na sua operação é livre por até 90 dias.", text)
+                self.assertIn("com suporte e responsabilidade, fale com a CD2", text)
+        for fmt in FORMATS:
+            self.assertNotIn("quanto quiser", render.render(output(), fmt))
+
+    def test_header_dates_are_escaped(self):
+        # Aqui o "hoje" precisa ser uma data válida (vira prazo); a data de conferência é texto livre.
+        out = output()
+        out["checked_at"] = "<script>alert(1)</script>"
+        page = render.render(out, "html")
+        self.assertNotIn("<script>alert(1)</script>", page)
+        self.assertIn("&lt;script&gt;alert(1)&lt;/script&gt;", page)
+
+    def test_network_red_line_wording(self):
+        data = {
+            "today": TODAY,
+            "stores": [
+                {"name": "Loja Centro", "store": dict(STORE), "sectors": copy.deepcopy(EXAMPLE_SECTORS)},
+                {"name": "Loja Bairro", "store": dict(STORE), "sectors": copy.deepcopy(EXAMPLE_SECTORS[:2])},
+            ],
+        }
+        text = render.render(calc.run(data), "whatsapp")
+        self.assertNotIn("No vermelho em", text)
+        self.assertIn("Loja Centro, setores no vermelho: Caixa, Reposição", text)
+        single = render.render(output(), "whatsapp")
+        self.assertIn("No vermelho: Caixa", single)
 
     def test_unknown_format(self):
         with self.assertRaises(ValueError):
@@ -391,7 +452,7 @@ class SkillDocTest(unittest.TestCase):
             self.assertNotIn(EM, text, name)
             self.assertNotIn(EN, text, name)
             self.assertIsNone(EMOJI.search(text), name)
-            self.assertNotIn("Gabriel", text, name)
+            self.assertNotIn(PERSON, text, name)
             self.assertNotIn(" tela", text, name)
 
     def test_skill_md_example_input_runs(self):

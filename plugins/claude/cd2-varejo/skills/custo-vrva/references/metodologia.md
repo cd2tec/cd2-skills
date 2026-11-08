@@ -14,7 +14,7 @@ Fonte: [Decreto 12.712/2025 no site do Planalto](https://www.planalto.gov.br/cci
 
 - Teto da taxa de desconto (MDR) cobrada do estabelecimento: 3,6% (art. 182-B, I). MDR é a taxa que a operadora desconta de cada venda paga com o vale.
 - Repasse: até 15 dias corridos, contados da data da transação (art. 182-C).
-- Interoperabilidade plena: 360 dias da publicação, em 07/11/2026 (art. 177 e art. 182-D). A partir daí, qualquer maquininha pode aceitar qualquer cartão de vale.
+- Interoperabilidade plena: 360 dias da publicação, em 07/11/2026 (art. 177 e art. 182-D). A partir daí, pela regra, qualquer maquininha pode aceitar qualquer cartão de vale. Na prática, a adoção pelas operadoras e maquininhas pode levar um tempo.
 - A tarifa de intercâmbio (2%, art. 182-B, II) é cobrada entre emissora e credenciadora, não da loja, e por isso não entra na conta.
 
 ## O que você informa

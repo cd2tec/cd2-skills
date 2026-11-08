@@ -28,4 +28,4 @@ A entrega visual sai como arquivo HTML autocontido, salvo na pasta de trabalho. 
 
 ## Licença
 
-CC BY-NC-ND 4.0, da CD2 Tech. Avaliar na sua operação é livre. O uso contínuo na empresa é para clientes CD2, com suporte, manutenção e responsabilidade. Veja `LICENSE`, `NOTICE` e `COMMERCIAL.md`. Contato: [WhatsApp](https://wa.me/5519982355172) e [cd2.com.br](https://cd2.com.br/?utm_source=codex&utm_medium=skill&utm_campaign=cd2-varejo).
+CC BY-NC-ND 4.0, da CD2 Tech. Avaliar na sua operação é livre por até 90 dias. Para usar no dia a dia da empresa, com suporte e responsabilidade, fale com a CD2. Veja `LICENSE`, `NOTICE` e `COMMERCIAL.md`. Contato: [WhatsApp](https://wa.me/5519982355172) e [cd2.com.br](https://cd2.com.br/?utm_source=codex&utm_medium=skill&utm_campaign=cd2-varejo).

@@ -190,10 +190,29 @@ class _Ctx:
         return "rede" if self.multi else "loja"
 
     def rule(self, key) -> dict:
-        for _, scenarios in self.units:
+        # Prefere a loja com mais situações: a de convenção própria só tem uma, com a jornada dela.
+        units = sorted(self.units, key=lambda u: len(u[1]), reverse=True)
+        for _, scenarios in units:
             if key in scenarios:
                 return scenarios[key]["result"]["rule"]
         return {}
+
+    def network_notes(self, key) -> list:
+        """Avisos das lojas que entram na soma da rede com a própria situação."""
+        if not self.multi:
+            return []
+        names = (self.network.get(key) or {}).get("stores_substituted") or []
+        by_name = {name: scenarios for name, scenarios in self.units}
+        out = []
+        for name in names:
+            scenarios = by_name.get(name) or {}
+            own = next((k for k in calc.SCENARIO_ORDER if k in scenarios), None)
+            if own is None:
+                continue
+            h = _num(scenarios[own]["result"]["rule"]["weekly_hours"])
+            what = "da própria convenção" if own == "with_agreement" else "da regra para todos"
+            out.append(f"{name} entra com a jornada {what} ({h}h).")
+        return out
 
     def hours(self, key):
         return self.rule(key).get("weekly_hours")
@@ -446,8 +465,8 @@ def _how_items(ctx):
 
 _COMMERCIAL_TITLE = "Quer ir além da estimativa?"
 _COMMERCIAL_TEXT = (
-    "Esta avaliação é livre: use quanto quiser para entender a sua loja. Para usar no dia a dia da empresa, "
-    "a skill é para clientes CD2, que ganham suporte, manutenção e responsabilidade da CD2."
+    "Avaliar na sua operação é livre por até 90 dias. Para usar no dia a dia da empresa, "
+    "com suporte e responsabilidade, fale com a CD2."
 )
 _ARCHEO_TITLE = "Seus números estão no ERP ou na folha?"
 _ARCHEO_TEXT = "O Archeo MCP Creator, da CD2, cria a conexão para puxar os dados direto do sistema, sem digitar."
@@ -554,7 +573,7 @@ def _html_header(ctx) -> str:
     if ctx.profile_line:
         meta.append(f'<p class="para">Preparado para {esc(ctx.profile_line)}</p>')
     if ctx.today and not ctx.errors:
-        meta.append(f'<p class="caption">Calculado em {_date(ctx.today)}. Regras conferidas em {ctx.checked}.</p>')
+        meta.append(f'<p class="caption">Calculado em {esc(_date(ctx.today))}. Regras conferidas em {esc(ctx.checked)}.</p>')
     return "".join(meta)
 
 
@@ -657,6 +676,8 @@ def _html_card(ctx, key, primary) -> str:
     small = [(f"{_num(numbers['total_lost_hours'])}h", _lost_line(numbers))] + _extra_lines(numbers)
     dl = "".join(f"<div><dt>{esc(a)}</dt><dd>{esc(b)}</dd></div>" for a, b in small)
     parts.append(f'<dl class="miudos">{dl}</dl>')
+    for note in ctx.network_notes(key):
+        parts.append(f'<p class="caption">{esc(note)}</p>')
     return f'<article class="bloco b-raised cenario" aria-label="{esc(title)}">{"".join(parts)}</article>'
 
 
@@ -874,13 +895,18 @@ def _summary_line(ctx, key) -> str:
 
 def _red_lines(ctx, key):
     out = []
+    substituted = set((ctx.network or {}).get(key, {}).get("stores_substituted") or []) if ctx.multi else set()
     for name, scenarios in ctx.units:
-        if key not in scenarios:
+        own = key if key in scenarios else None
+        if own is None and name in substituted:
+            # A loja entra na soma com a própria situação: os setores dela também.
+            own = next((k for k in calc.SCENARIO_ORDER if k in scenarios), None)
+        if own is None:
             continue
-        reds = _red_names(scenarios, key)
+        reds = _red_names(scenarios, own)
         if reds:
-            where = f" em {name}" if name else ""
-            out.append(f"No vermelho{where}: {calc.join_names(reds)}.")
+            lead = f"{name}, {_plural(len(reds), 'setor', 'setores')} no vermelho" if name else "No vermelho"
+            out.append(f"{lead}: {calc.join_names(reds)}.")
     return out
 
 
@@ -913,6 +939,7 @@ def _render_whatsapp(ctx) -> str:
     lines.append("")
     for k in ctx.keys:
         lines.append(_summary_line(ctx, k))
+        lines += ctx.network_notes(k)
         lines += _red_lines(ctx, k)
         lines.append("")
     if ctx.multi:
@@ -1004,6 +1031,7 @@ def _render_markdown(ctx) -> str:
         lines.append(f"- **Horas a menos:** {_num(numbers['total_lost_hours'])}h {_lost_line(numbers)}")
         for value, text in _extra_lines(numbers):
             lines.append(f"- **{value}** {text}")
+        lines += [f"- {_md(note)}" for note in ctx.network_notes(k)]
         lines.append("")
 
     if ctx.multi:
@@ -1079,7 +1107,9 @@ def _render_csv(ctx) -> str:
                     cells = [_cell(name)] + cells
                 rows.append(";".join(cells))
     rows.append("")
-    rows += [_cell(_summary_line(ctx, k)) for k in ctx.keys]
+    for k in ctx.keys:
+        rows.append(_cell(_summary_line(ctx, k)))
+        rows += [_cell(note) for note in ctx.network_notes(k)]
     if ctx.overridden:
         rows.append(_cell(_override_text(ctx)))
     rows += [_cell(a) for a in _alerts(ctx)]

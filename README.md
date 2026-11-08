@@ -95,7 +95,7 @@ Skill: Sem acordo coletivo, você precisa de 3 a 4 pessoas a mais:
        O primeiro passo é procurar o sindicato antes de 16/12/2026.
 ```
 
-Loja de exemplo: 7 dias abertos, 13h por dia, 25 pessoas em caixa, açougue e padaria. Veja [como calculamos](core/cd2-varejo/skills/fim-escala-6x1/references/metodologia.md).
+Loja de exemplo, com a conta feita em 07/11/2026: 7 dias abertos, 13h por dia, encargos de 70% (o padrão) e jornada atual de 44h em 6 dias. Caixa: 14 pessoas, R$ 1.900,00 de salário médio e 5 postos abertos ao mesmo tempo. Açougue: 6 pessoas, R$ 2.600,00. Padaria: 5 pessoas, R$ 2.200,00. Veja [como calculamos](core/cd2-varejo/skills/fim-escala-6x1/references/metodologia.md).
 
 ### Quanto o VR/VA custa de verdade
 
@@ -108,7 +108,7 @@ Skill: Eu calculo com você. Quais bandeiras você aceita?
        [pergunta se pesquisa a situação do decreto na Justiça e pede
         vendas no mês, taxa e prazo de repasse de cada bandeira]
 
-Skill: Você paga R$ 1.576,67 por mês acima do permitido, ou R$ 18.920 por ano.
+Skill: Você paga R$ 1.576,67 por mês acima do permitido, ou R$ 18.920,00 por ano.
        São R$ 1.110,00 de taxa acima do teto e R$ 466,67 de custo do dinheiro parado.
        A Alelo é a que mais pesa: comece por ela.
 ```

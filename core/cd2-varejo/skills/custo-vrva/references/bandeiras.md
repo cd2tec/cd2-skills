@@ -33,6 +33,14 @@ Qualquer outra bandeira entra com o nome que a pessoa der. Sem nome, a entrega m
 - No extrato ou no portal de cada operadora, que mostra vendas, descontos e datas de pagamento.
 - No contrato com a operadora ou com quem fornece a maquininha, que traz a taxa e o prazo combinados.
 
-Se o extrato mostrar só valores, a taxa é o desconto ÷ as vendas × 100. Exemplo: R$ 1.170 descontados sobre R$ 18.000 vendidos dão 6,5%. O prazo é a diferença em dias corridos entre a data da venda e a data do pagamento. Quando cada venda tem um prazo diferente, use o prazo mais comum no mês e diga isso na entrega.
+Se o extrato mostrar só valores, a taxa é o desconto ÷ as vendas × 100. Exemplo: R$ 1.170 descontados sobre R$ 18.000 vendidos dão 6,5%.
+
+Cuidado para a taxa não sair inflada:
+
+- Use só a taxa de desconto de cada venda (MDR).
+- Nunca some aluguel de maquininha, anuidade, taxa de antecipação ou outras cobranças. Elas ficam fora da conta.
+- Mostre para a pessoa a separação: quanto foi de taxa por venda e quanto foi de cada outra cobrança.
+- Se o extrato não separar a taxa das outras cobranças, pergunte à pessoa antes de calcular. Não adivinhe.
+ O prazo é a diferença em dias corridos entre a data da venda e a data do pagamento. Quando cada venda tem um prazo diferente, use o prazo mais comum no mês e diga isso na entrega.
 
 Mostre para a pessoa os números que você tirou do arquivo e peça a confirmação antes de calcular.

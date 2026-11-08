@@ -1,4 +1,5 @@
 """Testes da entrega da skill custo-vrva (render.py e template.html)."""
+import codecs
 import copy
 import csv
 import importlib.util
@@ -12,6 +13,7 @@ import urllib.parse
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+PERSON = codecs.decode("Tnoevry", "rot13")  # nome próprio que nenhum arquivo pode citar
 SKILL = ROOT / "core" / "cd2-varejo" / "skills" / "custo-vrva"
 SHARED = ROOT / "core" / "cd2-varejo" / "shared" / "scripts"
 if str(SHARED) not in sys.path:
@@ -277,7 +279,7 @@ class HtmlTest(unittest.TestCase):
                     self.assertNotIn(EM, text)
                     self.assertNotIn(EN, text)
                     self.assertIsNone(EMOJI.search(text))
-                    self.assertNotIn("Gabriel", text)
+                    self.assertNotIn(PERSON, text)
                     self.assertNotIn("nesta conversa", text)
 
     def test_network_renders_each_store(self):
@@ -313,6 +315,25 @@ class HtmlTest(unittest.TestCase):
         self.assertIn("{{TITLE}}", page)
         self.assertEqual(page.count('class="cd2-assinatura"'), 1)
         self.assertEqual(page.count('id="veredito"'), 1)
+
+    def test_commercial_text_states_90_day_evaluation(self):
+        for fmt in ("html", "markdown"):
+            with self.subTest(fmt=fmt):
+                text = render.render(output(), fmt)
+                self.assertNotIn("quanto quiser", text)
+                self.assertIn("Avaliar na sua operação é livre por até 90 dias.", text)
+                self.assertIn("com suporte e responsabilidade, fale com a CD2", text)
+        for fmt in FORMATS:
+            self.assertNotIn("quanto quiser", render.render(output(), fmt))
+
+    def test_header_dates_are_escaped(self):
+        out = output()
+        out["today"] = "<script>alert(1)</script>"
+        out["checked_at"] = "<i>x</i>"
+        page = render.render(out, "html")
+        self.assertNotIn("<script>alert(1)</script>", page)
+        self.assertNotIn("<i>x</i>", page)
+        self.assertIn("&lt;script&gt;alert(1)&lt;/script&gt;", page)
 
     def test_unknown_format_and_theme(self):
         with self.assertRaises(ValueError):
@@ -495,7 +516,7 @@ class SkillDocTest(unittest.TestCase):
             self.assertNotIn(EM, text, name)
             self.assertNotIn(EN, text, name)
             self.assertIsNone(EMOJI.search(text), name)
-            self.assertNotIn("Gabriel", text, name)
+            self.assertNotIn(PERSON, text, name)
             self.assertNotIn(" tela", text, name)
             self.assertNotIn("nesta conversa", text, name)
 
