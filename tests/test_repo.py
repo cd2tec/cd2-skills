@@ -1,12 +1,40 @@
+import codecs
 import json
+import subprocess
 import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+# Nada disto pode aparecer num arquivo público: nome de pessoa, caminho local,
+# ferramenta interna ou repositório privado das calculadoras.
+# Os nomes próprios ficam em rot13 para este arquivo não carregar o que ele procura.
+LEAKS = tuple(codecs.decode(s, "rot13") for s in ("Tnoevry", "anlnovat", "sevqnl", "pq2grp/pq2-pnyp", "nepurb-unearff-cyhtvaf")) + (
+    "/private/tmp", "scratchpad", "claude.ai/artifact", "docs/superpowers")
+PERSON = codecs.decode("Tnoevry", "rot13")
+INTERNAL_DIRS = ("interno/", ".superpowers/", "dist/")
 
 
 def read(rel):
     return (ROOT / rel).read_text(encoding="utf-8")
+
+
+def tracked_files():
+    try:
+        out = subprocess.run(["git", "ls-files", "-z"], cwd=ROOT, capture_output=True, check=True)
+    except (OSError, subprocess.CalledProcessError):
+        raise unittest.SkipTest("git indisponível")
+    return [p for p in out.stdout.decode("utf-8").split("\0") if p]
+
+
+def tracked_texts():
+    """(caminho, texto) de cada arquivo de texto versionado, menos os testes."""
+    for rel in tracked_files():
+        if rel.startswith("tests/") or not (ROOT / rel).is_file():
+            continue
+        try:
+            yield rel, (ROOT / rel).read_text(encoding="utf-8")
+        except UnicodeDecodeError:
+            continue
 
 
 class RepoTest(unittest.TestCase):
@@ -16,7 +44,30 @@ class RepoTest(unittest.TestCase):
     def test_notice_credits_cd2_tech_only(self):
         text = read("NOTICE")
         self.assertIn("CD2 Tech", text)
-        self.assertNotIn("Gabriel", text)
+        self.assertNotIn(PERSON, text)
+
+    def test_no_leaks_in_any_tracked_file(self):
+        for rel, text in tracked_texts():
+            lowered = text.lower()
+            for needle in LEAKS:
+                self.assertFalse(needle.lower() in lowered, f"{rel}: {needle}")
+
+    def test_internal_dirs_are_ignored_and_untracked(self):
+        ignore = read(".gitignore").split()
+        for folder in INTERNAL_DIRS:
+            self.assertIn(folder, ignore)
+        for rel in tracked_files():
+            self.assertFalse(rel.startswith(INTERNAL_DIRS + ("docs/superpowers/",)), rel)
+
+    def test_no_deliverable_says_use_as_much_as_you_want(self):
+        # A avaliação gratuita tem prazo (90 dias, COMMERCIAL.md): nenhum texto pode dizer o contrário.
+        for rel, text in tracked_texts():
+            self.assertFalse("quanto quiser" in text, rel)
+
+    def test_notice_states_font_exception(self):
+        text = read("NOTICE")
+        self.assertIn("SIL Open Font License 1.1", text)
+        self.assertIn("não é coberta pela licença Creative Commons", text)
 
     def test_commercial_has_evaluation_and_clients(self):
         text = read("COMMERCIAL.md")

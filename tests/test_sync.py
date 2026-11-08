@@ -4,6 +4,7 @@ O sync roda via subprocess numa pasta temporária (--out-root), para não mexer
 nas cópias do repositório. Os scripts das skills também rodam via subprocess:
 as duas skills têm um calc.py e importar os dois no mesmo processo confunde.
 """
+import codecs
 import importlib.util
 import json
 import re
@@ -16,6 +17,7 @@ import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+PERSON = codecs.decode("Tnoevry", "rot13")  # nome próprio que nenhum arquivo pode citar
 SYNC = ROOT / "scripts" / "sync_plugins.py"
 PACKAGE = ROOT / "scripts" / "package_plugins.py"
 PLUGIN = "cd2-varejo"
@@ -197,7 +199,7 @@ class SyncTest(unittest.TestCase):
                 self.assertIn(needle, text, f"{skill}: falta {needle!r}")
             self.assertNotIn(EM, text)
             self.assertNotIn(EN, text)
-            self.assertNotIn("Gabriel", text)
+            self.assertNotIn(PERSON, text)
             self.assertIsNone(EMOJI.search(text), skill)
             self.assertEqual(re.findall(r"\{\{[^}]*\}\}", text), [], skill)
 
@@ -314,9 +316,25 @@ class PackageTest(unittest.TestCase):
                             self.assertNotIn(junk, entry, f"{name}: {entry}")
             with zipfile.ZipFile(out / f"{PLUGIN}-claude.zip") as zf:
                 self.assertIn(".claude-plugin/plugin.json", zf.namelist())
+                self.assertIn(".claude-plugin/icon.png", zf.namelist())
             with zipfile.ZipFile(out / f"{PLUGIN}-gpts.zip") as zf:
                 self.assertIn("custo-vrva/knowledge/scripts/calc.py", zf.namelist())
 
+
+
+class ClaudeIconTest(unittest.TestCase):
+    """O diretório de plugins do Claude procura o ícone em .claude-plugin/icon.png."""
+
+    def test_icon_is_square_png_and_matches_site(self):
+        import struct
+        icon = ROOT / "plugins" / "claude" / PLUGIN / ".claude-plugin" / "icon.png"
+        data = icon.read_bytes()
+        self.assertEqual(data[:8], b"\x89PNG\r\n\x1a\n")
+        width, height = struct.unpack(">II", data[16:24])
+        self.assertEqual(width, height)
+        self.assertGreaterEqual(width, 512)
+        self.assertLessEqual(len(data), 2 * 1024 * 1024)
+        self.assertEqual(data, (ROOT / "docs" / "assets" / "icon-512.png").read_bytes())
 
 if __name__ == "__main__":
     unittest.main()

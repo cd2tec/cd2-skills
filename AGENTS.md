@@ -26,7 +26,7 @@ O CI roda o `--check` e os testes. O `--check` falha se uma cópia divergir de `
 | `core/cd2-varejo/plugin.core.json` | Nome e versão de referência do plugin | Sim |
 | `skills.json` | Lista das skills (nome, título, resumo, site, regra e status). Gera a tabela do README e os cards do site | Sim |
 | `harnesses.json` | Plataformas do plugin, caminho, manifesto, layout e `utm_source` de cada uma | Sim |
-| `plugins/<plataforma>/cd2-varejo/` (manifesto, `README.md` e, no DSH, `install.py`) | Empacotamento próprio da plataforma | Sim |
+| `plugins/<plataforma>/cd2-varejo/` (manifesto, `README.md`, no Claude o ícone `.claude-plugin/icon.png` e, no DSH, `install.py`) | Empacotamento próprio da plataforma. O ícone do Claude é cópia de `docs/assets/icon-512.png` | Sim |
 | `plugins/<plataforma>/cd2-varejo/skills/` e `gpts/<skill>/` | Cópias geradas | **Não** |
 | `gpts/README.md` | Passo a passo para publicar os GPTs | Sim |
 | `.claude-plugin/marketplace.json` e `.agents/plugins/marketplace.json` | Marketplaces do Claude Code e do Codex | Sim |
@@ -90,14 +90,14 @@ Cada skill mostra a data de conferência dos parâmetros, e a pergunta sobre nov
 - Escreva a entrada no `CHANGELOG.md` com o título exato `## <versão>`, da mais recente para a mais antiga. O workflow de release copia essa seção para as notas da release.
 - Quando o `plugin.core.json` muda na `main`, o workflow de release cria a tag `cd2-varejo-v<versão>` com os ZIPs gerados por `scripts/package_plugins.py`: `cd2-varejo-<pacote>-<versão>.zip` e a cópia sem versão `cd2-varejo-<pacote>.zip`, para `claude`, `codex`, `dsh` e `gpts`. Release de versão que já existe não é recriada: suba a versão.
 - Depois da release, republique os GPTs pelo passo a passo do `gpts/README.md`.
-- Nunca faça commit de `dist/` nem de `.superpowers/`.
+- Nunca faça commit de `dist/`, `interno/` nem `.superpowers/`. Documentos internos de projeto ficam em `interno/`, fora do git e fora do `docs/`, que vai para o GitHub Pages.
 
 ## Links e UTM
 
 - Todo link para `cd2.com.br`, `archeo.cd2.com.br` e os sites das calculadoras leva `utm_source=<origem>&utm_medium=skill&utm_campaign=<campanha>`.
   - Nas skills e nas referências, escreva `utm_source={{UTM_SOURCE}}`. O sync troca o placeholder pelo `utm_source` da plataforma em `harnesses.json`: `claude`, `codex`, `deepseek` e `gpt-store`.
   - No `README.md`, `utm_source=github`. No `docs/index.html`, `utm_source=site-skills`.
-  - A campanha é o nome da skill no link da calculadora e `cd2-varejo` nos links gerais para `cd2.com.br` e o Archeo.
+  - A campanha (`utm_campaign`) depende de quem emite o link. O que sai de uma skill (o `SKILL.md`, as instruções do GPT da skill e as entregas do `render.py`) usa o nome da skill, em todo link: calculadora, `cd2.com.br` e Archeo. Os links do repositório como um todo usam `cd2-varejo`: `README.md`, `docs/index.html`, as referências de `shared/`, o `COMMERCIAL.md`, os READMEs dos pacotes e os links gerais do `_preamble.md` dos GPTs.
 - Os sites das calculadoras sempre com barra no fim: `https://calc-vrva.cd2.com.br/`.
 - WhatsApp comercial: `https://wa.me/5519982355172`, com mensagem preenchida que diz a origem. Nas skills: `Oi, vim pela skill {nome_humano} no {plataforma_humana} e quero falar sobre uso na minha empresa.` No README, "vim pelo GitHub das skills da CD2"; no site, "vim pelo site das skills da CD2".
 - Nenhum número digitado pela pessoa entra em URL, nem na do WhatsApp.

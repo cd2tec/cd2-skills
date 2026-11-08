@@ -31,4 +31,4 @@ Se a sua empresa √© cliente da CD2, qualquer contrato ativo, como AMS, sustenta√
 ## Fale com a CD2
 
 - WhatsApp: https://wa.me/5519982355172
-- Site: https://cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=licenca
+- Site: https://cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=cd2-varejo
