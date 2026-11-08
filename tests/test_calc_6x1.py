@@ -566,8 +566,39 @@ class RunTest(unittest.TestCase):
         self.assertEqual(
             set(net),
             {"min_additional", "max_additional", "min_monthly_cost", "max_monthly_cost",
-             "min_annual_cost", "max_annual_cost", "total_lost_hours", "counts"},
+             "min_annual_cost", "max_annual_cost", "total_lost_hours", "counts",
+             "stores_counted", "stores_substituted"},
         )
+        self.assertEqual(net["stores_counted"], 2)
+        self.assertEqual(net["stores_substituted"], [])
+
+    def test_network_mixed_agreements_counts_every_store(self):
+        # Loja Centro tem convenção própria (42h) e só tem a situação "com acordo".
+        # Na soma "sem acordo" ela entra com a jornada dela, em vez de sumir da rede.
+        data = {
+            "today": TODAY,
+            "stores": [
+                {"name": "Loja Centro", "store": dict(STORE), "sectors": copy.deepcopy(EXAMPLE_SECTORS),
+                 "overrides": {"weekly_hours_override": 42}},
+                {"name": "Loja Bairro", "store": dict(STORE), "sectors": copy.deepcopy(EXAMPLE_SECTORS)},
+            ],
+        }
+        self.assertEqual(calc.validate(data), [])
+        out = calc.run(data)
+        centro, bairro = out["stores"]
+        self.assertEqual(list(centro["scenarios"]), ["with_agreement"])
+        own_without = bairro["scenarios"]["without_agreement"]["result"]
+        own_centro = centro["scenarios"]["with_agreement"]["result"]
+        net = out["network"]["without_agreement"]
+        self.assertGreaterEqual(net["max_monthly_cost"], own_without["max_monthly_cost"])
+        self.assertGreaterEqual(net["max_additional"], own_without["max_additional"])
+        self.assertEqual(net["total_lost_hours"], own_without["total_lost_hours"] + own_centro["total_lost_hours"])
+        self.assertAlmostEqual(net["max_monthly_cost"], own_without["max_monthly_cost"] + own_centro["max_monthly_cost"])
+        self.assertEqual(net["stores_counted"], 2)
+        self.assertEqual(net["stores_substituted"], ["Loja Centro"])
+        with_net = out["network"]["with_agreement"]
+        self.assertEqual(with_net["stores_counted"], 2)
+        self.assertEqual(with_net["stores_substituted"], [])
 
     def test_after_phase2_single_scenario(self):
         out = calc.run(example_input(today="2027-12-16"))

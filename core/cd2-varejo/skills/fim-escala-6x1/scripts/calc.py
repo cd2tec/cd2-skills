@@ -654,15 +654,30 @@ def run(data: dict) -> dict:
 
 
 def _network(stores: list) -> dict:
+    """Soma da rede por situação.
+
+    Loja sem a situação (por exemplo, com convenção própria e só a situação "com acordo")
+    entra com a única situação que tem, para a rede não perder a loja. Os nomes dessas
+    lojas vão em `stores_substituted`, para a entrega avisar.
+    """
     fields = ("min_additional", "max_additional", "min_monthly_cost", "max_monthly_cost",
               "min_annual_cost", "max_annual_cost", "total_lost_hours")
     network = {}
     for scenario in SCENARIO_ORDER:
-        results = [s["scenarios"][scenario]["result"] for s in stores if scenario in s["scenarios"]]
-        if not results:
+        if not any(scenario in s["scenarios"] for s in stores):
             continue
+        results, substituted = [], []
+        for s in stores:
+            if scenario in s["scenarios"]:
+                results.append(s["scenarios"][scenario]["result"])
+            elif s["scenarios"]:
+                own = next(k for k in SCENARIO_ORDER if k in s["scenarios"])
+                results.append(s["scenarios"][own]["result"])
+                substituted.append(s["name"])
         entry = {f: _sum(results, lambda r, f=f: r[f]) for f in fields}
         entry["counts"] = {k: _sum(results, lambda r, k=k: r["counts"][k]) for k in ("red", "amber", "green")}
+        entry["stores_counted"] = len(results)
+        entry["stores_substituted"] = substituted
         network[scenario] = entry
     return network
 
