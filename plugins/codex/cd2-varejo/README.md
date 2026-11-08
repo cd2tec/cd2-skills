@@ -10,9 +10,10 @@ No Codex:
 
 ```
 codex plugin marketplace add cd2tec/cd2-skills
+codex plugin add cd2-varejo@cd2-skills
 ```
 
-Depois instale o plugin `cd2-varejo` pelo catálogo do marketplace `cd2-skills`.
+No app do Codex, depois de adicionar o marketplace, você também pode instalar o `cd2-varejo` pelo diretório de plugins, no marketplace `cd2-skills`. Para atualizar: `codex plugin marketplace upgrade cd2-skills`.
 
 No ChatGPT Work (planos de empresa), quem administra o workspace importa o repositório `cd2tec/cd2-skills`, que usa este mesmo pacote.
 

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>CD2 Skills para o varejo · CD2 Tech</title>
-<meta name="description" content="Plugin cd2-varejo da CD2 Tech: skills de IA para supermercados, padarias e redes do varejo alimentar. Calcula o impacto do fim da escala 6x1 e o custo real do VR/VA com os números da sua loja. Claude Code, Claude Cowork, Codex, ChatGPT Work, DeepSeek Harness e GPT Store.">
+<meta name="description" content="Plugin cd2-varejo da CD2 Tech: skills de IA para supermercados, padarias e redes do varejo alimentar. Calcula o impacto do fim da escala 6x1 e o custo real do VR/VA com os números da sua loja. Claude Code, Claude Cowork, Codex, ChatGPT Work e DeepSeek Harness, e em breve na GPT Store.">
 <meta property="og:title" content="CD2 Skills para o varejo · CD2 Tech">
 <meta property="og:description" content="Skills de IA para o varejo, de graça para avaliar. A conta da calculadora gratuita da CD2, com os números da sua loja.">
 <meta property="og:type" content="website">
@@ -196,7 +196,8 @@
   .block--deep { background: var(--blue-experience); color: var(--white-human); }
   .block--light { background: var(--white-human); color: var(--black-agile); }
   .block--accent { background: var(--yellow-like); color: var(--black-agile); }
-  .block--brand { background: var(--surface-brand); color: var(--ink-on-brand); }
+  .block--brand { background: var(--surface-brand); color: var(--ink-on-brand); --focus-ring: var(--yellow-like); }
+  .block--deep { --focus-ring: var(--yellow-like); }
   .block--raised { background: var(--surface-raised); color: var(--ink); border: 1px solid var(--hairline); }
   .notch-tr { border-top-right-radius: 0; }
   .notch-bl { border-bottom-left-radius: 0; }
@@ -236,7 +237,7 @@
   /* Exemplos de conversa */
   .examples { margin-top: var(--space-12); }
   .examples > h3 { margin-bottom: var(--space-6); }
-  .chat { background: var(--surface-brand-deep); color: var(--white-human); border-radius: var(--radius-lg); overflow: hidden; display: flex; flex-direction: column; }
+  .chat { --focus-ring: var(--yellow-like); background: var(--surface-brand-deep); color: var(--white-human); border-radius: var(--radius-lg); overflow: hidden; display: flex; flex-direction: column; }
   .chat__bar { padding: var(--space-4) var(--space-6); border-bottom: 1px solid rgba(242, 242, 242, 0.2); font: 700 12px/16px var(--font); letter-spacing: .12em; text-transform: uppercase; }
   .chat__body { padding: var(--space-6); display: flex; flex-direction: column; gap: var(--space-4); font-size: 15px; line-height: 23px; }
   .chat__body p b { display: block; font: 700 12px/16px var(--font); letter-spacing: .08em; text-transform: uppercase; margin-bottom: var(--space-1); }
@@ -269,6 +270,7 @@
   .panels { display: grid; gap: var(--space-6); }
   .panel { display: grid; gap: var(--space-6); background: var(--surface-raised); border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-6); min-width: 0; }
   .panel[hidden] { display: none; }
+  .js .panel:not(.is-on) { display: none; }
   @media (min-width: 1024px) { .panel { grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: var(--space-8); padding: var(--space-8); } }
   .panel > * { min-width: 0; }
   .panel__intro { display: flex; flex-direction: column; gap: var(--space-3); }
@@ -357,11 +359,11 @@
         <a class="btn btn--secondary" href="#skills">Ver as skills</a>
       </div>
       <ul class="chips" aria-label="Plataformas">
-        <li>Claude Code</li><li>Claude Cowork</li><li>Codex</li><li>ChatGPT Work</li><li>DeepSeek Harness</li><li>GPT Store</li>
+        <li>Claude Code</li><li>Claude Cowork</li><li>Codex</li><li>ChatGPT Work</li><li>DeepSeek Harness</li><li>GPT Store em breve</li>
       </ul>
       <ul class="facts">
         <li class="block block--deep notch-tr"><span class="stat">2</span><span class="stat-line">skills prontas, uma para cada calculadora gratuita da CD2</span></li>
-        <li class="block block--deep"><span class="stat">6</span><span class="stat-line">plataformas, do Claude Code à GPT Store, a partir de uma fonte só</span></li>
+        <li class="block block--deep"><span class="stat">5</span><span class="stat-line">plataformas a partir de uma fonte só, e a GPT Store em breve</span></li>
         <li class="block block--accent notch-bl"><span class="stat">90 dias</span><span class="stat-line">de avaliação grátis na operação da sua empresa</span></li>
       </ul>
     </div>
@@ -481,7 +483,7 @@
       </div>
 
       <div class="panels">
-        <div class="panel" role="tabpanel" id="p-claude" aria-labelledby="t-claude">
+        <div class="panel is-on" role="tabpanel" id="p-claude" aria-labelledby="t-claude">
           <div class="panel__intro">
             <span class="eyebrow">Marketplace direto do GitHub</span>
             <h3 class="heading-sm">Claude Code</h3>
@@ -504,7 +506,7 @@
           <div class="panel__how">
             <ol class="steps-list">
               <li><strong>Só para você:</strong> em Customize &gt; Plugins, faça o upload do ZIP.</li>
-              <li><strong>Para a organização</strong> (Owner, planos Team e Enterprise): em Organization settings &gt; Plugins &amp; skills, clique em Add &gt; Upload a plugin e suba o ZIP.</li>
+              <li><strong>Para a organização</strong> (Owner ou Primary Owner, planos Team e Enterprise): em Organization settings &gt; Plugins &amp; skills, clique em Add &gt; Upload a plugin e suba o ZIP.</li>
               <li>Na organização, defina quem recebe o plugin em Inventory, no menu da linha do <code>cd2-varejo</code>.</li>
             </ol>
             <p class="note">Para atualizar, baixe o ZIP novo e repita o upload no mesmo lugar.</p>
@@ -528,7 +530,7 @@ codex plugin add cd2-varejo@cd2-skills</code></pre><button type="button" class="
           <div class="panel__intro">
             <span class="eyebrow">Só nos planos de empresa</span>
             <h3 class="heading-sm">ChatGPT Work</h3>
-            <p>O ChatGPT Work existe só nos planos de empresa do ChatGPT, e quem instala é o admin do workspace. Ele usa o mesmo pacote do Codex. No ChatGPT Plus ou no gratuito, use a GPT Store.</p>
+            <p>O ChatGPT Work existe só nos planos de empresa do ChatGPT, e quem instala é o admin do workspace. Ele usa o mesmo pacote do Codex. No ChatGPT Plus ou no gratuito, os GPTs chegam em breve na GPT Store. Enquanto isso, quem tem o Plus já pode usar o plugin no Codex.</p>
           </div>
           <div class="panel__how">
             <ol class="steps-list">
@@ -556,15 +558,16 @@ codex plugin add cd2-varejo@cd2-skills</code></pre><button type="button" class="
 
         <div class="panel" role="tabpanel" id="p-gpt" aria-labelledby="t-gpt">
           <div class="panel__intro">
-            <span class="eyebrow">ChatGPT Plus e gratuito</span>
+            <span class="eyebrow">Em breve</span>
             <h3 class="heading-sm">GPT Store</h3>
-            <p>Para quem usa o ChatGPT Plus ou o gratuito, cada skill virou um GPT, publicado pela CD2 Tech. Não precisa instalar nada.</p>
+            <p>Em breve na GPT Store, um GPT para cada skill, para quem usa o ChatGPT Plus ou o gratuito. Não vai precisar instalar nada.</p>
           </div>
           <div class="panel__how">
             <ol class="steps-list">
-              <li>Procure na GPT Store por <strong>CD2 Escala 6x1</strong>, para o fim da escala 6x1.</li>
-              <li>Procure na GPT Store por <strong>CD2 VR/VA: quanto custa</strong>, para o custo do vale.</li>
+              <li><strong>CD2 Escala 6x1</strong>, para o fim da escala 6x1.</li>
+              <li><strong>CD2 VR/VA: quanto custa</strong>, para o custo do vale.</li>
             </ol>
+            <p>Enquanto isso, o Codex também funciona no ChatGPT Plus: veja a aba Codex.</p>
             <p class="note">O GPT não se conecta ao seu sistema. Para puxar os dados do ERP, use o plugin no Claude ou no Codex, com o Archeo. Quer saber como os GPTs são montados? Veja o <a href="https://github.com/cd2tec/cd2-skills/blob/main/gpts/README.md">gpts/README.md</a>.</p>
           </div>
         </div>
@@ -594,7 +597,7 @@ codex plugin add cd2-varejo@cd2-skills</code></pre><button type="button" class="
         <article class="block block--raised notch-tr">
           <span class="eyebrow">Para todo mundo</span>
           <h3>Livre para estudar</h3>
-          <p>Você pode ver, baixar, estudar e usar sem fins comerciais, sempre com o crédito à CD2 Tech.</p>
+          <p>Você pode ver, baixar, estudar, usar sem fins comerciais e compartilhar sem alterações, sempre com o crédito à CD2 Tech.</p>
         </article>
         <article class="block block--raised">
           <span class="eyebrow">Para a sua empresa</span>
@@ -678,7 +681,9 @@ codex plugin add cd2-varejo@cd2-skills</code></pre><button type="button" class="
         var on = t === tab;
         t.setAttribute("aria-selected", on ? "true" : "false");
         t.tabIndex = on ? 0 : -1;
-        document.getElementById(t.getAttribute("aria-controls")).hidden = !on;
+        var panel = document.getElementById(t.getAttribute("aria-controls"));
+        panel.hidden = !on;
+        panel.classList.toggle("is-on", on);
       });
       if (focus) tab.focus();
     }

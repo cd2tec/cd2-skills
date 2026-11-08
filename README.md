@@ -15,7 +15,7 @@
 [![Codex](https://img.shields.io/badge/Codex-plugin-0000ff.svg)](#codex)
 [![ChatGPT Work](https://img.shields.io/badge/ChatGPT%20Work-plugin-0000ff.svg)](#chatgpt-work)
 [![DeepSeek Harness](https://img.shields.io/badge/DeepSeek%20Harness-skills-0000ff.svg)](#deepseek-harness)
-[![GPT Store](https://img.shields.io/badge/GPT%20Store-2%20GPTs-0000ff.svg)](#gpt-store)
+[![GPT Store](https://img.shields.io/badge/GPT%20Store-em%20breve-0000ff.svg)](#gpt-store)
 [![Release](https://img.shields.io/github/v/release/cd2tec/cd2-skills?label=release&color=0000ff)](https://github.com/cd2tec/cd2-skills/releases/latest)
 [![Site](https://img.shields.io/badge/site-cd2tec.github.io-0000ff.svg)](https://cd2tec.github.io/cd2-skills/)
 
@@ -27,7 +27,7 @@
 
 A CD2 Tech publica calculadoras gratuitas para o varejo alimentar. Este repositório leva a mesma conta para dentro do assistente de IA que você já usa: o plugin **`cd2-varejo`** tem uma skill para cada calculadora. A skill entende quem é você, faz a conta com os números da sua loja e entrega o que fazer primeiro, com a marca CD2 Tech.
 
-Funciona no [Claude Code](#claude-code), no [Claude Cowork](#claude-cowork), no [Codex](#codex), no [ChatGPT Work](#chatgpt-work), no [DeepSeek Harness](#deepseek-harness) e na [GPT Store](#gpt-store).
+Funciona no [Claude Code](#claude-code), no [Claude Cowork](#claude-cowork), no [Codex](#codex), no [ChatGPT Work](#chatgpt-work) e no [DeepSeek Harness](#deepseek-harness). A [GPT Store](#gpt-store) chega em breve.
 
 ## O problema
 
@@ -128,7 +128,7 @@ O plugin `cd2-varejo` é o mesmo em todas as plataformas. Muda só a forma de in
 | [Codex](#codex) | Marketplace direto do GitHub | Entrega visual em arquivo HTML |
 | [ChatGPT Work](#chatgpt-work) | O admin importa o repositório | Só nos planos de empresa. Usa o pacote do Codex |
 | [DeepSeek Harness](#deepseek-harness) | ZIP da release e `python3 install.py` | Em developer preview, sujeito a mudança |
-| [GPT Store](#gpt-store) | Nada a instalar: procure o GPT | Para o ChatGPT Plus e o gratuito |
+| [GPT Store](#gpt-store) | Em breve: nada a instalar | Para o ChatGPT Plus e o gratuito |
 
 ### Downloads
 
@@ -184,7 +184,7 @@ O ChatGPT Work só existe nos planos de empresa do ChatGPT, e quem instala é o 
 3. Em **Import results**, confira se o `cd2-varejo` veio de `plugins/codex/cd2-varejo` e defina a política de instalação de cada papel.
 4. As pessoas do workspace instalam em **Plugins**, na barra lateral.
 
-No ChatGPT Plus pessoal ou no gratuito não há plugin: o caminho é a [GPT Store](#gpt-store).
+No ChatGPT Plus pessoal ou no gratuito não há plugin. Os GPTs chegam em breve na [GPT Store](#gpt-store). Enquanto isso, quem tem o Plus já pode usar o plugin no [Codex](#codex).
 
 ### DeepSeek Harness
 
@@ -197,10 +197,12 @@ O DeepSeek Harness está em **developer preview**, e a DeepSeek avisa que pode h
 
 ### GPT Store
 
-Para quem usa o ChatGPT Plus ou o gratuito, cada skill virou um GPT, publicado pela CD2 Tech:
+Em breve na GPT Store, um GPT para cada skill, para quem usa o ChatGPT Plus ou o gratuito:
 
-- procure na GPT Store por **CD2 Escala 6x1**, para o fim da escala 6x1;
-- procure na GPT Store por **CD2 VR/VA: quanto custa**, para o custo do vale.
+- **CD2 Escala 6x1**, para o fim da escala 6x1;
+- **CD2 VR/VA: quanto custa**, para o custo do vale.
+
+Enquanto isso, o Codex também funciona no ChatGPT Plus: veja a instalação no [Codex](#codex).
 
 O GPT não se conecta ao seu sistema. Para puxar os dados do ERP, use o plugin no Claude ou no Codex, com o Archeo. Como os GPTs são montados e publicados: [`gpts/README.md`](gpts/README.md).
 
@@ -214,7 +216,7 @@ Em vez de digitar, a skill pode puxar os números direto do seu ERP, da folha ou
 
 O plugin é da **CD2 Tech** e está na licença **CC BY-NC-ND 4.0**. Na prática:
 
-- **Livre para estudar.** Você pode ver, baixar, estudar e usar sem fins comerciais, sempre com o crédito à CD2 Tech.
+- **Livre para estudar.** Você pode ver, baixar, estudar, usar sem fins comerciais e compartilhar sem alterações, sempre com o crédito à CD2 Tech.
 - **Avaliação grátis na sua empresa.** Sua empresa pode usar as skills na própria operação por até 90 dias, para avaliar. Nesse período não há suporte, garantia nem responsabilidade da CD2. Veja o [`COMMERCIAL.md`](COMMERCIAL.md).
 - **Uso contínuo na empresa é para clientes CD2.** Qualquer contrato ativo com a CD2, como AMS, sustentação ou projeto, já inclui a licença comercial, com suporte, manutenção e responsabilidade da CD2.
 - **Nunca é permitido:** vender as skills, cobrar acesso a elas, distribuir uma versão modificada ou remover o crédito à CD2 Tech.

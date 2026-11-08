@@ -11,7 +11,7 @@ EMOJI = re.compile("[\U0001F300-\U0001FAFF☀-➿]")
 WA_README = "Oi, vim pelo GitHub das skills da CD2 e quero falar sobre uso na minha empresa."
 WA_SITE = "Oi, vim pelo site das skills da CD2 e quero falar sobre uso na minha empresa."
 # Hosts aceitos em src/href absolutos do site. O resto tem de ser relativo.
-SITE_HOSTS = ("cd2.com.br", "wa.me", "github.com", "fonts.googleapis.com", "fonts.gstatic.com")
+SITE_HOSTS = ("cd2.com.br", "wa.me", "github.com")
 UTM_HOSTS = ("cd2.com.br",)
 
 
@@ -173,6 +173,63 @@ class CopyRulesTest(unittest.TestCase):
             self.assertEqual(text.count("<!-- skills:start -->"), 1, rel)
             self.assertEqual(text.count("<!-- skills:end -->"), 1, rel)
             self.assertTrue(without_generated_block(text).strip(), rel)
+
+
+class LaunchTruthTest(unittest.TestCase):
+    """O que o README e o site prometem tem de ser verdade no dia do lançamento."""
+
+    DOCS = ("README.md", "docs/index.html")
+
+    def test_gpt_store_is_coming_soon(self):
+        near = re.compile(r"GPT Store.{0,160}?em breve|em breve.{0,160}?GPT Store", re.S | re.I)
+        for rel in self.DOCS:
+            text = read(rel)
+            self.assertRegex(text, near, rel)
+            self.assertNotIn("publicado pela CD2", text, rel)
+            self.assertNotIn("publicados pela CD2", text, rel)
+            self.assertNotIn("procure na GPT Store", text.lower(), rel)
+        self.assertNotIn("6 plataformas", read("README.md"))
+        self.assertNotIn('<span class="stat">6</span>', read("docs/index.html"))
+
+    def test_codex_command_agrees_everywhere(self):
+        for rel in ("README.md", "docs/index.html", "plugins/codex/cd2-varejo/README.md"):
+            text = read(rel)
+            self.assertIn("codex plugin marketplace add cd2tec/cd2-skills", text, rel)
+            self.assertIn("codex plugin add cd2-varejo@cd2-skills", text, rel)
+
+    def test_cowork_owner_wording_agrees(self):
+        for rel in self.DOCS:
+            self.assertIn("Owner ou Primary Owner", read(rel), rel)
+
+    def test_free_use_includes_sharing_unchanged(self):
+        for rel in self.DOCS:
+            self.assertIn("compartilhar sem alterações", read(rel), rel)
+
+    def test_every_img_has_alt(self):
+        for rel in self.DOCS:
+            for tag in re.findall(r"<img\b[^>]*>", read(rel)):
+                self.assertRegex(tag, r'\balt="[^"]+"', f"{rel}: {tag}")
+
+
+class SiteA11yTest(unittest.TestCase):
+    def setUp(self):
+        self.html = read("docs/index.html")
+
+    def test_focus_ring_visible_on_blue_blocks(self):
+        # Sobre blue-retail e azuis escuros o anel blue-tech some: tem de virar yellow-like.
+        for selector in (r"\.on-brand", r"\.block--brand", r"\.chat"):
+            rule = re.compile(selector + r"[^{]*\{[^}]*--focus-ring:\s*var\(--yellow-like\)")
+            self.assertRegex(self.html, rule, selector)
+
+    def test_tab_panels_hidden_before_first_paint(self):
+        # O script do <head> põe a classe js; o CSS esconde os painéis fora do ar antes do primeiro quadro.
+        head = self.html.split("</head>")[0]
+        self.assertIn('classList.add("js")', head)
+        self.assertRegex(head, r"\.js \.panel:not\(\.is-on\)\s*\{[^}]*display:\s*none")
+        panels = re.findall(r'<div class="panel[^"]*" role="tabpanel"', self.html)
+        self.assertEqual(len(panels), 6)
+        self.assertIn("is-on", panels[0])
+        self.assertTrue(all("is-on" not in p for p in panels[1:]))
 
 
 class GuidesTest(unittest.TestCase):
