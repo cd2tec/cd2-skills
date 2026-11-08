@@ -180,16 +180,38 @@ class LaunchTruthTest(unittest.TestCase):
 
     DOCS = ("README.md", "docs/index.html")
 
+    NEAR = re.compile(r"GPT Store.{0,160}?em breve|em breve.{0,160}?GPT Store", re.S | re.I)
+    GPT_NAMES = ("CD2 Escala 6x1", "CD2 VR/VA: quanto custa")
+    FORBIDDEN = ("publicado pela cd2", "publicados pela cd2", "procure na gpt store")
+
+    def check_gpt_store_text(self, text, rel):
+        self.assertRegex(text, self.NEAR, rel)
+        for name in self.GPT_NAMES:
+            self.assertIn(name, text, rel)
+        lowered = text.lower()
+        for phrase in self.FORBIDDEN:
+            self.assertNotIn(phrase, lowered, rel)
+
     def test_gpt_store_is_coming_soon(self):
-        near = re.compile(r"GPT Store.{0,160}?em breve|em breve.{0,160}?GPT Store", re.S | re.I)
         for rel in self.DOCS:
-            text = read(rel)
-            self.assertRegex(text, near, rel)
-            self.assertNotIn("publicado pela CD2", text, rel)
-            self.assertNotIn("publicados pela CD2", text, rel)
-            self.assertNotIn("procure na GPT Store", text.lower(), rel)
+            self.check_gpt_store_text(read(rel), rel)
         self.assertNotIn("6 plataformas", read("README.md"))
         self.assertNotIn('<span class="stat">6</span>', read("docs/index.html"))
+
+    def test_gpt_store_guard_is_live(self):
+        # Cada guarda tem de falhar quando a frase proibida volta ou um nome de GPT some.
+        for rel in self.DOCS:
+            text = read(rel)
+            broken = [
+                text + "\nCada skill virou um GPT, publicado pela CD2 Tech.",
+                text + "\nProcure na GPT Store por CD2 Escala 6x1.",
+                text.replace("CD2 Escala 6x1", "CD2 Escala"),
+                text.replace("CD2 VR/VA: quanto custa", "CD2 VR/VA"),
+                text.replace("em breve", "agora").replace("Em breve", "Agora"),
+            ]
+            for variant in broken:
+                with self.assertRaises(AssertionError, msg=rel):
+                    self.check_gpt_store_text(variant, rel)
 
     def test_codex_command_agrees_everywhere(self):
         for rel in ("README.md", "docs/index.html", "plugins/codex/cd2-varejo/README.md"):
