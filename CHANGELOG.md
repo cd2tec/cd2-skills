@@ -2,6 +2,10 @@
 
 As notas de cada versão entram na release do GitHub. Use um título `## <versão>` por versão, da mais recente para a mais antiga.
 
+## 0.2.1
+
+Correção de instalação. A descrição do plugin passou de 500 caracteres, e o envio do ZIP no Claude recusava o pacote. A descrição ficou mais curta, e o `--check` agora confere esse limite. As skills não mudaram.
+
 ## 0.2.0
 
 Dez skills novas, todas com nome em português, e teste livre e sem prazo.

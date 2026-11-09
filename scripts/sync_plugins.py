@@ -67,6 +67,8 @@ PLACEHOLDER = "{{" + "UTM_SOURCE" + "}}"
 SKILL_PLACEHOLDER = "{{" + "SKILL" + "}}"
 TEXT_SUFFIXES = {".md", ".py", ".html", ".json"}
 GPT_LIMIT = 8000
+MANIFEST_DESCRIPTION_LIMIT = 500  # o validador de upload do Claude recusa acima disso
+SKILL_DESCRIPTION_LIMIT = 1024
 JUNK_DIRS = {"__pycache__"}
 JUNK_FILES = {".DS_Store"}
 IGNORED = shutil.ignore_patterns("__pycache__", "*.pyc", ".DS_Store")
@@ -263,6 +265,8 @@ def check_frontmatter(core: Path) -> list[str]:
             motivo = yaml_scalar_problem(found.group(1).strip()) if found else None
             if motivo:
                 problems.append(f"{shown(skill_md, ROOT)}: {campo} {motivo}")
+            if found and campo == "description" and len(found.group(1).strip()) > SKILL_DESCRIPTION_LIMIT:
+                problems.append(f"{shown(skill_md, ROOT)}: description acima de {SKILL_DESCRIPTION_LIMIT} caracteres")
     return problems
 
 
@@ -353,6 +357,9 @@ def check_manifest(path: Path, core_meta: dict, label) -> list[str]:
             problems.append(f"{label(path)}: {key} '{manifest.get(key)}' diferente do core '{core_meta[key]}'")
     if manifest.get("license") != LICENSE_ID:
         problems.append(f"{label(path)}: license '{manifest.get('license')}' diferente de '{LICENSE_ID}'")
+    tamanho = len(manifest.get("description", ""))
+    if tamanho > MANIFEST_DESCRIPTION_LIMIT:
+        problems.append(f"{label(path)}: description com {tamanho} caracteres, o limite é {MANIFEST_DESCRIPTION_LIMIT}")
     return problems
 
 
@@ -378,6 +385,9 @@ def check_marketplaces(plugin: str, spec: dict) -> list[str]:
         if source_of(entry) != expected:
             problems.append(f"{shown(path, ROOT)}: source '{source_of(entry)}' diferente de '{expected}'")
         if harness == "claude":
+            tamanho = len(entry.get("description", ""))
+            if tamanho > MANIFEST_DESCRIPTION_LIMIT:
+                problems.append(f"{shown(path, ROOT)}: description com {tamanho} caracteres, o limite é {MANIFEST_DESCRIPTION_LIMIT}")
             if "version" in entry:
                 problems.append(f"{shown(path, ROOT)}: não declare version na entrada do plugin (vale a do plugin.json)")
             if entry.get("license") != LICENSE_ID:

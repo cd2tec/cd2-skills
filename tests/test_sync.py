@@ -245,7 +245,7 @@ class SyncTest(unittest.TestCase):
         for path in manifests:
             meta = json.loads(path.read_text(encoding="utf-8"))
             self.assertEqual(meta["name"], PLUGIN, path)
-            self.assertEqual(meta["version"], "0.2.0", path)
+            self.assertEqual(meta["version"], "0.2.1", path)
             self.assertEqual(meta["license"], "CC-BY-NC-ND-4.0", path)
             self.assertEqual(meta["author"], {"name": "CD2 Tech", "url": "https://cd2.com.br"}, path)
             self.assertEqual(meta["homepage"], "https://cd2tec.github.io/cd2-skills/", path)
@@ -437,7 +437,7 @@ class PackageTest(unittest.TestCase):
             )
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
             for harness in ("claude", "codex", "dsh", "gpts"):
-                for name in (f"{PLUGIN}-{harness}.zip", f"{PLUGIN}-{harness}-0.2.0.zip"):
+                for name in (f"{PLUGIN}-{harness}.zip", f"{PLUGIN}-{harness}-0.2.1.zip"):
                     path = out / name
                     self.assertTrue(path.is_file(), name)
                     with zipfile.ZipFile(path) as zf:
@@ -467,6 +467,46 @@ class ClaudeIconTest(unittest.TestCase):
         self.assertGreaterEqual(width, 512)
         self.assertLessEqual(len(data), 2 * 1024 * 1024)
         self.assertEqual(data, (ROOT / "docs" / "assets" / "icon-512.png").read_bytes())
+
+class DescriptionLimits(unittest.TestCase):
+    """O validador de plugin do Claude recusa descrição acima de 500 caracteres."""
+
+    @classmethod
+    def setUpClass(cls):
+        spec = importlib.util.spec_from_file_location("sync_limites", ROOT / "scripts/sync_plugins.py")
+        cls.sync = importlib.util.module_from_spec(spec)
+        sys.modules["sync_limites"] = cls.sync
+        spec.loader.exec_module(cls.sync)
+
+    def manifesto(self, tamanho):
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        path = Path(tmp.name) / "plugin.json"
+        path.write_text(json.dumps({"name": "cd2-varejo", "version": "1.0.0", "license": self.sync.LICENSE_ID,
+                                    "description": "x" * tamanho}), encoding="utf-8")
+        return self.sync.check_manifest(path, {"name": "cd2-varejo", "version": "1.0.0"}, str)
+
+    def test_manifesto_acima_do_limite_acusa(self):
+        self.assertTrue(any("500" in p for p in self.manifesto(501)))
+
+    def test_manifesto_no_limite_passa(self):
+        self.assertEqual(self.manifesto(500), [])
+
+    def test_manifestos_e_marketplace_reais_cabem(self):
+        for rel in ("plugins/claude/cd2-varejo/.claude-plugin/plugin.json", "plugins/codex/cd2-varejo/plugin.json",
+                    "plugins/dsh/cd2-varejo/plugin.json"):
+            with self.subTest(rel):
+                self.assertLessEqual(len(json.loads((ROOT / rel).read_text(encoding="utf-8"))["description"]), 500)
+        market = json.loads((ROOT / ".claude-plugin/marketplace.json").read_text(encoding="utf-8"))
+        for entry in market["plugins"]:
+            self.assertLessEqual(len(entry.get("description", "")), 500)
+
+    def test_descricao_de_skill_cabe_em_1024(self):
+        for skill in (ROOT / "core/cd2-varejo/skills").glob("*/SKILL.md"):
+            with self.subTest(skill.parent.name):
+                texto = skill.read_text(encoding="utf-8")
+                self.assertLessEqual(len(re.search(r"^description:\s*(.+)$", texto, re.M).group(1)), 1024)
+
 
 class FrontmatterYaml(unittest.TestCase):
     def conferir(self, descricao, nome="minha-skill"):
