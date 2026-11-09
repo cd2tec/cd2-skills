@@ -208,6 +208,24 @@ ORDER BY pc.codigo
 """
 
 
+# Seção 3.3 de relatorio-fiscal, em SQLite: loja 1, outubro de 2026, só Autorizada, junção por série e modelo.
+SQL_FISCAL_CABECALHO_ITENS = """
+SELECT COUNT(*) notas,
+       SUM(CASE WHEN i.soma IS NULL THEN 1 ELSE 0 END) sem_item,
+       SUM(CASE WHEN i.soma IS NOT NULL AND ABS(h.valor_produtos - i.soma) > 0.05 THEN 1 ELSE 0 END) divergentes,
+       SUM(CASE WHEN i.soma IS NOT NULL AND ABS(h.valor_produtos - i.soma) <= 0.05 THEN 1 ELSE 0 END) fecham,
+       CAST(SUM(h.valor_produtos) AS float) total_cabecalho,
+       CAST(SUM(COALESCE(i.soma, 0)) AS float) total_itens_ligados,
+       CAST(SUM(h.valor_produtos - COALESCE(i.soma, 0)) AS float) diferenca_total
+FROM fiscal_conf_notas h
+LEFT JOIN (SELECT loja, nota, serie, modelo, SUM(COALESCE(valor, 0)) soma
+           FROM fiscal_conf_itens GROUP BY loja, nota, serie, modelo) i
+       ON i.loja = h.loja AND i.nota = h.nota AND i.serie = h.serie AND i.modelo = h.modelo
+WHERE h.situacao = 'Autorizada' AND h.loja = 1
+  AND h.data >= '2026-10-01' AND h.data < '2026-11-01'
+"""
+
+
 class Base(unittest.TestCase):
     def setUp(self):
         tmp = tempfile.TemporaryDirectory()
@@ -459,26 +477,27 @@ class TestModelos(Base):
         self.assertIn("### 3.1 Contas a pagar por vencimento", secao("relatorio-financeiro", "3.1"))
         # Em financeiro-pagar.csv, referência 31/10/2026, só situação Aberto com saldo > 0
         # (T11 liquidado, T12 cancelado e T13 aberto de saldo zero ficam fora). Dias até o vencimento:
-        #   T01 -103: 1 vencido > 90                  1.000
-        #   T02  -82: 2 vencido 61-90                 T02   500
-        #   T03  -46: 3 vencido 31-60                 T03   300
-        #   T04  -11: 4 vencido 1-30                  T04   200
+        #   T01 -103 (1.000) e T18 -91 (5): 1 vencido > 90      1.005, 2 títulos
+        #   T02  -82 (500), T14 -90 (10), T19 -61 (7): 2 vencido 61-90    517, 3 títulos
+        #   T03  -46 (300), T15 -60 (20), T20 -31 (8): 3 vencido 31-60    328, 3 títulos
+        #   T04  -11 (200), T16 -30 (30), T17  -1 (40): 4 vencido 1-30    270, 3 títulos
         #   T05    0 e T06 7: 5 a vencer 0-7          100 + 50 = 150 (7 ainda é desta faixa)
         #   T07    8: 6 a vencer 8-15                 400
         #   T08   30: 7 a vencer 16-30                250
         #   T10   60: 8 a vencer 31-60                150
         #   T09   61: 9 a vencer > 60                 600
-        # Total em aberto: 3.550.
+        # Os limites -90, -60, -30 e -1 caem na faixa mais nova (61-90, 31-60, 1-30), e -91, -61, -31 na mais velha.
+        # Total em aberto: 3.670.
         self.carregar("financeiro-pagar.csv")
 
         linhas = self.linhas(SQL_FINANCEIRO_AGING)
 
         self.assertEqual([l["faixa"][0] for l in linhas], list("123456789"))
-        self.assertEqual([l["titulos"] for l in linhas], [1, 1, 1, 1, 2, 1, 1, 1, 1])
-        valores = [1000.0, 500.0, 300.0, 200.0, 150.0, 400.0, 250.0, 150.0, 600.0]
+        self.assertEqual([l["titulos"] for l in linhas], [2, 3, 3, 3, 2, 1, 1, 1, 1])
+        valores = [1005.0, 517.0, 328.0, 270.0, 150.0, 400.0, 250.0, 150.0, 600.0]
         for linha, valor in zip(linhas, valores):
             self.assertAlmostEqual(linha["valor"], valor)
-            self.assertAlmostEqual(linha["part_pct"], valor / 35.5)
+            self.assertAlmostEqual(linha["part_pct"], valor / 36.7)
 
         # Prova da seção 3.1: faixas exclusivas somam o total em aberto, e esse total vem de outra conta:
         # original - baixado, título a título, sem passar pela coluna de saldo nem pelas faixas.
@@ -487,7 +506,7 @@ class TestModelos(Base):
             "WHERE situacao = 'Aberto' AND original - baixado > 0"
         )
         self.assertAlmostEqual(sum(l["valor"] for l in linhas), independente[0]["total"])
-        self.assertAlmostEqual(independente[0]["total"], 3550.0)
+        self.assertAlmostEqual(independente[0]["total"], 3670.0)
         self.assertEqual(sum(l["titulos"] for l in linhas), independente[0]["n"])
         # Amostra: em nenhum título aberto o saldo exportado difere de original - baixado.
         divergentes = self.linhas(
@@ -534,21 +553,56 @@ class TestModelos(Base):
         )
         self.assertGreater(sem_serie[0]["total"], 2600.0)
 
+    def test_fiscal_cabecalho_itens(self):
+        self.assertIn("### 3.3 Cabeçalho x itens", secao("relatorio-fiscal", "3.3"))
+        # Em fiscal-conf-notas.csv e fiscal-conf-itens.csv, loja 1, outubro de 2026, só Autorizada
+        # (a 203 cancelada e a 205 de setembro ficam fora, e a cancelada não infla "sem item"):
+        #   200: produtos 1.000, itens 600 + 400 = 1.000          fecha
+        #   201: produtos 500, itens 450                          diverge em 50
+        #   202: produtos 300, sem item                           sem item
+        #   204: produtos 100, itens 100,02, diferença de 0,02    fecha (dentro de 0,05)
+        # Notas 4 = 2 fecham + 1 diverge + 1 sem item. Cabeçalho 1.900, itens 1.550,02,
+        # diferença 349,98 = 50 + 300 + (-0,02).
+        self.carregar("fiscal-conf-notas.csv", "fiscal-conf-itens.csv")
+
+        r = self.linhas(SQL_FISCAL_CABECALHO_ITENS)[0]
+
+        self.assertEqual((r["notas"], r["fecham"], r["divergentes"], r["sem_item"]), (4, 2, 1, 1))
+        self.assertAlmostEqual(r["total_cabecalho"], 1900.0)
+        self.assertAlmostEqual(r["total_itens_ligados"], 1550.02)
+
+        # Prova da seção 3.3, parte 1: notas contadas direto no cabeçalho, sem a junção.
+        direto = self.linhas(
+            "SELECT COUNT(*) n FROM fiscal_conf_notas WHERE situacao = 'Autorizada' AND loja = 1 "
+            "AND data >= '2026-10-01' AND data < '2026-11-01'"
+        )[0]["n"]
+        self.assertEqual(r["notas"], direto)
+        self.assertEqual(r["fecham"] + r["divergentes"] + r["sem_item"], direto)
+
+        # Parte 2: soma direta nos itens (mesmos filtros, sem junção) fecha com o cabeçalho menos as diferenças.
+        itens = self.linhas(
+            "SELECT SUM(valor) total FROM fiscal_conf_itens WHERE situacao = 'Autorizada' AND loja = 1 "
+            "AND data >= '2026-10-01' AND data < '2026-11-01'"
+        )[0]["total"]
+        self.assertAlmostEqual(itens, 1550.02)
+        self.assertAlmostEqual(r["total_cabecalho"] - itens, r["diferenca_total"])
+        self.assertAlmostEqual(r["diferenca_total"], 349.98)
+
     def test_contabil_balancete(self):
         self.assertIn("### 3.1 Balancete de verificação", secao("relatorio-contabil", "3.1"))
         # Em contabil-lancamentos.csv, só Efetivado (o rascunho L5 de 999 fica fora), exercício
         # desde 01/01/2026 e período de outubro. Saldo com sinal: débito positivo, crédito negativo.
-        #   1.1.01.001 Caixa:         anterior +1.000, débitos 500, créditos 200 + 40 = 240, atual +1.260
-        #   2.1.01.001 Fornecedores:  anterior 0, débitos 40, créditos 100, atual -60
-        #   2.3.01.001 Capital:       anterior -1.000, sem movimento no mês, atual -1.000
-        #   3.1.01.001 Receita:       anterior 0, créditos 500, atual -500
-        #   4.1.01.001 Despesas:      anterior 0, débitos 200 + 100 = 300, atual +300
+        #   1.1.01 Caixa:         anterior +1.000, débitos 500, créditos 200 + 40 = 240, atual +1.260
+        #   2.1.01 Fornecedores:  anterior 0, débitos 40, créditos 100, atual -60
+        #   2.3.01 Capital:       anterior -1.000, sem movimento no mês, atual -1.000
+        #   3.1.01 Receita:       anterior 0, créditos 500, atual -500
+        #   4.1.01 Despesas:      anterior 0, débitos 200 + 100 = 300, atual +300
         # Débitos do mês 500 + 40 + 300 = 840 e créditos 240 + 100 + 500 = 840.
         self.carregar("contabil-plano.csv", "contabil-lancamentos.csv")
 
         linhas = self.linhas(SQL_CONTABIL_BALANCETE)
 
-        self.assertEqual([l["codigo"] for l in linhas], ["1.1.01.001", "2.1.01.001", "2.3.01.001", "3.1.01.001", "4.1.01.001"])
+        self.assertEqual([l["codigo"] for l in linhas], ["1.1.01", "2.1.01", "2.3.01", "3.1.01", "4.1.01"])
         self.assertEqual([l["saldo_anterior"] for l in linhas], [1000.0, 0.0, -1000.0, 0.0, 0.0])
         self.assertEqual([l["debitos"] for l in linhas], [500.0, 40.0, 0.0, 0.0, 300.0])
         self.assertEqual([l["creditos"] for l in linhas], [240.0, 100.0, 0.0, 500.0, 0.0])
@@ -567,7 +621,11 @@ class TestModelos(Base):
         self.assertAlmostEqual(sum(l["saldo_atual"] for l in linhas), 0.0)
         self.assertAlmostEqual(sum(l["saldo_anterior"] for l in linhas), 0.0)
         # Equação patrimonial: ativo 1.260 = passivo 60 + patrimônio líquido 1.000 + resultado (500 - 300).
-        self.assertAlmostEqual(1260.0, 60.0 + 1000.0 + (500.0 - 300.0))
+        ativo = linhas[0]["saldo_atual"]
+        passivo = -linhas[1]["saldo_atual"]
+        patrimonio = -linhas[2]["saldo_atual"]
+        resultado = -(linhas[3]["saldo_atual"] + linhas[4]["saldo_atual"])
+        self.assertAlmostEqual(ativo, passivo + patrimonio + resultado)
 
 
 if __name__ == "__main__":

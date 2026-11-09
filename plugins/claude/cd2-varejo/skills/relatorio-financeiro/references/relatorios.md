@@ -107,28 +107,36 @@ Cliente pessoa física: código e nome, CPF mascarado, sem telefone nem endereç
 ```sql
 SELECT CONVERT(varchar(10), x.dia, 23) dia,
        CAST(x.entradas AS float) entradas, CAST(x.saidas AS float) saidas,
-       CAST(<saldo_atual> + SUM(x.entradas - x.saidas) OVER (ORDER BY x.dia ROWS UNBOUNDED PRECEDING) AS float) saldo_projetado
-FROM (SELECT u.dia, SUM(u.entra) entradas, SUM(u.sai) saidas
-      FROM (SELECT CAST(r.<vencimento> AS date) dia, r.<saldo> entra, 0 sai
+       CAST(x.saidas_vencidas AS float) saidas_vencidas,
+       CAST(<saldo_atual> + SUM(x.entradas - x.saidas - x.saidas_vencidas) OVER (ORDER BY x.dia ROWS UNBOUNDED PRECEDING) AS float) saldo_projetado
+FROM (SELECT u.dia, SUM(u.entra) entradas, SUM(u.sai) saidas, SUM(u.sai_vencida) saidas_vencidas
+      FROM (SELECT CAST(r.<vencimento> AS date) dia, r.<saldo> entra, 0 sai, 0 sai_vencida
             FROM <titulo_receber> r
-            WHERE <em_aberto_r> AND r.<vencimento> >= <data_referencia> AND r.<vencimento> < DATEADD(day, 30, <data_referencia>)
+            WHERE <em_aberto_r> AND r.<vencimento> >= <data_referencia> AND r.<vencimento> <= DATEADD(day, 30, <data_referencia>)
             UNION ALL
-            SELECT CAST(p.<vencimento> AS date), 0, p.<saldo>
+            SELECT CASE WHEN p.<vencimento> < <data_referencia> THEN CAST(<data_referencia> AS date)
+                        ELSE CAST(p.<vencimento> AS date) END,
+                   0,
+                   CASE WHEN p.<vencimento> >= <data_referencia> THEN p.<saldo> ELSE 0 END,
+                   CASE WHEN p.<vencimento> <  <data_referencia> THEN p.<saldo> ELSE 0 END
             FROM <titulo_pagar> p
-            WHERE <em_aberto_p> AND p.<vencimento> >= <data_referencia> AND p.<vencimento> < DATEADD(day, 30, <data_referencia>)) u
+            WHERE <em_aberto_p> AND p.<vencimento> <= DATEADD(day, 30, <data_referencia>)) u
       GROUP BY u.dia) x
 ORDER BY x.dia OFFSET 0 ROWS
 ```
 
+A janela vai da data de referência até 30 dias depois, inclusive. Os a pagar vencidos entram no primeiro dia, mas na coluna `saidas_vencidas`, a linha própria; os a receber vencidos ficam de fora.
+**Primeira data de saldo negativo:** envolva a consulta numa tabela derivada `z` e peça `SELECT MIN(z.dia) FROM (...) z WHERE z.saldo_projetado < 0`; sem linha, o saldo não fica negativo na janela.
+
 **Premissas que precisam estar na entrega:**
 - Vencidos a receber: fora da projeção por default (ou em linha própria "vencido, recebimento incerto"). Somar vencido como entrada do dia infla o caixa.
-- Vencidos a pagar: entram no primeiro dia, em linha própria.
+- Vencidos a pagar: entram no primeiro dia, na coluna própria `saidas_vencidas`.
 - Cartão: pela data prevista de crédito, líquido de taxa, se o dado existir.
 - **Não incluído:** vendas futuras à vista, folha, impostos, aluguel, compras ainda não faturadas, investimentos. A projeção é o que já está contratado em título; liste o que ficou de fora.
 
 Ofereça cenário quando fizer sentido: recebimento com o atraso médio histórico aplicado (3.2) contra recebimento no vencimento.
 **Prova (realizado):** saldo inicial + entradas - saídas = saldo final, por conta, com o saldo final lido do extrato e não calculado.
-**Prova (projetado):** soma das entradas e das saídas da janela = soma dos títulos a receber e a pagar com vencimento na janela, nos totais de 3.1 e 3.2.
+**Prova (projetado):** a soma de `entradas` = títulos a receber nas faixas de 0 a 7, 8 a 15 e 16 a 30 dias de 3.2; a soma de `saidas` = títulos a pagar nas mesmas três faixas de 3.1; a soma de `saidas_vencidas` = títulos a pagar das quatro faixas vencidas de 3.1. Não se compara com o total em aberto inteiro, porque a janela corta o que vence depois de 30 dias.
 
 **Para exportar:** o fluxo tem duas metades. Do projetado: os títulos a pagar e a receber em aberto (3.1 e 3.2) e o saldo atual das contas. Do realizado: o extrato ou movimento de caixa e bancos do período, uma linha por lançamento.
 

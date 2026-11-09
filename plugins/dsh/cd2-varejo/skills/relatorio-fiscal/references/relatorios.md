@@ -65,8 +65,9 @@ FROM (SELECT i.<cfop> cfop, COUNT(*) itens,
 ORDER BY x.valor DESC, x.cfop OFFSET 0 ROWS
 ```
 
+A coluna do item usada em `<valor_total>` é o **valor do produto do item** (quantidade x preço menos o desconto do item). Se o item do ERP embute IPI, frete ou ST rateados, use a coluna de valor de produtos do item, ou o valor do item sai maior que o do cabeçalho e a prova acusa diferença que não existe. Declare a coluna usada.
 "Isentas" e "outras" dependem do CST: só preencha essas colunas se o dado já as trouxer; não as derive por conta própria. A junção leva a série e o modelo: só por número, a mesma nota de séries diferentes se multiplica e o total passa do valor dos cabeçalhos.
-**Prova:** soma por CFOP = valor de produtos dos cabeçalhos autorizados do período, somado direto no cabeçalho, sem a junção com os itens; documentos = contagem no cabeçalho. Se não fechar, a diferença é o assunto do relatório 3.3, não um ajuste.
+**Prova:** soma por CFOP = valor de produtos dos cabeçalhos autorizados do período, somado direto no cabeçalho, sem a junção com os itens; itens do relatório = itens das notas autorizadas do período, contados direto na exportação de itens. Se não fechar, a diferença é o assunto do relatório 3.3, não um ajuste.
 
 **Para exportar:** peça dois relatórios do mês e do estabelecimento: as notas (cabeçalho) e os itens das notas, em CSV ou Excel. Colunas mínimas do cabeçalho: número, série, modelo, data, situação, valor de produtos. Dos itens: número, série, modelo, CFOP, valor. Recomendadas: loja ou CNPJ, ICMS e ICMS-ST por item, tipo (entrada ou saída).
 
@@ -97,16 +98,21 @@ Volume alto: o resumo e os 30 maiores na conversa, completo em planilha, com fil
 ```sql
 SELECT COUNT(*) notas,
        SUM(CASE WHEN i.soma IS NULL THEN 1 ELSE 0 END) sem_item,
-       SUM(CASE WHEN ABS(h.<valor_produtos> - COALESCE(i.soma, 0)) > 0.05 THEN 1 ELSE 0 END) divergentes,
+       SUM(CASE WHEN i.soma IS NOT NULL AND ABS(h.<valor_produtos> - i.soma) > 0.05 THEN 1 ELSE 0 END) divergentes,
+       SUM(CASE WHEN i.soma IS NOT NULL AND ABS(h.<valor_produtos> - i.soma) <= 0.05 THEN 1 ELSE 0 END) fecham,
        CAST(SUM(h.<valor_produtos>) AS float) total_cabecalho,
-       CAST(SUM(COALESCE(i.soma, 0)) AS float) total_itens
+       CAST(SUM(COALESCE(i.soma, 0)) AS float) total_itens_ligados,
+       CAST(SUM(h.<valor_produtos> - COALESCE(i.soma, 0)) AS float) diferenca_total
 FROM <nota> h
 LEFT JOIN (SELECT <cod_loja>, <num_nota>, <serie>, <modelo>, SUM(COALESCE(<valor_total>, 0)) soma
            FROM <nota_item> GROUP BY <cod_loja>, <num_nota>, <serie>, <modelo>) i
        ON i.<cod_loja> = h.<cod_loja> AND i.<num_nota> = h.<num_nota>
       AND i.<serie> = h.<serie> AND i.<modelo> = h.<modelo>
-WHERE h.<data> >= '2025-07-01' AND h.<data> < '2025-08-01'
+WHERE h.<situacao_autorizada> AND h.<cod_loja> = <loja>
+  AND h.<data> >= '2025-07-01' AND h.<data> < '2025-08-01'
 ```
+
+As três classes são exclusivas: `sem_item` (nota sem nenhum item), `divergentes` (com itens e diferença acima da tolerância) e `fecham` (com itens e diferença dentro dela). Só as autorizadas da loja e do período entram; nota cancelada sem item não infla `sem_item`.
 
 **Antes de chamar de divergência**, elimine as causas estruturais, nesta ordem:
 1. chave de junção incompleta (falta série, modelo ou tipo, e notas diferentes se misturam);
@@ -115,7 +121,7 @@ WHERE h.<data> >= '2025-07-01' AND h.<data> < '2025-08-01'
 4. notas canceladas com itens removidos.
 
 Uma taxa de divergência muito alta (dezenas por cento) quase sempre é uma dessas causas, não erro de emissão. Depois de ajustar, liste as divergentes restantes com número, parceiro, os dois valores e a diferença. Tolerância de R$ 0,05 por nota para arredondamento.
-**Prova:** o total de notas, contado direto no cabeçalho, = fecham + divergentes + sem item; e o total do cabeçalho = total dos itens + a soma das diferenças.
+**Prova:** (1) as notas, contadas direto no cabeçalho com os mesmos filtros e sem a junção, = fecham + divergentes + sem item. (2) o total do cabeçalho menos a soma direta do valor dos itens (`SUM` na tabela ou no arquivo de itens, com os mesmos filtros de loja, período e situação, sem passar pela junção) = `diferenca_total`. Itens de nota que não achou cabeçalho, ou chave que não casou, fazem esta segunda parte falhar, e é para isso que ela serve.
 
 **Para exportar:** os mesmos dois relatórios de 3.1 (cabeçalhos e itens do mês), com a chave completa nos dois. Colunas mínimas: número, série, modelo e valor de produtos no cabeçalho; número, série, modelo e valor no item. Recomendadas: desconto, frete, outras despesas, situação.
 
@@ -126,8 +132,9 @@ Uma taxa de divergência muito alta (dezenas por cento) quase sempre é uma dess
 ### 3.4 Entradas x saídas por CFOP
 
 Duas tabelas lado a lado (entradas 1, 2, 3; saídas 5, 6, 7), agrupadas pelo CFOP, com valor contábil, base e ICMS, e os grupos de operação: compra e venda, devolução, transferência, bonificação, remessa e retorno, uso e consumo, baixa de estoque.
+A separação entre entrada e saída vem do primeiro dígito do **CFOP do item** (1, 2 e 3 entrada; 5, 6 e 7 saída), que fica no item e não no cabeçalho: uma nota com itens dos dois sentidos reparte o valor entre os lados.
 **Leituras típicas:** transferências entre lojas que não fecham (saída de uma sem entrada na outra, no mesmo período), devoluções acima do padrão, entradas de uso e consumo classificadas como revenda.
-**Prova:** valor das entradas + valor das saídas = valor dos documentos autorizados do período, somado direto no cabeçalho, com entrada e saída separadas pelo primeiro dígito do CFOP.
+**Prova:** valor das entradas + valor das saídas = valor dos documentos autorizados do período, somado direto no cabeçalho, pelo total geral. Por lado, a prova só existe se o cabeçalho trouxer o tipo da nota (entrada ou saída); sem ele, fecha só o total.
 
 **Para exportar:** o mesmo arquivo de itens de 3.1, com entradas e saídas, e o cabeçalho para a prova. Colunas mínimas: loja, CFOP, valor. Recomendadas: ICMS, base, data.
 
@@ -154,16 +161,29 @@ Apresente como **débitos e créditos destacados nos documentos**. A diferença 
 
 ```sql
 SELECT h.<serie>, MIN(h.<num_nota>) primeiro, MAX(h.<num_nota>) ultimo, COUNT(*) registradas,
-       MAX(h.<num_nota>) - MIN(h.<num_nota>) + 1 - COUNT(DISTINCT h.<num_nota>) faltantes
+       MAX(h.<num_nota>) - MIN(h.<num_nota>) + 1 - COUNT(DISTINCT h.<num_nota>) lacunas_aritmeticas
 FROM <nota> h
 WHERE h.<tipo> = <saida_emissao_propria> AND h.<modelo> = <modelo> AND h.<cod_loja> = <loja>
   AND h.<data> >= '2025-07-01' AND h.<data> < '2025-08-01'
 GROUP BY h.<serie>
 ```
 
-Para listar os números faltantes, use `LEAD(num) OVER (PARTITION BY serie ORDER BY num)` e mostre os intervalos onde `próximo - atual > 1`. Só vale para **emissão própria**: notas de terceiros não têm sequência. Antes de reportar salto, desconte as faixas inutilizadas e veja se a numeração é compartilhada entre lojas ou PDVs.
+`lacunas_aritmeticas` é só a conta do primeiro ao último: serve de conferência cruzada, não de prova. Os faltantes vêm dos saltos:
+
+```sql
+SELECT y.<serie>, y.num + 1 inicio_lacuna, y.proximo - 1 fim_lacuna, y.proximo - y.num - 1 faltantes
+FROM (SELECT h.<serie>, h.<num_nota> num,
+             LEAD(h.<num_nota>) OVER (PARTITION BY h.<serie> ORDER BY h.<num_nota>) proximo
+      FROM <nota> h
+      WHERE h.<tipo> = <saida_emissao_propria> AND h.<modelo> = <modelo> AND h.<cod_loja> = <loja>
+        AND h.<data> >= '2025-07-01' AND h.<data> < '2025-08-01') y
+WHERE y.proximo - y.num > 1
+ORDER BY y.<serie>, y.num
+```
+
+Sem inutilizadas conhecidas, `faltantes` somados devem igualar `lacunas_aritmeticas`; diferença aponta número repetido. Só vale para **emissão própria**: notas de terceiros não têm sequência. Antes de reportar salto, desconte as faixas inutilizadas e veja se a numeração é compartilhada entre lojas ou PDVs.
 **Canceladas:** quantidade, valor, % sobre as emitidas, prazo entre emissão e cancelamento, e por usuário quando a pergunta for de auditoria.
-**Prova:** último - primeiro + 1 = emitidas + canceladas + inutilizadas + faltantes, com os faltantes achados pelos saltos da sequência e não pela conta do primeiro ao último.
+**Prova:** último - primeiro + 1 = emitidas + canceladas + inutilizadas + faltantes, com os faltantes somados da lista de saltos (LEAD) e não da conta do primeiro ao último.
 
 **Para exportar:** peça o relatório de notas emitidas do mês, com as canceladas, e o das faixas inutilizadas. Colunas mínimas: número, série, modelo, situação. Recomendadas: data, loja, valor, data do cancelamento.
 

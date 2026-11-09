@@ -51,7 +51,7 @@ Pedido genérico ("como está o financeiro") recebe **a pagar e a receber por fa
 |---|---|
 | A pagar e a receber | Soma das faixas = total em aberto, somado direto dos títulos (original menos baixas, título a título). Amostra de 5 títulos conferida na origem, dita como conferência de amostra |
 | Fluxo realizado | Saldo inicial + entradas - saídas = saldo final de cada conta de banco e caixa, com o saldo final vindo do extrato |
-| Fluxo projetado | Soma por dia = soma dos títulos da janela, e o total bate com os relatórios 3.1 e 3.2 |
+| Fluxo projetado | Entradas e saídas = títulos das faixas de 0 a 30 dias de 3.2 e 3.1; saídas vencidas = faixas vencidas a pagar de 3.1 |
 | Prazos médios | Compras e vendas usadas = totais da fonte de compras e de vendas no período |
 | Cartões | Venda em cartão no caixa = recebíveis gerados (bruto) no mesmo período |
 | Bancos | Saldo inicial + entradas - saídas = saldo final, por conta |

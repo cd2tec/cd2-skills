@@ -65,7 +65,6 @@ Onde `<deb>` = `CASE WHEN l.<dc> = 'D' THEN l.<valor> ELSE 0 END` e `<cre>` o eq
 - Sem a situação: rascunho e pendente entram na soma. Peça a coluna ou só os efetivados.
 - Sem o saldo anterior (exportação só do mês): peça o balancete do mês anterior ou o exercício inteiro; sem isso, o saldo sai como movimento do período.
 - Sem a natureza no plano: o D ou C do saldo sai pelo sinal, sem a leitura de saldo invertido.
-- Código de conta que chega como data (1.1.01 vira 2001-01-01): peça a exportação com o código como texto.
 
 ### 3.2 Razão
 

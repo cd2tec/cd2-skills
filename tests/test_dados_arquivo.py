@@ -62,6 +62,21 @@ class TestNormalizacao(unittest.TestCase):
         self.assertEqual(normalizar_data("05-02-26"), "2026-02-05")
         self.assertIsNone(normalizar_data("31/02/2026"))
         self.assertIsNone(normalizar_data("Arroz"))
+        self.assertEqual(normalizar_data("31.01.2026"), "2026-01-31")
+
+    def test_codigo_de_conta_nao_e_data(self):
+        for codigo in ("1.1.01", "2.1.01", "3.1.02", "4.1.03"):
+            self.assertIsNone(normalizar_data(codigo), codigo)
+
+    def test_coluna_de_codigos_de_conta_fica_texto(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            arq = Path(tmp) / "plano.csv"
+            arq.write_text("Conta;Codigo\n1;1.1.01\n2;2.1.01\n3;3.1.01\n", encoding="utf-8")
+            perfil = carregar([arq], Path(tmp) / "b.sqlite")
+            tipos = {c["nome"]: c["tipo"] for c in perfil["tabelas"][0]["colunas"]}
+            self.assertEqual(tipos["codigo"], "texto")
+            r = consultar(Path(tmp) / "b.sqlite", "SELECT codigo FROM plano ORDER BY conta")
+            self.assertEqual([l[0] for l in r["linhas"]], ["1.1.01", "2.1.01", "3.1.01"])
 
     def test_nome_seguro(self):
         usados = set()

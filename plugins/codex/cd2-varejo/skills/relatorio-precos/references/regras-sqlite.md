@@ -10,7 +10,7 @@ python3 scripts/dados_arquivo.py carregar --base /tmp/base.sqlite ARQUIVO [ARQUI
 
 - Aceita CSV (Windows-1252 ou UTF-8, separado por ponto e vírgula, vírgula, tab ou barra vertical) e XLSX (só a primeira planilha). Arquivo `.xls` antigo: peça para a pessoa abrir no Excel e salvar como CSV ou XLSX.
 - Cada arquivo vira uma tabela, com o nome do arquivo sem acento e em minúsculas. Cada coluna vira um nome seguro (`Preço Líquido` vira `preco_liquido`). O nome original fica no perfil.
-- Números como `1.234,56` e `(R$ 1.234,50)` viram valor. Datas como `31/01/2026` viram `2026-01-31`. Código com zero à esquerda e código de barras continuam texto.
+- Números como `1.234,56` e `(R$ 1.234,50)` viram valor. Datas como `31/01/2026` viram `2026-01-31`. Código com zero à esquerda, código de barras e código de conta contábil como `1.1.01` continuam texto: com ponto como separador, a data exige ano de quatro dígitos.
 - Linhas de subtotal e total geral vão para `<tabela>__totais` e não entram na tabela principal. Só conta como total a linha em que a célula é apenas o rótulo (`Subtotal`, `TOTAL GERAL`, `Total do dia`, `Total:`) e há número na linha; produto chamado "Total Clean Detergente" fica na principal. Some a principal; use a de totais só para conferir.
 - Coluna em que ao menos 80% dos valores são número vira número; o que não for número fica vazio (NULL) e o aviso lista os primeiros valores. Linhas que repetem o cabeçalho (paginação do ERP) saem e entram no aviso.
 - CPF vira `***.456.789-**` ao carregar, em coluna de CPF e em qualquer texto com CPF pontuado. Coluna sem "cpf" no nome com valores de 11 dígitos não é mascarada, mas o aviso aponta. Não peça nem repita o número inteiro.

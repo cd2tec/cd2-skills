@@ -100,7 +100,8 @@ class TestSkillsRelatorio(unittest.TestCase):
             self.assertIn(aviso, texto, nome)
             self.assertIn('"conferencia": true', texto, nome)
             self.assertIn("conferência", descricao(CORE / "skills" / nome), nome)
-            self.assertRegex(texto, r"(?i)não é documento (fiscal|contábil|oficial)|não gera", nome)
+            self.assertIn("## Limite desta skill", texto, nome)
+            self.assertRegex(texto, r"(?i)(conferência|relatório de conferência)[^\n]*não (é|substitui)", nome)
 
 
 if __name__ == "__main__":

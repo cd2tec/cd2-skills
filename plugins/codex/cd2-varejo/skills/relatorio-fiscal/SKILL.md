@@ -63,10 +63,10 @@ Pedido genérico ("relatório fiscal do mês") recebe o **resumo por CFOP** de e
 
 | Relatório | Prova |
 |---|---|
-| Resumo por CFOP | Soma por CFOP = valor de produtos dos cabeçalhos autorizados do período, somado direto no cabeçalho |
+| Resumo por CFOP | Soma por CFOP (valor de produtos do item) = valor de produtos dos cabeçalhos autorizados do período, somado direto no cabeçalho |
 | Analítico | Soma dos itens por nota = valor de produtos do cabeçalho |
-| Cabeçalho x itens | Total de notas, contado direto no cabeçalho = fecham + divergentes + sem item; total do cabeçalho = total dos itens + diferenças |
-| Entradas x saídas | Entradas e saídas somadas = total dos documentos autorizados no cabeçalho |
+| Cabeçalho x itens | Notas contadas direto no cabeçalho = fecham + divergentes + sem item (classes exclusivas); total do cabeçalho menos a soma direta dos itens, sem a junção = diferença total |
+| Entradas x saídas | Entradas e saídas (pelo CFOP do item) somadas = total dos documentos autorizados no cabeçalho |
 | Resumo de tributos | Imposto por CFOP = imposto por alíquota = total do cabeçalho |
 | Sequência | Último - primeiro + 1 = emitidas + canceladas + inutilizadas + faltantes, com os faltantes achados pelos saltos |
 | Cadastro tributário | Produtos avaliados = produtos do cadastro (contagem direta); amostra de 5 itens de cada lista conferida na origem |

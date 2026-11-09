@@ -335,11 +335,15 @@ def normalizar_numero(texto: str, ponto_milhar: bool | None = None) -> float | N
 
 
 def normalizar_data(texto: str) -> str | None:
-    """dd/mm/aaaa (ou aa, com / - .) e ISO viram aaaa-mm-dd; com hora, aaaa-mm-dd hh:mm:ss."""
+    """dd/mm/aaaa (ou aa, com / -) e ISO viram aaaa-mm-dd; com hora, aaaa-mm-dd hh:mm:ss.
+
+    Com ponto como separador o ano precisa ter 4 dígitos: 1.1.01 é código de conta, não data."""
     t = str(texto).strip()
     m = _RE_DATA_BR.match(t)
     if m:
         dia, mes, ano = int(m.group(1)), int(m.group(2)), m.group(3)
+        if len(ano) == 2 and "." in t[:len(m.group(1)) + len(m.group(2)) + 2]:
+            return None
         ano = int(ano) + 2000 if len(ano) == 2 else int(ano)
         resto = m.groups()[3:]
     else:

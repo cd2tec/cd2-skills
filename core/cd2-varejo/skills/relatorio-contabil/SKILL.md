@@ -58,7 +58,6 @@ Pedido genérico ("me dá a contabilidade do mês") recebe o **balancete no nív
 6. **Competência x data de lançamento.** O lançamento pode ter data de digitação diferente da competência. Use a competência e diga.
 7. **Centro de custo e filial** são dimensões paralelas ao plano. Meça o preenchimento antes de quebrar por elas.
 8. **Varejo:** a integração do estoque e do custo da mercadoria vendida costuma ser por lote mensal ou diário; receita vem do fiscal. Contabilidade "atrasada" em relação aos módulos é comum: informe a data do último lançamento integrado de cada origem.
-9. **Código de conta pode virar data.** Em arquivo, um código como 1.1.01 é lido como data por planilhas e leitores. Confira se a coluna do plano chegou como código; se não, peça a exportação com o código como texto.
 
 ## Prova obrigatória por relatório
 
