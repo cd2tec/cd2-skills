@@ -152,6 +152,13 @@ class Painel(unittest.TestCase):
             {**CONFIG_ARQUIVO, "secoes": [dict(CONFIG_ARQUIVO["secoes"][1], tipo=["barras"])]},
             {**CONFIG_ARQUIVO, "leitura": ["texto"]},
             {**CONFIG_ARQUIVO, "origem": ["arquivo"]},
+            {**CONFIG_ARQUIVO, "titulo": 5},
+            {**CONFIG_ARQUIVO, "titulo": ["x"]},
+            {**CONFIG_ARQUIVO, "rede": 3},
+            {**CONFIG_ARQUIVO, "periodo": ["x"]},
+            {**CONFIG_ARQUIVO, "fonte": {"nome": 7}},
+            {**CONFIG_ARQUIVO, "fonte": {"nome": ["a.csv"]}},
+            {**CONFIG_BANCO, "fonte": {"banco": 1, "engine": "e", "conector": "c"}},
         ]
         for cfg in casos:
             res, _ = construir(cfg)

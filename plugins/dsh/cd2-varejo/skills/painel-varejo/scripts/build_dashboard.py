@@ -66,8 +66,15 @@ def validar(cfg):
             erro(msgs, "fonte.nome e obrigatorio quando a origem e arquivo ou digitado (nome do arquivo ou 'dados informados')")
     elif origem and not all((cfg.get("fonte") or {}).get(k) for k in ("banco", "engine", "conector")):
         erro(msgs, "fonte precisa de banco, engine e conector quando a origem e banco ou outro-mcp")
-    if not cfg.get("titulo"):
-        erro(msgs, "titulo e obrigatorio")
+    if not isinstance(cfg.get("titulo"), str) or not cfg.get("titulo"):
+        erro(msgs, "titulo e obrigatorio e precisa ser texto")
+    for campo in ("rede", "periodo"):
+        if cfg.get(campo) is not None and not isinstance(cfg[campo], str):
+            erro(msgs, f"{campo} precisa ser texto")
+    if isinstance(cfg.get("fonte"), dict):
+        for k, v in cfg["fonte"].items():
+            if k in ("nome", "banco", "engine", "conector") and v is not None and not isinstance(v, str):
+                erro(msgs, f"fonte.{k} precisa ser texto")
     if cfg.get("veredito") is not None:
         if not (cfg["veredito"] or {}).get("titulo"):
             erro(msgs, "veredito precisa de titulo")
