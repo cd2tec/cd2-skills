@@ -48,6 +48,7 @@ Unidade, tempo, recorte e nível têm padrão em `references/metodo-analise.md`,
 - Diga o que exportar, usando a linha **Para exportar** do relatório pedido (no painel, o que a seção "Sem conexão" do `SKILL.md` pede). Peça o que o ERP tiver: CSV ou Excel servem.
 - Carregue com `scripts/dados_arquivo.py`, como manda `references/regras-sqlite.md`. O perfil é a sua medição: linhas, período, vazios, valores distintos.
 - Leia os avisos do perfil e repasse à pessoa os que mudam o número.
+- Se um aviso disser que linhas com rótulo de total ficaram na tabela, pergunte à pessoa, antes de calcular, se elas são totais. Se forem, filtre essas linhas na consulta, senão a soma conta em dobro. Se forem dados reais, siga e registre nas premissas.
 - Pergunte, em uma frase, se ela tem o total do mesmo relatório no ERP. Se tiver, use como conferência. Se o arquivo trouxer linhas de total, a tabela `<tabela>__totais` também confere. O selo não muda: continua "Conferido só contra o arquivo".
 
 **Digitado:** peça só o que falta, com um exemplo. `origem` é `digitado`.

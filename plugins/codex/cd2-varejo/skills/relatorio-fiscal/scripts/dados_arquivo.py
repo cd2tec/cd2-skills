@@ -42,8 +42,9 @@ MAX_VALORES_PERFIL = 20
 _DELIMITADORES = [";", "\t", "|", ","]
 _RE_TOTAL = re.compile(
     r"^\s*(sub\s*-?\s*total(\s+.*)?|total|totais|soma|total\s+geral|total\s+d[aoe]s?\b.*"
-    r"|total\s+(depto|departamento|loja|filial|grupo|secao|categoria|fornecedor|cliente|vendedor|mes|dia)\b.*)\s*:?\s*$",
+    r"|total\s+(depto|departamento|loja|filial|grupo|secao|categoria|fornecedor|cliente|vendedor|mes|dia)(\s*\d+)?)\s*:?\s*$",
     re.IGNORECASE)
+_DATAS_ZERADAS = ("00/00/0000", "00/00/00", "00.00.0000", "0000-00-00")
 _RE_CPF = re.compile(r"^\d{3}\.\d{3}\.\d{3}-\d{2}$")
 _RE_DATA_BR = re.compile(r"^(\d{1,2})[/.-](\d{1,2})[/.-](\d{4}|\d{2})(?:[ T](\d{1,2}):(\d{2})(?::(\d{2}))?)?$")
 _RE_DATA_ISO = re.compile(r"^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{1,2}):(\d{2})(?::(\d{2}))?)?$")
@@ -395,13 +396,42 @@ def _sem_rotulo(celulas: list[str]) -> bool:
     return bool(resto) and all(normalizar_numero(c) is not None for c in resto)
 
 
+def _soma_fecha(total: list[str], grupo: list[list[str]], coluna: int) -> bool:
+    alvo = normalizar_numero(total[coluna])
+    return alvo is not None and abs(sum(normalizar_numero(l[coluna]) or 0 for l in grupo) - alvo) < 0.005
+
+
+def _fecha_grupos(dados: list[list[str]], chave: tuple[int, str]) -> bool:
+    """Cada linha com este rotulo e a soma das linhas desde o rotulo anterior, em toda coluna numerica dela.
+
+    Toda coluna, porque uma so pode fechar por acaso (quantidade 1 + 1 = 2). Grupo vazio derruba (rotulos seguidos sao categoria) e ao menos um grupo precisa ter duas linhas: com grupos
+    de uma linha so, Parcial 100 seguido de Total 100 fecharia por coincidencia.
+    """
+    grupos, atual = [], []
+    for l in dados:
+        indice = _indice_rotulo(l)
+        if indice is None:
+            atual.append(l)
+            continue
+        if _chave_rotulo(l, indice) == chave:
+            grupos.append((l, atual))
+        atual = []
+    if not all(g for _, g in grupos) or all(len(g) < 2 for _, g in grupos):
+        return False
+    colunas = [j for j in range(len(dados[0])) if any(normalizar_numero(total[j]) for total, _ in grupos)]
+    return bool(colunas) and all(_soma_fecha(total, g, j) for j in colunas for total, g in grupos)
+
+
 class _ContextoTotais:
     """O que a regra de total precisa saber da tabela inteira.
 
     densas: colunas preenchidas em ao menos 90% das linhas comuns (sem rotulo de total e sem cara de subtotal,
-    que furariam a propria medida). categorias: rotulos que sao valor de coluna, como Baixa=Total: mais de 20%
-    das linhas, mais de uma vez, e a maior parte delas sem furo em coluna densa. Subtotal repetido em grupo
-    pequeno passa de 20%, mas deixa a coluna de produto vazia, e por isso continua sendo total.
+    que furariam a propria medida).
+    fechamentos: rotulos em que cada ocorrencia e a soma das linhas acima dela, em toda coluna numerica. E total,
+    onde quer que o rotulo esteja.
+    categorias: rotulos que sao valor de coluna, como Baixa=Total: mais de 20% das linhas, mais de uma vez, e a
+    maior parte delas sem furo em coluna densa a esquerda do rotulo. A direita o furo nao conta: o Saldo pode
+    ficar vazio justamente porque a Baixa foi total.
     """
 
     def __init__(self, dados: list[list[str]]):
@@ -413,16 +443,17 @@ class _ContextoTotais:
             indice = _indice_rotulo(l)
             if indice is not None:
                 rotuladas[_chave_rotulo(l, indice)].append(l)
+        self.fechamentos = {chave for chave, linhas in rotuladas.items() if len(linhas) >= 2 and _fecha_grupos(dados, chave)}
         self.categorias = {
             chave for chave, linhas in rotuladas.items()
-            if len(linhas) >= 2 and len(linhas) > 0.2 * len(dados)
-            and sum(1 for l in linhas if not self.tem_furo(l)) * 2 > len(linhas)
+            if chave not in self.fechamentos and len(linhas) >= 2 and len(linhas) > 0.2 * len(dados)
+            and sum(1 for l in linhas if not self.tem_furo(l[:chave[0]])) * 2 > len(linhas)
         }
         # Se metade ou mais da tabela tem as duas primeiras colunas vazias, elas sao so colunas pouco usadas.
         self.aceita_sem_rotulo = bool(comuns) and sum(1 for l in dados if _sem_rotulo(l)) * 2 <= len(dados)
 
     def tem_furo(self, celulas: list[str]) -> bool:
-        return any(not celulas[j] for j in self.densas)
+        return any(j < len(celulas) and not celulas[j] for j in self.densas)
 
 
 def e_linha_total(celulas: list[str], contexto: _ContextoTotais | None = None) -> bool:
@@ -437,9 +468,12 @@ def e_linha_total(celulas: list[str], contexto: _ContextoTotais | None = None) -
     primeira = next(i for i, c in enumerate(celulas) if str(c).strip())
     if contexto is None:
         return indice == primeira
+    chave = _chave_rotulo(celulas, indice)
+    if chave in contexto.fechamentos:
+        return True
     if indice != primeira and not contexto.tem_furo(celulas):
         return False
-    return _chave_rotulo(celulas, indice) not in contexto.categorias
+    return chave not in contexto.categorias
 
 
 def nome_seguro(texto: str, usados: set[str]) -> str:
@@ -512,11 +546,14 @@ def _inferir_coluna(nome_original: str, valores: list[str], avisos: list[str], a
     """
     if not valores:
         return "texto", None
-    datas = [normalizar_data(v) for v in valores]
-    if sum(1 for d in datas if d is not None) / len(datas) >= 0.8:
-        falhas = [v for v, d in zip(valores, datas) if d is None]
+    # 00/00/0000 e data em branco (titulo em aberto): nao vota, e pode passar de 20% da coluna.
+    zeradas = [v for v in valores if v in _DATAS_ZERADAS]
+    reais = [v for v in valores if v not in _DATAS_ZERADAS]
+    datas = [normalizar_data(v) for v in reais]
+    if datas and sum(1 for d in datas if d is not None) / len(datas) >= 0.8:
+        falhas = [v for v, d in zip(reais, datas) if d is None] + zeradas
         if falhas:
-            amostra = ", ".join(f"\"{v}\"" for v in falhas[:5])
+            amostra = ", ".join(f"\"{v}\"" for v in list(dict.fromkeys(falhas))[:5])
             avisos.append(f"Na coluna \"{nome_original}\" de {arquivo}, {len(falhas)} valor(es) não são data e "
                           f"ficaram vazios: {amostra}.")
         return "data", normalizar_data
@@ -610,6 +647,19 @@ def _indice_do_cabecalho(linhas: list[list[str]], cabecalho: int | None, arquivo
     return cabecalho - 1
 
 
+def _avisar_rotulos_na_principal(principais, originais, arquivo: str, avisos: list[str]) -> None:
+    """Linha com rotulo de total e numero que ficou na tabela: a soma pode contar em dobro, e so a pessoa sabe."""
+    ficaram = collections.defaultdict(list)
+    for l in principais:
+        indice = _indice_rotulo(l)
+        if indice is not None and any(normalizar_numero(c) is not None for c in l):
+            ficaram[_chave_rotulo(l, indice)].append(l[indice])
+    for (indice, _), rotulos in ficaram.items():
+        avisos.append(f"{arquivo}: na coluna \"{originais[indice]}\", {len(rotulos)} linha(s) com o rótulo "
+                      f"\"{rotulos[0]}\" ficaram na tabela. Se forem totais, a soma conta em dobro: pergunte à pessoa "
+                      "e, se forem, filtre essas linhas na consulta antes de calcular.")
+
+
 def _carregar_um(con, caminho: Path, tabela: str, avisos: list[str], linha_cabecalho: int | None = None) -> dict:
     linhas = _ler_arquivo(caminho, avisos)
     linhas = [[str(c).strip() for c in l] for l in linhas]
@@ -701,6 +751,7 @@ def _carregar_um(con, caminho: Path, tabela: str, avisos: list[str], linha_cabec
         con.executemany(f"INSERT INTO {_aspas(tabela + '__totais')} VALUES ({marcas})", [converter(l, True) for l in totais])
         avisos.append(f"{caminho.name}: separei {len(totais)} linha(s) de total ou subtotal na tabela "
                       f"{tabela}__totais. Elas não entram nas somas de {tabela}.")
+    _avisar_rotulos_na_principal(principais, originais, caminho.name, avisos)
     if sem_rotulo:
         avisos.append(f"{caminho.name}: {sem_rotulo} dessas linha(s) têm só números e as duas primeiras colunas "
                       "vazias: possível subtotal sem rótulo. Confirme com a pessoa que exportou.")

@@ -579,6 +579,134 @@ class TestTotais(Base):
         self.assertEqual((tab["linhas"], tab["linhas_total"]), (3, 3))
 
 
+class TestTotaisReexame(Base):
+    def carga(self, conteudo):
+        arq = self.csv("t.csv", conteudo)
+        perfil = carregar([arq], self.base)
+        return perfil, perfil["tabelas"][0]
+
+    def soma(self):
+        return self.sql("SELECT ROUND(SUM(valor), 2) FROM t")["linhas"][0][0]
+
+    def avisos_de_rotulo(self, perfil):
+        return [a for a in perfil["avisos"] if "dobro" in a]
+
+    def test_saldo_vazio_quando_baixa_total_nao_tira_titulo_real(self):
+        # 20 títulos de 100,00: 20 x 100 = 2000. 12 com Baixa=Total e Saldo vazio.
+        linhas = []
+        for i in range(20):
+            total = i % 5 < 3
+            linhas.append(f"T{i};F{i};01/02/2026;{'Total' if total else 'Parcial'};05/02/2026;{'' if total else '10,00'};100,00\n")
+        perfil, tab = self.carga("Titulo;Fornecedor;Vencimento;Baixa;Dt Baixa;Saldo;Valor\n" + "".join(linhas))
+        self.assertEqual((tab["linhas"], tab["linhas_total"]), (20, 0))
+        self.assertEqual(self.soma(), 2000.0)
+        aviso = self.avisos_de_rotulo(perfil)
+        self.assertEqual(len(aviso), 1)
+        self.assertIn('"Baixa"', aviso[0])
+        self.assertIn("12", aviso[0])
+
+    def test_furo_a_esquerda_do_rotulo_continua_total(self):
+        # Subtotal não bate com a soma e repete em 2 de 6 linhas, mas deixa Cod vazio: 100 + 200 + 50 + 25 = 375.
+        _, tab = self.carga("Cod;Grupo;Desc;Valor\n10;M;Arroz;100,00\n11;M;Feijao;200,00\n;M;Subtotal;999,00\n"
+                            "12;F;Queijo;50,00\n13;F;Sal;25,00\n;F;Subtotal;999,00\n")
+        self.assertEqual((tab["linhas"], tab["linhas_total"]), (4, 2))
+        self.assertEqual(self.soma(), 375.0)
+
+    def test_total_que_fecha_o_dia_vai_para_totais(self):
+        # 3 dias de 60 + 40 = 100: 300 sem as linhas de total.
+        linhas = "".join(f"0{d}/01/2026;Loja A;60,00\n0{d}/01/2026;Loja B;40,00\n0{d}/01/2026;Total;100,00\n" for d in (1, 2, 3))
+        perfil, tab = self.carga("Data;Loja;Valor\n" + linhas)
+        self.assertEqual(self.soma(), 300.0)
+        self.assertEqual((tab["linhas"], tab["linhas_total"]), (6, 3))
+        self.assertEqual(self.avisos_de_rotulo(perfil), [])
+
+    def test_subtotal_que_fecha_grupos_de_dois_vai_para_totais(self):
+        # 10 + 20 + 5 + 5 = 40; os subtotais 30 e 10 ficam fora.
+        perfil, tab = self.carga("Produto;Qtd;Valor\nA;1;10,00\nB;1;20,00\nSubtotal;2;30,00\n"
+                                 "C;1;5,00\nD;1;5,00\nSubtotal;2;10,00\n")
+        self.assertEqual(self.soma(), 40.0)
+        self.assertEqual((tab["linhas"], tab["linhas_total"]), (4, 2))
+        self.assertEqual(self.avisos_de_rotulo(perfil), [])
+
+    def test_total_que_nao_fecha_fica_na_tabela_com_aviso(self):
+        # (60 + 40 + 90) x 3 = 570: o 90 não é a soma do dia, então nada é movido, e o aviso diz o risco.
+        linhas = "".join(f"0{d}/01/2026;Loja A;60,00\n0{d}/01/2026;Loja B;40,00\n0{d}/01/2026;Total;90,00\n" for d in (1, 2, 3))
+        perfil, tab = self.carga("Data;Loja;Valor\n" + linhas)
+        self.assertEqual(self.soma(), 570.0)
+        self.assertEqual((tab["linhas"], tab["linhas_total"]), (9, 0))
+        aviso = self.avisos_de_rotulo(perfil)
+        self.assertEqual(len(aviso), 1)
+        self.assertIn('"Loja"', aviso[0])
+        self.assertIn("3 linha", aviso[0])
+        self.assertIn('"Total"', aviso[0])
+
+    def test_subtotal_que_nao_fecha_na_primeira_coluna_avisa(self):
+        # 10 + 20 + 25 + 5 + 5 + 7 = 72: os "Subtotal" 25 e 7 não fecham e ficam, com aviso.
+        perfil, tab = self.carga("Produto;Qtd;Valor\nA;1;10,00\nB;1;20,00\nSubtotal;2;25,00\n"
+                                 "C;1;5,00\nD;1;5,00\nSubtotal;2;7,00\n")
+        self.assertEqual(self.soma(), 72.0)
+        self.assertEqual(tab["linhas_total"], 0)
+        aviso = self.avisos_de_rotulo(perfil)
+        self.assertTrue(aviso and '"Produto"' in aviso[0] and "2 linha" in aviso[0])
+
+    def test_categoria_com_valor_coincidente_nao_vira_total(self):
+        # Parcial e Total alternados, valor igual: cada Total "fecha" um grupo de 1 linha. 4 x 100 = 400.
+        perfil, tab = self.carga("Titulo;Baixa;Valor\nT1;Parcial;100,00\nT2;Total;100,00\nT3;Parcial;100,00\nT4;Total;100,00\n")
+        self.assertEqual(self.soma(), 400.0)
+        self.assertEqual(tab["linhas_total"], 0)
+        self.assertTrue(self.avisos_de_rotulo(perfil))
+
+    def test_rotulo_sem_numero_nao_avisa(self):
+        perfil, _ = self.carga("Item;Obs;Valor\nA;Total;\nB;Total;\nC;x;1,00\n")
+        self.assertEqual(self.avisos_de_rotulo(perfil), [])
+
+    def test_nome_de_produto_nao_e_rotulo(self):
+        for nome in ("Total Dia Sabonete", "Total Loja Cereal", "Total Depto Clean", "Total Clean Detergente"):
+            self.assertFalse(e_linha_total([nome, "4,99", "3"]), nome)
+
+    def test_rotulos_que_continuam_valendo(self):
+        for rotulo in ("Total do dia", "Total da loja 3", "Total Geral", "Subtotal", "Total:", "Total Depto",
+                       "Total Loja 3", "Total Dia 15"):
+            self.assertTrue(e_linha_total([rotulo, "", "10,00"]), rotulo)
+
+    def test_produtos_total_na_primeira_coluna_ficam_na_tabela(self):
+        # 5 + 7 + 3 = 15.
+        _, tab = self.carga("Descricao;Qtd;Valor\nTotal Dia Sabonete;1;5,00\nTotal Loja Cereal;1;7,00\nArroz;1;3,00\n")
+        self.assertEqual((tab["linhas"], tab["linhas_total"]), (3, 0))
+        self.assertEqual(self.soma(), 15.0)
+
+
+class TestDataZerada(Base):
+    def carga(self):
+        linhas = "".join(f"{i};{'00/00/0000' if i <= 12 else f'{i:02d}/01/2026'}\n" for i in range(1, 21))
+        return carregar([self.csv("d.csv", "id;baixa\n" + linhas)], self.base)
+
+    def test_data_zerada_nao_vota_contra_a_coluna(self):
+        # 12 de 20 em aberto (60%), 8 datas reais: dias 13 a 20.
+        perfil = self.carga()
+        coluna = perfil["tabelas"][0]["colunas"][1]
+        self.assertEqual(coluna["tipo"], "data")
+        self.assertEqual((coluna["min"], coluna["max"]), ("2026-01-13", "2026-01-20"))
+        self.assertEqual(coluna["vazios_pct"], 60.0)
+        self.assertEqual(self.sql("SELECT COUNT(*) FROM d WHERE baixa IS NULL")["linhas"][0][0], 12)
+        self.assertEqual(self.sql("SELECT COUNT(*) FROM d WHERE baixa >= '2026-01-15'")["linhas"][0][0], 6)
+
+    def test_aviso_cita_a_data_zerada_uma_vez(self):
+        aviso = [a for a in self.carga()["avisos"] if '"baixa"' in a]
+        self.assertEqual(len(aviso), 1)
+        self.assertEqual(aviso[0].count("00/00/0000"), 1)
+        self.assertIn("12", aviso[0])
+
+    def test_lixo_de_verdade_aparece_antes_da_zerada(self):
+        linhas = "".join(f"{i};00/00/0000\n" for i in range(1, 7)) + "7;abc\n" + "".join(f"{i};{i:02d}/01/2026\n" for i in range(8, 20))
+        aviso = [a for a in carregar([self.csv("d.csv", "id;baixa\n" + linhas)], self.base)["avisos"] if '"baixa"' in a]
+        self.assertLess(aviso[0].index("abc"), aviso[0].index("00/00/0000"))
+
+    def test_coluna_toda_zerada_nao_vira_data(self):
+        perfil = carregar([self.csv("d.csv", "id;baixa\n1;00/00/0000\n2;00/00/0000\n")], self.base)
+        self.assertEqual(perfil["tabelas"][0]["colunas"][1]["tipo"], "texto")
+
+
 class TestDataComLixo(Base):
     def test_data_invalida_vira_nulo_com_aviso(self):
         linhas = "".join(f"{i};{i:02d}/01/2026\n" for i in range(1, 10)) + "10;00/00/0000\n"
