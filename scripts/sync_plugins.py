@@ -13,8 +13,8 @@ Uso:
 Layouts (campo "layout" em harnesses.json, padrão "plugin"):
 
 - "plugin" (Claude, Codex): skills/<skill>/ copiado do core, com o que está em
-  shared/ dentro de cada skill (shared/scripts/brand.py em scripts/,
-  shared/references/* em references/ e shared/assets/brand/ em assets/brand/).
+  shared/ e nos kits do tipo da skill dentro de cada skill (shared/scripts/brand.py
+  em scripts/, references/* em references/ e shared/assets/brand/ em assets/brand/).
   Cada skill fica autocontida. LICENSE, NOTICE e COMMERCIAL.md vão na raiz do pacote.
 - "flat-skills" (DeepSeek Harness): o mesmo conteúdo por skill, mais LICENSE,
   NOTICE e COMMERCIAL.md dentro de cada skills/<skill>/, porque o harness lê
@@ -22,6 +22,12 @@ Layouts (campo "layout" em harnesses.json, padrão "plugin"):
 - "gpt" (GPT Store): gpts/<skill>/instructions.md (preâmbulo mais as instruções
   do GPT da skill), gpts/<skill>/gpt.json e gpts/<skill>/knowledge/ com a skill
   autocontida, menos o SKILL.md.
+
+Kits: shared/ vai para todas as skills (a marca). Os kits em kits/<kit>/ vão só
+para as skills do tipo que os usa. O campo "tipo" de cada item do skills.json
+(calculadora, relatorio, painel, ficha) escolhe os kits pela tabela "kits" do
+plugin em harnesses.json. Toda skill de core/ precisa estar no skills.json com
+"tipo" e "gpt". Só as skills com "gpt": true viram pacote de GPT.
 
 Em todo arquivo de texto copiado (.md, .py, .html, .json), o placeholder de UTM
 vira o utm_source da plataforma. O script também gera a tabela de skills do
@@ -32,8 +38,9 @@ O --check falha quando: alguma cópia difere; um instructions.md de GPT passa de
 8.000 caracteres; o name do frontmatter difere da pasta; um manifesto tem nome,
 versão ou licença diferente do core e de CC-BY-NC-ND-4.0; uma referência entre
 crases aponta para arquivo inexistente; ou sobra placeholder de UTM nas cópias.
-Um arquivo de shared/ com o mesmo caminho de um arquivo da skill também é erro:
-o compartilhado nunca sobrescreve o da skill.
+Um arquivo de shared/ ou de um kit com o mesmo caminho de um arquivo da skill
+(ou de outro kit) também é erro: o compartilhado nunca sobrescreve nada. Kit
+inexistente em uso por uma skill registrada também é acusado.
 """
 
 from __future__ import annotations
@@ -64,6 +71,7 @@ IGNORED = shutil.ignore_patterns("__pycache__", "*.pyc", ".DS_Store")
 # Caminho relativo entre crases apontando para um arquivo da skill.
 REF_PATTERN = re.compile(r"`((?:\.\./|references/|assets/|scripts/)[^`\s]+\.(?:md|py|html|json))`")
 LAYOUTS = ("plugin", "flat-skills", "gpt")
+TIPOS = ("calculadora", "relatorio", "painel", "ficha")
 MARK_START, MARK_END = "<!-- skills:start -->", "<!-- skills:end -->"
 
 
@@ -99,27 +107,51 @@ def skill_dirs(core: Path) -> list[Path]:
     return sorted(p.parent for p in (core / "skills").glob("*/SKILL.md"))
 
 
-def assemble_skill(skill: Path, shared: Path, dest: Path) -> list[str]:
-    """Copia `skill` para `dest` e soma o conteúdo de `shared` no mesmo caminho relativo.
+def kits_da_skill(core: Path, spec: dict, skills: list[dict], nome: str) -> list[Path]:
+    """Fontes compartilhadas da skill `nome`: shared/ e os kits do seu tipo.
 
-    shared/scripts/brand.py vai para scripts/brand.py, shared/references/x.md
-    para references/x.md e shared/assets/brand/ para assets/brand/. Se a skill
-    já tiver um arquivo nesse caminho, o da skill fica e o problema é reportado.
+    O tipo vem do skills.json e a lista de kits do tipo vem de spec["kits"].
+    Levanta ValueError se a skill não está no skills.json, não tem tipo ou o
+    tipo não está na tabela de kits.
+    """
+    entry = next((s for s in skills if s.get("name") == nome), None)
+    if entry is None:
+        raise ValueError(f"skill {nome} está em core mas não está no skills.json")
+    tipo = entry.get("tipo")
+    if not tipo:
+        raise ValueError(f"skill {nome} sem 'tipo' no skills.json")
+    kits = spec.get("kits", {})
+    if tipo not in kits:
+        raise ValueError(f"skill {nome}: tipo '{tipo}' sem entrada em 'kits' do harnesses.json")
+    return [core / spec.get("shared", "shared")] + [core / "kits" / kit for kit in kits[tipo]]
+
+
+def assemble_skill(skill: Path, fontes: list[Path], dest: Path) -> list[str]:
+    """Copia `skill` para `dest` e soma o conteúdo de cada fonte no mesmo caminho relativo.
+
+    shared/scripts/brand.py vai para scripts/brand.py, kits/x/references/y.md
+    para references/y.md e assim por diante. Colisão entre a skill e uma fonte,
+    ou entre duas fontes, é reportada e o primeiro arquivo fica.
     """
     problems: list[str] = []
     shutil.copytree(skill, dest, ignore=IGNORED)
-    if not shared.is_dir():
-        return problems
-    for rel, path in files_of(shared).items():
-        target = dest / rel
-        if target.exists():
-            problems.append(
-                f"colisão: skills/{skill.name}/{rel} já existe na skill e o compartilhado "
-                f"shared/{rel} o sobrescreveria; renomeie um dos dois"
-            )
+    donos: dict[str, str] = {}
+    for fonte in fontes:
+        if not fonte.is_dir():
+            problems.append(f"fonte compartilhada inexistente: {fonte.as_posix()} (usada por skills/{skill.name})")
             continue
-        target.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(path, target)
+        for rel, path in files_of(fonte).items():
+            target = dest / rel
+            if target.exists():
+                dono = donos.get(rel, f"skills/{skill.name}")
+                problems.append(
+                    f"colisão: {rel} de {fonte.name}/ já existe em {dono} (skill {skill.name}); "
+                    f"renomeie um dos dois"
+                )
+                continue
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(path, target)
+            donos[rel] = f"{fonte.name}/"
     return problems
 
 
@@ -128,52 +160,69 @@ def copy_license(dest: Path) -> None:
         shutil.copy2(ROOT / name, dest / name)
 
 
-def build_skills(core: Path, shared: Path, work: Path) -> list[str]:
+def fontes_ou_problema(core: Path, spec: dict, skills: list[dict], nome: str, problems: list[str]):
+    try:
+        return kits_da_skill(core, spec, skills, nome)
+    except ValueError as err:
+        problems.append(str(err))
+        return None
+
+
+def build_skills(core: Path, spec: dict, skills: list[dict], work: Path) -> list[str]:
     problems: list[str] = []
     for skill in skill_dirs(core):
-        problems += assemble_skill(skill, shared, work / "skills" / skill.name)
+        fontes = fontes_ou_problema(core, spec, skills, skill.name, problems)
+        if fontes is not None:
+            problems += assemble_skill(skill, fontes, work / "skills" / skill.name)
     return problems
 
 
-def build_gpts(core: Path, shared: Path, work: Path) -> list[str]:
+def build_gpts(core: Path, spec: dict, skills: list[dict], work: Path) -> list[str]:
     problems: list[str] = []
     gpt_src = core / "gpts"
     preamble_path = gpt_src / "_preamble.md"
     if not preamble_path.is_file():
         return [f"preâmbulo ausente: {shown(preamble_path, ROOT)}"]
     preamble = preamble_path.read_text(encoding="utf-8").strip()
+    com_gpt = {s["name"] for s in skills if s.get("gpt") is True}
     for skill in skill_dirs(core):
+        if skill.name not in com_gpt:
+            continue
         src = gpt_src / skill.name
         missing = [n for n in ("instructions.md", "gpt.json") if not (src / n).is_file()]
         if missing:
             problems.append(f"GPT da skill {skill.name} sem {', '.join(missing)} em {shown(src, ROOT)}")
             continue
+        fontes = fontes_ou_problema(core, spec, skills, skill.name, problems)
+        if fontes is None:
+            continue
         base = work / skill.name
         knowledge = base / "knowledge"
-        problems += assemble_skill(skill, shared, knowledge)
+        problems += assemble_skill(skill, fontes, knowledge)
         (knowledge / "SKILL.md").unlink()
         body = (src / "instructions.md").read_text(encoding="utf-8").strip()
         text = preamble.replace(SKILL_PLACEHOLDER, skill.name) + "\n\n" + body + "\n"
         (base / "instructions.md").write_text(text, encoding="utf-8")
         shutil.copy2(src / "gpt.json", base / "gpt.json")
-    stray = sorted(
-        p.name for p in gpt_src.iterdir()
-        if p.is_dir() and not is_junk(Path(p.name)) and not (core / "skills" / p.name / "SKILL.md").is_file()
-    )
-    problems += [f"core/gpts/{name} não corresponde a nenhuma skill" for name in stray]
+    if gpt_src.is_dir():
+        stray = sorted(
+            p.name for p in gpt_src.iterdir()
+            if p.is_dir() and not is_junk(Path(p.name)) and p.name not in com_gpt
+        )
+        problems += [f"core/gpts/{name} não corresponde a nenhuma skill com \"gpt\": true" for name in stray]
     return problems
 
 
-def build_harness(core: Path, shared: Path, layout: str, work: Path) -> list[str]:
+def build_harness(core: Path, spec: dict, skills: list[dict], layout: str, work: Path) -> list[str]:
     work.mkdir(parents=True)
     if layout == "plugin":
-        problems = build_skills(core, shared, work)
+        problems = build_skills(core, spec, skills, work)
     elif layout == "flat-skills":
-        problems = build_skills(core, shared, work)
+        problems = build_skills(core, spec, skills, work)
         for skill in (work / "skills").iterdir():
             copy_license(skill)
     elif layout == "gpt":
-        problems = build_gpts(core, shared, work)
+        problems = build_gpts(core, spec, skills, work)
     else:
         return [f"layout desconhecido '{layout}' (use um de: {', '.join(LAYOUTS)})"]
     copy_license(work)
@@ -205,6 +254,16 @@ def check_frontmatter(core: Path) -> list[str]:
             problems.append(f"{shown(skill_md, ROOT)}: name diferente da pasta '{folder}'")
         if not re.search(r"^description:\s*\S", front, re.M):
             problems.append(f"{shown(skill_md, ROOT)}: sem description")
+    return problems
+
+
+def check_skills_json(skills: list[dict]) -> list[str]:
+    problems: list[str] = []
+    for s in skills:
+        if s.get("tipo") not in TIPOS:
+            problems.append(f"skills.json: '{s.get('name')}' com tipo '{s.get('tipo')}' (use um de: {', '.join(TIPOS)})")
+        if not isinstance(s.get("gpt"), bool):
+            problems.append(f"skills.json: '{s.get('name')}' sem 'gpt' true ou false")
     return problems
 
 
@@ -313,16 +372,21 @@ def utm_url(url: str, source: str, campaign: str) -> str:
     return f"{url}{sep}utm_source={source}&utm_medium=skill&utm_campaign={campaign}"
 
 
+def link_label(skill: dict) -> str:
+    return "Abrir a calculadora gratuita" if skill["tipo"] == "calculadora" else "Conecte seu ERP"
+
+
 def readme_block(skills: list[dict]) -> str:
     lines = [
-        "| Skill | O que faz | Regra | Calculadora gratuita | Status |",
+        "| Skill | O que faz | Regra | Site | Status |",
         "| --- | --- | --- | --- | --- |",
     ]
     for s in skills:
         host = urlparse(s["site_url"]).netloc
         url = utm_url(s["site_url"], "github", s["name"])
+        rule = s["rule"] or "Não se aplica"
         lines.append(
-            f"| **{s['title']}** (`{s['name']}`) | {s['summary']} | {s['rule']} | [{host}]({url}) | {s['status']} |"
+            f"| **{s['title']}** (`{s['name']}`) | {s['summary']} | {rule} | [{host}]({url}) | {s['status']} |"
         )
     return "\n".join(lines)
 
@@ -331,13 +395,14 @@ def site_block(skills: list[dict]) -> str:
     cards = []
     for s in skills:
         url = html.escape(utm_url(s["site_url"], "site-skills", s["name"]), quote=True)
+        rule = f'    <p class="skill-rule">Base: {html.escape(s["rule"])}</p>\n' if s["rule"] else ""
         cards.append(
             f'  <article class="skill-card" id="skill-{html.escape(s["name"])}">\n'
             f'    <p class="skill-status">{html.escape(s["status"])}</p>\n'
             f"    <h3>{html.escape(s['title'])}</h3>\n"
             f"    <p>{html.escape(s['summary'])}</p>\n"
-            f'    <p class="skill-rule">Base: {html.escape(s["rule"])}</p>\n'
-            f'    <a class="skill-link" href="{url}">Abrir a calculadora gratuita</a>\n'
+            f"{rule}"
+            f'    <a class="skill-link" href="{url}">{link_label(s)}</a>\n'
             "  </article>"
         )
     return '<div class="skills-grid">\n' + "\n".join(cards) + "\n</div>"
@@ -433,18 +498,18 @@ def main() -> int:
     with tempfile.TemporaryDirectory(prefix="cd2-sync-") as tmp:
         for plugin, spec in config["plugins"].items():
             core = ROOT / spec["core"]
-            shared = core / spec.get("shared", "shared")
             core_meta = load_json(core / "plugin.core.json")
             problems += check_frontmatter(core)
             names = {p.name for p in skill_dirs(core)}
             problems += [f"skills.json cita '{s['name']}', que não existe em {spec['core']}/skills"
                          for s in skills if s["name"] not in names]
+            problems += check_skills_json(skills)
             problems += check_marketplaces(plugin, spec)
 
             for harness, target in spec["harnesses"].items():
                 layout = target.get("layout", "plugin")
                 work = Path(tmp) / plugin / harness
-                build_problems = build_harness(core, shared, layout, work)
+                build_problems = build_harness(core, spec, skills, layout, work)
                 replace_utm(work, target["utm_source"])
                 tree_problems = check_tree(work, layout, lambda p, w=work, d=target["path"]: f"{d}/{shown(p, w)}")
                 problems += [f"[{harness}] {p}" for p in build_problems + tree_problems]

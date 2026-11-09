@@ -470,8 +470,9 @@ class SkillDocTest(unittest.TestCase):
                     "references/bandeiras.md", "references/legal-params.json", "scripts/calc.py", "scripts/render.py"):
             self.assertIn(ref, text)
         shared = ROOT / "core" / "cd2-varejo" / "shared"
+        kit = ROOT / "core" / "cd2-varejo" / "kits" / "calculadora"
         for ref in re.findall(r"`((?:references|scripts|assets)/[^`]+)`", text):
-            self.assertTrue((SKILL / ref).exists() or (shared / ref).exists(), ref)
+            self.assertTrue((SKILL / ref).exists() or (shared / ref).exists() or (kit / ref).exists(), ref)
 
     def test_skill_md_footer_matches_brand(self):
         block = re.search(r"```text\n(.*?)\n```", self.read("SKILL.md"), re.S).group(1)

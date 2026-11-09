@@ -291,9 +291,133 @@ class CollisionTest(unittest.TestCase):
             (skill / "references" / "marca.md").write_text("da skill", encoding="utf-8")
             (shared / "references").mkdir(parents=True)
             (shared / "references" / "marca.md").write_text("compartilhado", encoding="utf-8")
-            problems = module.assemble_skill(skill, shared, dest)
+            problems = module.assemble_skill(skill, [shared], dest)
             self.assertTrue(any("marca.md" in p for p in problems), problems)
             self.assertEqual((dest / "references" / "marca.md").read_text(encoding="utf-8"), "da skill")
+
+
+def load_sync():
+    spec = importlib.util.spec_from_file_location("cd2_sync_plugins", SYNC)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def write(path: Path, text: str = "x") -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(text, encoding="utf-8")
+
+
+def make_core(base: Path, skills: dict[str, dict]) -> tuple[Path, dict, list[dict]]:
+    """core temporário com shared/, kits e uma skill por entrada de `skills` (nome -> item do skills.json)."""
+    core = base / "core"
+    write(core / "shared" / "scripts" / "brand.py")
+    write(core / "kits" / "calculadora" / "references" / "fluxo-conversa.md")
+    write(core / "kits" / "relatorio" / "scripts" / "render_relatorio.py")
+    write(core / "kits" / "sql" / "references" / "regras-sql.md")
+    write(core / "kits" / "dados" / "scripts" / "dados_arquivo.py")
+    write(core / "gpts" / "_preamble.md", "preambulo {{SKILL}}")
+    items = []
+    for nome, item in skills.items():
+        write(core / "skills" / nome / "SKILL.md", f"---\nname: {nome}\ndescription: y\n---\n")
+        items.append({"name": nome, **item})
+    spec = {"shared": "shared", "kits": {
+        "calculadora": ["calculadora"], "relatorio": ["sql", "dados", "relatorio"],
+        "painel": ["sql", "dados"], "ficha": ["sql"],
+    }}
+    return core, spec, items
+
+
+class KitsTest(unittest.TestCase):
+    def setUp(self):
+        self.sync = load_sync()
+        self._tmp = tempfile.TemporaryDirectory()
+        self.base = Path(self._tmp.name)
+        self.addCleanup(self._tmp.cleanup)
+
+    def test_kit_entra_so_no_tipo_certo(self):
+        core, spec, items = make_core(self.base, {
+            "calc-x": {"tipo": "calculadora", "gpt": False},
+            "relatorio-x": {"tipo": "relatorio", "gpt": False},
+        })
+        work = self.base / "work"
+        self.assertEqual(self.sync.build_harness(core, spec, items, "plugin", work), [])
+        calc, rel = work / "skills" / "calc-x", work / "skills" / "relatorio-x"
+        self.assertTrue((calc / "references" / "fluxo-conversa.md").is_file())
+        self.assertTrue((calc / "scripts" / "brand.py").is_file())
+        self.assertFalse((calc / "scripts" / "render_relatorio.py").exists())
+        self.assertFalse((calc / "scripts" / "dados_arquivo.py").exists())
+        for rel_path in ("scripts/render_relatorio.py", "scripts/dados_arquivo.py",
+                         "references/regras-sql.md", "scripts/brand.py"):
+            self.assertTrue((rel / rel_path).is_file(), rel_path)
+        self.assertFalse((rel / "references" / "fluxo-conversa.md").exists())
+
+    def test_kits_da_skill(self):
+        core, spec, items = make_core(self.base, {"p": {"tipo": "painel", "gpt": False}})
+        self.assertEqual(
+            self.sync.kits_da_skill(core, spec, items, "p"),
+            [core / "shared", core / "kits" / "sql", core / "kits" / "dados"],
+        )
+
+    def test_colisao_entre_kits_e_erro(self):
+        core, spec, items = make_core(self.base, {"r": {"tipo": "relatorio", "gpt": False}})
+        write(core / "kits" / "sql" / "scripts" / "dados_arquivo.py", "outro")
+        problems = self.sync.build_harness(core, spec, items, "plugin", self.base / "work")
+        self.assertTrue(any("colisão" in p and "dados_arquivo.py" in p for p in problems), problems)
+
+    def test_kit_inexistente_e_acusado(self):
+        core, spec, items = make_core(self.base, {"f": {"tipo": "ficha", "gpt": False}})
+        shutil.rmtree(core / "kits" / "sql")
+        problems = self.sync.build_harness(core, spec, items, "plugin", self.base / "work")
+        self.assertTrue(any("inexistente" in p and "sql" in p for p in problems), problems)
+
+    def test_skill_em_core_fora_do_skills_json_acusa(self):
+        core, spec, items = make_core(self.base, {"a": {"tipo": "ficha", "gpt": False}})
+        write(core / "skills" / "orfa" / "SKILL.md", "---\nname: orfa\ndescription: y\n---\n")
+        problems = self.sync.build_harness(core, spec, items, "plugin", self.base / "work")
+        self.assertTrue(any("orfa" in p and "skills.json" in p for p in problems), problems)
+
+    def test_skill_sem_tipo_acusa(self):
+        core, spec, items = make_core(self.base, {"a": {"gpt": False}})
+        problems = self.sync.build_harness(core, spec, items, "plugin", self.base / "work")
+        self.assertTrue(any("a" in p and "tipo" in p for p in problems), problems)
+        self.assertTrue(any("tipo" in p for p in self.sync.check_skills_json(items)))
+
+    def test_skill_sem_gpt_nao_gera_pasta(self):
+        core, spec, items = make_core(self.base, {
+            "com": {"tipo": "calculadora", "gpt": True},
+            "sem": {"tipo": "ficha", "gpt": False},
+        })
+        write(core / "gpts" / "com" / "instructions.md", "corpo")
+        write(core / "gpts" / "com" / "gpt.json", "{}")
+        work = self.base / "work"
+        self.assertEqual(self.sync.build_harness(core, spec, items, "gpt", work), [])
+        self.assertTrue((work / "com" / "instructions.md").is_file())
+        self.assertTrue((work / "com" / "knowledge" / "references" / "fluxo-conversa.md").is_file())
+        self.assertFalse((work / "sem").exists())
+
+    def test_skill_com_gpt_sem_instrucoes_acusa(self):
+        core, spec, items = make_core(self.base, {"com": {"tipo": "calculadora", "gpt": True}})
+        problems = self.sync.build_harness(core, spec, items, "gpt", self.base / "work")
+        self.assertTrue(any("com" in p and "instructions.md" in p for p in problems), problems)
+
+    def test_pasta_de_gpt_de_skill_sem_gpt_acusa(self):
+        core, spec, items = make_core(self.base, {"sem": {"tipo": "ficha", "gpt": False}})
+        write(core / "gpts" / "sem" / "instructions.md")
+        problems = self.sync.build_harness(core, spec, items, "gpt", self.base / "work")
+        self.assertTrue(any("core/gpts/sem" in p for p in problems), problems)
+
+    def test_cabecalho_e_rotulos_por_tipo(self):
+        calc = {"name": "c", "title": "C", "summary": "s", "site_url": "https://calc.cd2.com.br/",
+                "rule": "Decreto 1", "status": "disponível", "tipo": "calculadora", "gpt": True}
+        rel = {**calc, "name": "r", "site_url": "https://archeo.cd2.com.br/", "rule": "", "tipo": "relatorio", "gpt": False}
+        table = self.sync.readme_block([calc, rel])
+        self.assertIn("| Skill | O que faz | Regra | Site | Status |", table)
+        self.assertIn("Não se aplica", table)
+        cards = self.sync.site_block([calc, rel])
+        self.assertIn("Abrir a calculadora gratuita", cards)
+        self.assertIn("Conecte seu ERP", cards)
+        self.assertEqual(cards.count("Base:"), 1)
 
 
 class PackageTest(unittest.TestCase):

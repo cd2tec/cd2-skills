@@ -28,6 +28,23 @@
           "layout": "gpt",
           "utm_source": "gpt-store"
         }
+      },
+      "kits": {
+        "calculadora": [
+          "calculadora"
+        ],
+        "relatorio": [
+          "sql",
+          "dados",
+          "relatorio"
+        ],
+        "painel": [
+          "sql",
+          "dados"
+        ],
+        "ficha": [
+          "sql"
+        ]
       }
     }
   }
