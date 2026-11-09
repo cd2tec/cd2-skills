@@ -130,7 +130,7 @@ def _validar_bloco(bloco, indice, erros):
         for col in colunas:
             if not col.get("campo") or not col.get("rotulo"):
                 erros.append(f"{nome}: coluna sem campo ou rótulo.")
-            if col.get("formato") not in FORMATOS_COLUNA | {None}:
+            if col.get("formato") is not None and (not isinstance(col["formato"], str) or col["formato"] not in FORMATOS_COLUNA):
                 erros.append(f"{nome}: formato '{col.get('formato')}' inválido.")
             if "cpf" in str(col.get("campo", "")).lower():
                 for linha in linhas:
@@ -204,7 +204,7 @@ def validar(rel) -> list[str]:
     if not 1 <= len(leitura) <= 6:
         erros.append("'leitura' precisa de 1 a 6 itens.")
     for item in leitura:
-        if item.get("nivel") not in NIVEIS or not item.get("texto"):
+        if not isinstance(item.get("nivel"), str) or item["nivel"] not in NIVEIS or not item.get("texto"):
             erros.append(f"Leitura inválida: use nível {', '.join(NIVEIS)} e texto.")
     prova = _objeto(rel.get("prova"), "prova", erros)
     if "tolerancia_pct" in prova and not brand.e_numero(prova["tolerancia_pct"]):
@@ -268,7 +268,7 @@ def avaliar_prova(prova) -> list[dict]:
     return saida
 
 
-def selo_prova(resultado, origem="banco") -> str:
+def selo_prova(resultado, origem) -> str:
     """Selo de prova fechada. Só vale com origem banco ou outro-mcp; arquivo e digitado nunca dizem "Prova fechada"."""
     if origem not in BANCO:
         return SELO_ARQUIVO

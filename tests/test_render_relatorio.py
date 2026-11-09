@@ -247,6 +247,12 @@ class TiposErrados(unittest.TestCase):
             "tolerancia texto": lambda r: r["prova"].update(tolerancia_pct="2"),
             "titulo numero": lambda r: r.update(titulo=5),
             "origem lista": lambda r: r.update(origem=["banco"]),
+            "nivel lista": lambda r: r["leitura"][0].update(nivel=[]),
+            "nivel dict": lambda r: r["leitura"][0].update(nivel={}),
+            "formato da coluna lista": lambda r: r["blocos"][4]["colunas"][1].update(formato=[]),
+            "formato da coluna dict": lambda r: r["blocos"][4]["colunas"][1].update(formato={}),
+            "tipo do bloco lista": lambda r: r["blocos"][4].update(tipo=[]),
+            "tipo da etapa lista": lambda r: r["blocos"][3]["etapas"][0].update(tipo=[]),
             "raiz lista": None,
         }
         for nome, mexer in casos.items():
@@ -265,6 +271,10 @@ class TiposErrados(unittest.TestCase):
 
 
 class Selo(unittest.TestCase):
+    def test_selo_prova_exige_a_origem(self):
+        with self.assertRaises(TypeError):
+            rr.selo_prova(rr.avaliar_prova(novo()["prova"]))
+
     def test_selo_prova_nao_diz_fechada_para_arquivo(self):
         res = rr.avaliar_prova(novo()["prova"])
         for origem in ("arquivo", "digitado"):
