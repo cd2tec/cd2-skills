@@ -114,7 +114,7 @@ class RepoTest(unittest.TestCase):
         core = json.loads(read("core/cd2-varejo/plugin.core.json"))
         skills = json.loads(read("skills.json"))
         harnesses = json.loads(read("harnesses.json"))
-        self.assertEqual(core["version"], "0.2.0")
+        self.assertEqual(core["version"], "0.2.1")
         self.assertEqual(
             {s["name"] for s in skills},
             {
