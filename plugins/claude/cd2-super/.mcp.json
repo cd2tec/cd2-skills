@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "archeo": {
+      "type": "http",
+      "url": "https://archeo.cd2.com.br/api/mcp"
+    }
+  }
+}

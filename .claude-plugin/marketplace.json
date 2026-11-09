@@ -5,13 +5,13 @@
     "url": "https://cd2.com.br"
   },
   "metadata": {
-    "description": "Super (CD2 Tech): calculadoras, relatórios com a conta conferida e painel de varejo para o varejo alimentar brasileiro, com a marca CD2 Tech."
+    "description": "Super (CD2 Tech): rotinas do dia, calculadoras, relatórios com a conta conferida e painel de varejo para o varejo alimentar brasileiro, com a marca CD2 Tech."
   },
   "plugins": [
     {
       "name": "cd2-super",
       "source": "./plugins/claude/cd2-super",
-      "description": "Skills da CD2 Tech para o varejo alimentar: calculadoras fim-escala-6x1 e custo-vrva; relatórios gerenciais relatorio-vendas, relatorio-estoque, relatorio-compras, relatorio-precos, relatorio-perdas, relatorio-financeiro, relatorio-fiscal e relatorio-contabil; painel-varejo; e ficha-archeo-mcp para o Archeo MCP Creator da CD2. Os relatórios e o painel funcionam conectados ao ERP ou com arquivo exportado.",
+      "description": "Skills da CD2 Tech para o varejo alimentar: rotinas do dia (briefing-do-dia, sinais, negociação com fornecedor e ofertas); calculadoras fim-escala-6x1 e custo-vrva; oito relatórios gerenciais relatorio-*; painel-varejo; e ficha-archeo-mcp para o Archeo MCP Creator da CD2. Rotinas, relatórios e painel funcionam conectados ao ERP ou com arquivo exportado.",
       "license": "CC-BY-NC-ND-4.0",
       "keywords": [
         "cd2",
@@ -24,6 +24,10 @@
         "calculadora",
         "relatorio",
         "painel",
+        "rotinas",
+        "briefing",
+        "ofertas",
+        "fornecedor",
         "curva-abc",
         "estoque",
         "erp",

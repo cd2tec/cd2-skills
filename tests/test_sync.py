@@ -245,7 +245,7 @@ class SyncTest(unittest.TestCase):
         for path in manifests:
             meta = json.loads(path.read_text(encoding="utf-8"))
             self.assertEqual(meta["name"], PLUGIN, path)
-            self.assertEqual(meta["version"], "0.3.0", path)
+            self.assertEqual(meta["version"], "0.4.0", path)
             self.assertEqual(meta["license"], "CC-BY-NC-ND-4.0", path)
             self.assertEqual(meta["author"], {"name": "CD2 Tech", "url": "https://cd2.com.br"}, path)
             self.assertEqual(meta["homepage"], "https://cd2tec.github.io/super/", path)
@@ -324,6 +324,7 @@ def make_core(base: Path, skills: dict[str, dict]) -> tuple[Path, dict, list[dic
     write(core / "kits" / "relatorio" / "scripts" / "render_relatorio.py")
     write(core / "kits" / "sql" / "references" / "regras-sql.md")
     write(core / "kits" / "dados" / "scripts" / "dados_arquivo.py")
+    write(core / "kits" / "rotina" / "references" / "regras-rotina.md")
     write(core / "gpts" / "_preamble.md", "preambulo {{SKILL}}")
     items = []
     for nome, item in skills.items():
@@ -331,9 +332,63 @@ def make_core(base: Path, skills: dict[str, dict]) -> tuple[Path, dict, list[dic
         items.append({"name": nome, **item})
     spec = {"shared": "shared", "kits": {
         "calculadora": ["calculadora"], "relatorio": ["sql", "dados", "relatorio"],
-        "painel": ["sql", "dados"], "ficha": ["sql"],
+        "painel": ["sql", "dados"], "ficha": ["sql"], "rotina": ["sql", "dados", "relatorio", "rotina"],
     }}
     return core, spec, items
+
+
+SKILL_FONTE = (
+    "---\nname: relatorio-compras\ndescription: y\n---\n"
+    "# T\nUse `references/relatorios.md`.\n## Prova\nsoma\n## Entrega\ncortar\n## Depois\nfica\n## Fechamento\ncortar2\n"
+)
+
+
+class ReaproveitaTest(unittest.TestCase):
+    def setUp(self):
+        self.sync = load_sync()
+        self._tmp = tempfile.TemporaryDirectory()
+        self.base = Path(self._tmp.name)
+        self.addCleanup(self._tmp.cleanup)
+
+    def montar(self, reaproveita):
+        core, spec, items = make_core(self.base, {
+            "relatorio-compras": {"tipo": "relatorio", "gpt": False},
+            "r": {"tipo": "rotina", "gpt": False, "reaproveita": reaproveita},
+        })
+        write(core / "skills" / "relatorio-compras" / "SKILL.md", SKILL_FONTE)
+        write(core / "skills" / "relatorio-compras" / "references" / "relatorios.md", "Teste: SKILL.md, seção X\n")
+        return core, spec, items
+
+    def test_reaproveita_gera_relatorios_e_guia(self):
+        core, spec, items = self.montar(["relatorio-compras"])
+        work = self.base / "work"
+        self.assertEqual(self.sync.build_skills(core, spec, items, work), [])
+        refs = work / "skills" / "r" / "references"
+        self.assertIn("guia-compras.md", (refs / "relatorios-compras.md").read_text(encoding="utf-8"))
+        guia = (refs / "guia-compras.md").read_text(encoding="utf-8")
+        self.assertNotIn("name: relatorio-compras", guia)
+        self.assertIn("references/relatorios-compras.md", guia)
+        self.assertIn("soma", guia)
+        self.assertIn("fica", guia)
+        self.assertNotIn("cortar", guia)
+
+    def test_reaproveita_skill_inexistente_acusa(self):
+        core, spec, items = self.montar(["relatorio-nada"])
+        problems = self.sync.build_skills(core, spec, items, self.base / "work")
+        self.assertTrue(any("relatorio-nada" in p for p in problems), problems)
+
+    def test_reaproveita_fora_de_rotina_acusa(self):
+        items = [{"name": "relatorio-x", "tipo": "relatorio", "gpt": False, "reaproveita": ["relatorio-x"]}]
+        problems = self.sync.check_skills_json(items)
+        self.assertTrue(any("reaproveita" in p and "relatorio-x" in p for p in problems), problems)
+
+    def test_reaproveita_de_nao_relatorio_acusa(self):
+        items = [
+            {"name": "painel-varejo", "tipo": "painel", "gpt": False},
+            {"name": "r", "tipo": "rotina", "gpt": False, "reaproveita": ["painel-varejo"]},
+        ]
+        problems = self.sync.check_skills_json(items)
+        self.assertTrue(any("reaproveita" in p and "painel-varejo" in p for p in problems), problems)
 
 
 class KitsTest(unittest.TestCase):
@@ -437,7 +492,7 @@ class PackageTest(unittest.TestCase):
             )
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
             for harness in ("claude", "codex", "dsh", "gpts"):
-                for name in (f"{PLUGIN}-{harness}.zip", f"{PLUGIN}-{harness}-0.3.0.zip"):
+                for name in (f"{PLUGIN}-{harness}.zip", f"{PLUGIN}-{harness}-0.4.0.zip"):
                     path = out / name
                     self.assertTrue(path.is_file(), name)
                     with zipfile.ZipFile(path) as zf:
@@ -449,6 +504,7 @@ class PackageTest(unittest.TestCase):
             with zipfile.ZipFile(out / f"{PLUGIN}-claude.zip") as zf:
                 self.assertIn(".claude-plugin/plugin.json", zf.namelist())
                 self.assertIn(".claude-plugin/icon.png", zf.namelist())
+                self.assertIn(".mcp.json", zf.namelist())
             with zipfile.ZipFile(out / f"{PLUGIN}-gpts.zip") as zf:
                 self.assertIn("custo-vrva/knowledge/scripts/calc.py", zf.namelist())
 

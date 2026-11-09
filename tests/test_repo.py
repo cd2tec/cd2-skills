@@ -114,16 +114,28 @@ class RepoTest(unittest.TestCase):
         core = json.loads(read("core/cd2-super/plugin.core.json"))
         skills = json.loads(read("skills.json"))
         harnesses = json.loads(read("harnesses.json"))
-        self.assertEqual(core["version"], "0.3.0")
+        self.assertEqual(core["version"], "0.4.0")
         self.assertEqual(
             {s["name"] for s in skills},
             {
                 "fim-escala-6x1", "custo-vrva", "relatorio-vendas", "relatorio-estoque",
                 "relatorio-compras", "relatorio-precos", "relatorio-perdas", "relatorio-financeiro",
                 "relatorio-fiscal", "relatorio-contabil", "painel-varejo", "ficha-archeo-mcp",
+                "perfil-da-operacao", "briefing-do-dia", "sinais-da-operacao", "preparo-de-negociacao", "ata-de-negociacao", "plano-de-ofertas", "comunicacao-de-ofertas",
             },
         )
         self.assertEqual(set(harnesses["plugins"]["cd2-super"]["harnesses"]), {"claude", "codex", "dsh", "gpt"})
+
+
+class ArcheoPreConfigurado(unittest.TestCase):
+    MCP = ROOT / "plugins/claude/cd2-super/.mcp.json"
+
+    def test_mcp_json_archeo(self):
+        texto = self.MCP.read_text(encoding="utf-8")
+        servidor = json.loads(texto)["mcpServers"]["archeo"]
+        self.assertEqual(servidor, {"type": "http", "url": "https://archeo.cd2.com.br/api/mcp"})
+        self.assertNotIn("authorization", texto.lower())
+        self.assertNotIn("token", texto.lower())
 
 
 if __name__ == "__main__":

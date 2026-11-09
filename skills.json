@@ -118,5 +118,96 @@
     "status": "disponível",
     "tipo": "ficha",
     "gpt": false
+  },
+  {
+    "name": "perfil-da-operacao",
+    "title": "Perfil da operação",
+    "summary": "Mostra o que está conectado, infere lojas e departamentos e gera o bloco de perfil para as outras rotinas.",
+    "site_url": "https://archeo.cd2.com.br/",
+    "rule": "",
+    "status": "disponível",
+    "tipo": "rotina",
+    "gpt": false
+  },
+  {
+    "name": "briefing-do-dia",
+    "title": "Briefing do dia",
+    "summary": "Monta o briefing da manhã, com venda contra a meta, ruptura, validade, contas, agenda e três ações.",
+    "site_url": "https://archeo.cd2.com.br/",
+    "rule": "",
+    "status": "disponível",
+    "tipo": "rotina",
+    "gpt": false,
+    "reaproveita": [
+      "relatorio-vendas",
+      "relatorio-estoque",
+      "relatorio-perdas",
+      "relatorio-financeiro"
+    ]
+  },
+  {
+    "name": "sinais-da-operacao",
+    "title": "Sinais da operação",
+    "summary": "Aponta o que mudou e merece atenção, como fornecedor atrasando, custo sem repasse e margem negativa.",
+    "site_url": "https://archeo.cd2.com.br/",
+    "rule": "",
+    "status": "disponível",
+    "tipo": "rotina",
+    "gpt": false,
+    "reaproveita": [
+      "relatorio-compras",
+      "relatorio-precos",
+      "relatorio-estoque",
+      "relatorio-vendas",
+      "relatorio-perdas"
+    ]
+  },
+  {
+    "name": "preparo-de-negociacao",
+    "title": "Preparo de negociação",
+    "summary": "Prepara a visita de um fornecedor, com compra, custo, serviço, ruptura e o que pedir.",
+    "site_url": "https://archeo.cd2.com.br/",
+    "rule": "",
+    "status": "disponível",
+    "tipo": "rotina",
+    "gpt": false,
+    "reaproveita": [
+      "relatorio-compras",
+      "relatorio-estoque"
+    ]
+  },
+  {
+    "name": "ata-de-negociacao",
+    "title": "Ata de negociação",
+    "summary": "Fecha a visita do fornecedor com acordos, pendências, mensagem de confirmação e o que atualizar no ERP.",
+    "site_url": "https://archeo.cd2.com.br/",
+    "rule": "",
+    "status": "disponível",
+    "tipo": "rotina",
+    "gpt": false
+  },
+  {
+    "name": "plano-de-ofertas",
+    "title": "Plano de ofertas",
+    "summary": "Monta a semana de ofertas, com itens por papel, preço, margem, verba, canais e como medir.",
+    "site_url": "https://archeo.cd2.com.br/",
+    "rule": "",
+    "status": "disponível",
+    "tipo": "rotina",
+    "gpt": false,
+    "reaproveita": [
+      "relatorio-precos",
+      "relatorio-vendas"
+    ]
+  },
+  {
+    "name": "comunicacao-de-ofertas",
+    "title": "Comunicação de ofertas",
+    "summary": "Escreve os textos da oferta por canal, no tom da loja, com período, condições e regras.",
+    "site_url": "https://archeo.cd2.com.br/",
+    "rule": "",
+    "status": "disponível",
+    "tipo": "rotina",
+    "gpt": false
   }
 ]

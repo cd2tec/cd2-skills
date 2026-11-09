@@ -31,6 +31,13 @@ No Claude Cowork, baixe o [`cd2-super-claude.zip`](https://github.com/cd2tec/sup
 | [`relatorio-contabil`](skills/relatorio-contabil/SKILL.md) | Conferência de balancete, razão e lançamentos, como relatório gerencial e não escrituração oficial |
 | [`painel-varejo`](skills/painel-varejo/SKILL.md) | Painel visual da operação do varejo, com totalizadores, linha do tempo, mapa de calor e leitura. Sem conexão, entrega a foto do período |
 | [`ficha-archeo-mcp`](skills/ficha-archeo-mcp/SKILL.md) | Ficha de uma ferramenta para cadastrar no Archeo MCP Creator da CD2, com o SQL e os parâmetros. Sem conexão, entrega um rascunho marcado como não validado |
+| [`perfil-da-operacao`](skills/perfil-da-operacao/SKILL.md) | Mostra o que está conectado, infere lojas e departamentos e gera o bloco de perfil para as outras rotinas |
+| [`briefing-do-dia`](skills/briefing-do-dia/SKILL.md) | Briefing da manhã, com venda contra a meta, ruptura, validade, contas, agenda e três ações |
+| [`sinais-da-operacao`](skills/sinais-da-operacao/SKILL.md) | O que mudou e merece atenção, como fornecedor atrasando, custo sem repasse e margem negativa |
+| [`preparo-de-negociacao`](skills/preparo-de-negociacao/SKILL.md) | Preparo da visita de um fornecedor, com compra, custo, serviço, ruptura e o que pedir |
+| [`ata-de-negociacao`](skills/ata-de-negociacao/SKILL.md) | Ata da visita, com acordos, pendências, mensagem de confirmação e o que atualizar no ERP |
+| [`plano-de-ofertas`](skills/plano-de-ofertas/SKILL.md) | Plano da semana de ofertas, com itens por papel, preço, margem, verba, canais e como medir |
+| [`comunicacao-de-ofertas`](skills/comunicacao-de-ofertas/SKILL.md) | Textos da oferta por canal, no tom da loja, com período, condições e regras |
 
 Exemplos de pedido: *"quantas pessoas vou precisar contratar com o fim da 6x1?"*, *"quanto eu pago a mais de taxa no vale?"*, *"faz a curva ABC de venda desse arquivo"* ou *"monta um painel da operação"*. A entrega visual sai como artefato quando o Claude oferece esse recurso e, se não, como arquivo HTML.
 

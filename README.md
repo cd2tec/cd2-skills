@@ -57,6 +57,13 @@ Quem toca supermercado, padaria ou mercado de bairro não tem tempo para juridiq
 | **Relatório contábil** (`relatorio-contabil`) | Confere balancete, razão e lançamentos, como relatório gerencial e não escrituração oficial. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=relatorio-contabil) | disponível |
 | **Painel de varejo** (`painel-varejo`) | Monta um painel visual da operação do varejo, com totalizadores, linha do tempo, mapa de calor e leitura. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=painel-varejo) | disponível |
 | **Ficha de ferramenta do Archeo MCP Creator** (`ficha-archeo-mcp`) | Prepara a ficha de uma ferramenta para cadastrar no Archeo MCP Creator da CD2, com o SQL e os parâmetros. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=ficha-archeo-mcp) | disponível |
+| **Perfil da operação** (`perfil-da-operacao`) | Mostra o que está conectado, infere lojas e departamentos e gera o bloco de perfil para as outras rotinas. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=perfil-da-operacao) | disponível |
+| **Briefing do dia** (`briefing-do-dia`) | Monta o briefing da manhã, com venda contra a meta, ruptura, validade, contas, agenda e três ações. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=briefing-do-dia) | disponível |
+| **Sinais da operação** (`sinais-da-operacao`) | Aponta o que mudou e merece atenção, como fornecedor atrasando, custo sem repasse e margem negativa. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=sinais-da-operacao) | disponível |
+| **Preparo de negociação** (`preparo-de-negociacao`) | Prepara a visita de um fornecedor, com compra, custo, serviço, ruptura e o que pedir. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=preparo-de-negociacao) | disponível |
+| **Ata de negociação** (`ata-de-negociacao`) | Fecha a visita do fornecedor com acordos, pendências, mensagem de confirmação e o que atualizar no ERP. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=ata-de-negociacao) | disponível |
+| **Plano de ofertas** (`plano-de-ofertas`) | Monta a semana de ofertas, com itens por papel, preço, margem, verba, canais e como medir. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=plano-de-ofertas) | disponível |
+| **Comunicação de ofertas** (`comunicacao-de-ofertas`) | Escreve os textos da oferta por canal, no tom da loja, com período, condições e regras. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=comunicacao-de-ofertas) | disponível |
 <!-- skills:end -->
 
 As calculadoras vão além do site:
@@ -64,6 +71,22 @@ As calculadoras vão além do site:
 - **Mais personalizada.** Lê a convenção coletiva ou o extrato da operadora que você mandar e calcula várias lojas de uma rede.
 - **Mais atualizada.** Antes de calcular, pode pesquisar novidades em fontes oficiais e dizer de onde tirou cada informação.
 - **Mesma conta.** O script de cada skill porta a conta da calculadora e é conferido por testes com os exemplos da metodologia.
+
+## Rotinas do dia
+
+Sete skills organizam o plugin pelo dia de quem toca o supermercado. Elas usam as consultas e as provas dos relatórios, então o número é o mesmo nos dois lugares.
+
+| Grupo | Skill | Pergunta que responde |
+|---|---|---|
+| Seu dia | `perfil-da-operacao` | O que você consegue ver da minha operação e por onde começo? |
+| Seu dia | `briefing-do-dia` | Como está o dia? |
+| Seu dia | `sinais-da-operacao` | O que mudou e merece atenção? |
+| Fornecedores | `preparo-de-negociacao` | O fornecedor chega às 14h, me prepara. |
+| Fornecedores | `ata-de-negociacao` | Fecha a visita. |
+| Ofertas | `plano-de-ofertas` | Monta a semana de ofertas. |
+| Ofertas | `comunicacao-de-ofertas` | Escreve a comunicação dessa oferta. |
+
+As rotinas leem o ERP conectado ou um arquivo exportado, e a agenda e o e-mail quando estão conectados. Nada é escrito no ERP: o que precisa mudar vira uma lista para você fazer. E-mail sai como rascunho, WhatsApp sai como texto pronto para colar, e o que nasce de um e-mail ou de uma transcrição é mostrado antes de sair. As regras de oferta são apoio para conferência, não parecer jurídico.
 
 ## Relatórios e painel
 
@@ -180,6 +203,20 @@ Skill: Você paga R$ 1.576,67 por mês acima do permitido, ou R$ 18.920,00 por a
 Padaria de exemplo: Alelo, Pluxee, Ticket e VR, com o dinheiro a 2% ao mês. Veja [como calculamos](core/cd2-super/skills/custo-vrva/references/metodologia.md).
 
 Outros pedidos que a skill entende: *"monta a escala da loja com 2 folgas"*, *"calcula as 4 lojas da rede"*, *"a Ticket pode me cobrar 6%?"*, *"me dá um resumo para mandar no WhatsApp"*.
+
+### Briefing do dia
+
+```
+Você:  como está o dia?
+
+Skill: Ontem a Loja 1 vendeu R$ 12.400,00, 6% acima do mesmo dia da
+       semana anterior. No mês, está em 95% da meta até o dia 8.
+
+       Três coisas para hoje: 4 itens A sem saldo, R$ 18.200,00 a pagar
+       e a visita da distribuidora às 14h.
+
+       Não vi: contas a receber. Conferido só contra o arquivo.
+```
 
 ## Instalação
 

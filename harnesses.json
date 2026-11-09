@@ -44,6 +44,12 @@
         ],
         "ficha": [
           "sql"
+        ],
+        "rotina": [
+          "sql",
+          "dados",
+          "relatorio",
+          "rotina"
         ]
       }
     }

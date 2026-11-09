@@ -77,7 +77,7 @@ Se uma conferência não fechar, a página abre em vermelho com a diferença, an
 
 ## Blocos
 
-Aparecem na ordem da lista. Todos têm `tipo`, `titulo` e `nota` opcional.
+Aparecem na ordem da lista. Todos têm `tipo`, `titulo` e `nota` opcional. Todos aceitam também `origem_texto`, opcional: o texto simples que diz de onde veio o bloco, completo e sem link inventado, como "De: venda por dia, banco Exemplo, 01/11 a 08/11". O script imprime como veio.
 
 ### `tabela`
 
@@ -129,6 +129,20 @@ Calcula a participação de cada linha. `var_pct` é opcional. `melhor: "baixa"`
 ```
 
 Serve para Kardex, fluxo de caixa e resultado. Valor de saída vai negativo.
+
+### `agenda`, `acordos` e `pendencias`
+
+Blocos de texto das rotinas. Todos têm a lista `itens`; lista vazia sai como "Sem itens neste recorte".
+
+```json
+{ "tipo": "agenda", "titulo": "Agenda de hoje", "itens": [ { "hora": "14:00", "titulo": "Visita da Distribuidora Exemplo", "detalhe": "Comprador da mercearia" } ] }
+{ "tipo": "acordos", "titulo": "Acordos", "itens": [ { "tema": "Preço", "texto": "Arroz 5 kg congelado até 31/12", "trecho": "seguro o preço do arroz até o fim do ano" } ] }
+{ "tipo": "pendencias", "titulo": "Pendências", "itens": [ { "texto": "Enviar a verba de aniversário", "dono": "Comprador", "data": "14/11/2026" } ] }
+```
+
+Em `agenda`, `detalhe` é opcional. Em `acordos`, `trecho` é obrigatório: o que foi dito ou anotado, para a pessoa conferir. O script recusa acordo sem trecho, mas não compara o trecho com a transcrição. Em `pendencias`, `dono` e `data` são obrigatórios.
+
+Na ata, `origem` é `arquivo` ou `digitado`, então o selo é "Conferido só contra o arquivo". A conferência é por verificação, como `{ "nome": "Todo acordo traz o trecho de origem", "fechou": true, "detalhe": "6 de 6" }`.
 
 ## Saídas
 
