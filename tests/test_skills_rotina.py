@@ -67,7 +67,8 @@ class KitRotina(unittest.TestCase):
         self.assertIn("não grava nada", texto_kit("perfil-da-operacao.md"))
 
 
-ROTINAS = {"perfil-da-operacao", "briefing-do-dia", "preparo-de-negociacao", "ata-de-negociacao"}
+ROTINAS = {"perfil-da-operacao", "briefing-do-dia", "preparo-de-negociacao", "ata-de-negociacao",
+           "plano-de-ofertas", "comunicacao-de-ofertas"}
 
 
 def skill_md(nome):
@@ -149,6 +150,41 @@ class Fornecedores(unittest.TestCase):
 
     def test_ata_sem_reaproveita(self):
         self.assertNotIn("reaproveita", item("ata-de-negociacao"))
+
+
+class Ofertas(unittest.TestCase):
+    def test_regras_tem_data_e_fontes(self):
+        regras = texto_kit("regras-de-oferta.md")
+        self.assertIn("Data de conferência:", regras)
+        self.assertGreaterEqual(regras.count("planalto.gov.br"), 6)
+
+    def test_regras_marcam_premissa(self):
+        self.assertIn("Premissa", texto_kit("regras-de-oferta.md"))
+
+    def test_regras_citam_produtos_restritos(self):
+        regras = texto_kit("regras-de-oferta.md")
+        for trecho in ("fórmula", "mamadeira", "bebida alcoólica", "cigarro"):
+            self.assertIn(trecho, regras.lower())
+
+    def test_comunicacao_pergunta_novidades(self):
+        self.assertIn("uso o que sei ou pesquiso novidades?", skill_md("comunicacao-de-ofertas"))
+
+    def test_comunicacao_traz_aviso(self):
+        texto = skill_md("comunicacao-de-ofertas")
+        self.assertIn("não é parecer jurídico", texto)
+        self.assertIn("quem publica responde pela oferta", texto)
+
+    def test_comunicacao_usa_as_regras(self):
+        self.assertIn("`references/regras-de-oferta.md`", skill_md("comunicacao-de-ofertas"))
+
+    def test_plano_discrimina_relatorio_precos(self):
+        self.assertIn("relatorio-precos", skill_md("plano-de-ofertas"))
+
+    def test_plano_reaproveita(self):
+        self.assertEqual(set(item("plano-de-ofertas")["reaproveita"]), {"relatorio-precos", "relatorio-vendas"})
+
+    def test_comunicacao_sem_reaproveita(self):
+        self.assertNotIn("reaproveita", item("comunicacao-de-ofertas"))
 
 
 if __name__ == "__main__":

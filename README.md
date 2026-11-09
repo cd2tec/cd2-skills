@@ -61,6 +61,8 @@ Quem toca supermercado, padaria ou mercado de bairro não tem tempo para juridiq
 | **Briefing do dia** (`briefing-do-dia`) | Monta o briefing da manhã, com venda contra a meta, ruptura, validade, contas, agenda e três ações. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=briefing-do-dia) | disponível |
 | **Preparo de negociação** (`preparo-de-negociacao`) | Prepara a visita de um fornecedor, com compra, custo, serviço, ruptura e o que pedir. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=preparo-de-negociacao) | disponível |
 | **Ata de negociação** (`ata-de-negociacao`) | Fecha a visita do fornecedor com acordos, pendências, mensagem de confirmação e o que atualizar no ERP. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=ata-de-negociacao) | disponível |
+| **Plano de ofertas** (`plano-de-ofertas`) | Monta a semana de ofertas, com itens por papel, preço, margem, verba, canais e como medir. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=plano-de-ofertas) | disponível |
+| **Comunicação de ofertas** (`comunicacao-de-ofertas`) | Escreve os textos da oferta por canal, no tom da loja, com período, condições e regras. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=comunicacao-de-ofertas) | disponível |
 <!-- skills:end -->
 
 As calculadoras vão além do site:

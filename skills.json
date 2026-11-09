@@ -168,5 +168,29 @@
     "status": "disponível",
     "tipo": "rotina",
     "gpt": false
+  },
+  {
+    "name": "plano-de-ofertas",
+    "title": "Plano de ofertas",
+    "summary": "Monta a semana de ofertas, com itens por papel, preço, margem, verba, canais e como medir.",
+    "site_url": "https://archeo.cd2.com.br/",
+    "rule": "",
+    "status": "disponível",
+    "tipo": "rotina",
+    "gpt": false,
+    "reaproveita": [
+      "relatorio-precos",
+      "relatorio-vendas"
+    ]
+  },
+  {
+    "name": "comunicacao-de-ofertas",
+    "title": "Comunicação de ofertas",
+    "summary": "Escreve os textos da oferta por canal, no tom da loja, com período, condições e regras.",
+    "site_url": "https://archeo.cd2.com.br/",
+    "rule": "",
+    "status": "disponível",
+    "tipo": "rotina",
+    "gpt": false
   }
 ]
