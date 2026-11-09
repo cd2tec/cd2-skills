@@ -12,8 +12,8 @@ import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-SKILL = ROOT / "core" / "cd2-varejo" / "skills" / "fim-escala-6x1"
-sys.path.insert(0, str(ROOT / "core" / "cd2-varejo" / "shared" / "scripts"))
+SKILL = ROOT / "core" / "cd2-super" / "skills" / "fim-escala-6x1"
+sys.path.insert(0, str(ROOT / "core" / "cd2-super" / "shared" / "scripts"))
 sys.path.insert(0, str(SKILL / "scripts"))
 
 import calc  # noqa: E402

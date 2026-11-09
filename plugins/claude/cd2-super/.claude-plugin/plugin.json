@@ -1,0 +1,28 @@
+{
+  "name": "cd2-super",
+  "version": "0.3.0",
+  "description": "Skills da CD2 Tech para o varejo alimentar: calculadoras fim-escala-6x1 e custo-vrva; relatórios gerenciais relatorio-vendas, relatorio-estoque, relatorio-compras, relatorio-precos, relatorio-perdas, relatorio-financeiro, relatorio-fiscal e relatorio-contabil; painel-varejo; e ficha-archeo-mcp para o Archeo MCP Creator da CD2. Os relatórios e o painel funcionam conectados ao ERP ou com arquivo exportado.",
+  "author": {
+    "name": "CD2 Tech",
+    "url": "https://cd2.com.br"
+  },
+  "keywords": [
+    "cd2",
+    "varejo",
+    "supermercado",
+    "escala-6x1",
+    "jornada",
+    "vale-refeicao",
+    "vale-alimentacao",
+    "calculadora",
+    "relatorio",
+    "painel",
+    "curva-abc",
+    "estoque",
+    "erp",
+    "archeo"
+  ],
+  "homepage": "https://cd2tec.github.io/super/",
+  "repository": "https://github.com/cd2tec/super",
+  "license": "CC-BY-NC-ND-4.0"
+}

@@ -7,7 +7,7 @@ Um GPT por skill, para quem usa o ChatGPT Plus ou o gratuito. A GPT Store não t
 | [`fim-escala-6x1/`](fim-escala-6x1/) | CD2 Escala 6x1 |
 | [`custo-vrva/`](custo-vrva/) | CD2 VR/VA: quanto custa |
 
-> As pastas dos GPTs e os arquivos `LICENSE`, `NOTICE` e `COMMERCIAL.md` daqui são **gerados** por `python3 scripts/sync_plugins.py` a partir de `core/cd2-varejo/` (as instruções vêm de `core/cd2-varejo/gpts/`). Não edite aqui: edite lá e rode o sync. Só este README é escrito à mão.
+> As pastas dos GPTs e os arquivos `LICENSE`, `NOTICE` e `COMMERCIAL.md` daqui são **gerados** por `python3 scripts/sync_plugins.py` a partir de `core/cd2-super/` (as instruções vêm de `core/cd2-super/gpts/`). Não edite aqui: edite lá e rode o sync. Só este README é escrito à mão.
 
 Em cada pasta:
 
@@ -58,7 +58,7 @@ Se o editor recusar algum arquivo:
 
 ## Atualizar a cada release
 
-1. Baixe o `cd2-varejo-gpts.zip` da release nova em https://github.com/cd2tec/cd2-skills/releases/latest e descompacte.
+1. Baixe o `cd2-super-gpts.zip` da release nova em https://github.com/cd2tec/super/releases/latest e descompacte.
 2. Para cada GPT, abra o editor em **Configure**:
    - substitua o texto de **Instructions** pelo `instructions.md` novo, inteiro;
    - em **Knowledge**, apague todos os arquivos antigos e suba de novo todos os de `knowledge/`. Arquivo velho esquecido faz o GPT rodar script de outra versão;

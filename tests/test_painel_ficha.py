@@ -13,9 +13,9 @@ ROOT = Path(__file__).resolve().parent.parent
 # Nomes do repositório e das skills antigas, em rot13 para este arquivo não carregar o que ele procura.
 NOMES_ANTIGOS = tuple(codecs.decode(s, "rot13") for s in (
     "nepurb-unearff", "nanylmr-zpc", "ohvyq-zpc-qnfuobneq", "fcrp-zpc-gbby", "Ergnvy Grpu"))
-CORE = ROOT / "core/cd2-varejo/skills"
-PAINEL = ROOT / "plugins/claude/cd2-varejo/skills/painel-varejo"
-FICHA = ROOT / "plugins/claude/cd2-varejo/skills/ficha-archeo-mcp"
+CORE = ROOT / "core/cd2-super/skills"
+PAINEL = ROOT / "plugins/claude/cd2-super/skills/painel-varejo"
+FICHA = ROOT / "plugins/claude/cd2-super/skills/ficha-archeo-mcp"
 BUILD = PAINEL / "scripts/build_dashboard.py"
 PREVIEW = PAINEL / "scripts/preview_dashboard.py"
 

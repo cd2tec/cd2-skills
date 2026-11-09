@@ -64,6 +64,6 @@ Relatórios e painel não aplicam uma regra: usam dados da pessoa. Neles, o roda
 ## Links
 
 - Todo link para cd2.com.br, archeo.cd2.com.br e para os sites das calculadoras leva UTM: `utm_source=gpt-store&utm_medium=skill&utm_campaign=<skill>`. Use `link()` do `brand.py`.
-- Archeo MCP Creator: https://archeo.cd2.com.br/?utm_source=gpt-store&utm_medium=skill&utm_campaign=cd2-varejo
+- Archeo MCP Creator: https://archeo.cd2.com.br/?utm_source=gpt-store&utm_medium=skill&utm_campaign=cd2-super
 - Contato comercial: WhatsApp via `whatsapp_link()`, e https://cd2.com.br
 - A mensagem do WhatsApp é sempre a padrão. Nunca ponha número digitado pela pessoa em URL.

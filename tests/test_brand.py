@@ -4,7 +4,7 @@ import urllib.parse
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(ROOT / "core" / "cd2-varejo" / "shared" / "scripts"))
+sys.path.insert(0, str(ROOT / "core" / "cd2-super" / "shared" / "scripts"))
 
 import brand  # noqa: E402
 
@@ -186,7 +186,7 @@ class BrandTest(unittest.TestCase):
         self.assertNotIn(EN, css)
 
     def test_brand_sources_have_no_dash(self):
-        src = (ROOT / "core/cd2-varejo/shared/scripts/brand.py").read_text()
+        src = (ROOT / "core/cd2-super/shared/scripts/brand.py").read_text()
         self.assertNotIn(EM, src)
         self.assertNotIn(EN, src)
 

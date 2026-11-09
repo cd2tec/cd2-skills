@@ -1,14 +1,14 @@
 {
-  "name": "cd2-skills",
+  "name": "super",
   "interface": {
-    "displayName": "CD2 Skills (CD2 Tech)"
+    "displayName": "Super (CD2 Tech)"
   },
   "plugins": [
     {
-      "name": "cd2-varejo",
+      "name": "cd2-super",
       "source": {
         "source": "local",
-        "path": "./plugins/codex/cd2-varejo"
+        "path": "./plugins/codex/cd2-super"
       },
       "policy": {
         "installation": "AVAILABLE",

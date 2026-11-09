@@ -17,8 +17,8 @@ import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-SKILL = ROOT / "core" / "cd2-varejo" / "skills" / "custo-vrva"
-SHARED = ROOT / "core" / "cd2-varejo" / "shared" / "scripts"
+SKILL = ROOT / "core" / "cd2-super" / "skills" / "custo-vrva"
+SHARED = ROOT / "core" / "cd2-super" / "shared" / "scripts"
 if str(SHARED) not in sys.path:
     sys.path.insert(0, str(SHARED))
 

@@ -14,8 +14,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 PERSON = codecs.decode("Tnoevry", "rot13")  # nome próprio que nenhum arquivo pode citar
-SKILL = ROOT / "core" / "cd2-varejo" / "skills" / "custo-vrva"
-SHARED = ROOT / "core" / "cd2-varejo" / "shared" / "scripts"
+SKILL = ROOT / "core" / "cd2-super" / "skills" / "custo-vrva"
+SHARED = ROOT / "core" / "cd2-super" / "shared" / "scripts"
 if str(SHARED) not in sys.path:
     sys.path.insert(0, str(SHARED))
 
@@ -469,8 +469,8 @@ class SkillDocTest(unittest.TestCase):
         for ref in ("references/fluxo-conversa.md", "references/marca.md", "references/metodologia.md",
                     "references/bandeiras.md", "references/legal-params.json", "scripts/calc.py", "scripts/render.py"):
             self.assertIn(ref, text)
-        shared = ROOT / "core" / "cd2-varejo" / "shared"
-        kit = ROOT / "core" / "cd2-varejo" / "kits" / "calculadora"
+        shared = ROOT / "core" / "cd2-super" / "shared"
+        kit = ROOT / "core" / "cd2-super" / "kits" / "calculadora"
         for ref in re.findall(r"`((?:references|scripts|assets)/[^`]+)`", text):
             self.assertTrue((SKILL / ref).exists() or (shared / ref).exists() or (kit / ref).exists(), ref)
 

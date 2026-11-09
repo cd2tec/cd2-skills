@@ -111,10 +111,10 @@ class RepoTest(unittest.TestCase):
             self.assertNotIn("apache", text.lower(), rel)
 
     def test_json_files_parse(self):
-        core = json.loads(read("core/cd2-varejo/plugin.core.json"))
+        core = json.loads(read("core/cd2-super/plugin.core.json"))
         skills = json.loads(read("skills.json"))
         harnesses = json.loads(read("harnesses.json"))
-        self.assertEqual(core["version"], "0.2.1")
+        self.assertEqual(core["version"], "0.3.0")
         self.assertEqual(
             {s["name"] for s in skills},
             {
@@ -123,7 +123,7 @@ class RepoTest(unittest.TestCase):
                 "relatorio-fiscal", "relatorio-contabil", "painel-varejo", "ficha-archeo-mcp",
             },
         )
-        self.assertEqual(set(harnesses["plugins"]["cd2-varejo"]["harnesses"]), {"claude", "codex", "dsh", "gpt"})
+        self.assertEqual(set(harnesses["plugins"]["cd2-super"]["harnesses"]), {"claude", "codex", "dsh", "gpt"})
 
 
 if __name__ == "__main__":
