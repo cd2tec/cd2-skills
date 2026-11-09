@@ -9,7 +9,10 @@ ROOT = Path(__file__).resolve().parent.parent
 # Nada disto pode aparecer num arquivo público: nome de pessoa, caminho local,
 # ferramenta interna ou repositório privado das calculadoras.
 # Os nomes próprios ficam em rot13 para este arquivo não carregar o que ele procura.
-LEAKS = tuple(codecs.decode(s, "rot13") for s in ("Tnoevry", "anlnovat", "sevqnl", "pq2grp/pq2-pnyp", "nepurb-unearff-cyhtvaf")) + (
+LEAKS = tuple(codecs.decode(s, "rot13") for s in (
+    "Tnoevry", "anlnovat", "sevqnl", "pq2grp/pq2-pnyp", "nepurb-unearff-cyhtvaf",
+    "nanylmr-zpc", "ohvyq-zpc-qnfuobneq", "fcrp-zpc-gbby", "Ergnvy Grpu",
+)) + (
     "/private/tmp", "scratchpad", "claude.ai/artifact", "docs/superpowers")
 PERSON = codecs.decode("Tnoevry", "rot13")
 INTERNAL_DIRS = ("interno/", ".superpowers/", "dist/")
@@ -88,11 +91,18 @@ class RepoTest(unittest.TestCase):
                 continue  # histórico da 0.1.0 continua verdadeiro
             self.assertIsNone(LICENSE_90.search(text), rel)
 
+    def test_sem_apache(self):
+        # A licença é só a CC BY-NC-ND 4.0. A Manrope (assets/fonts) segue na OFL e fica de fora.
+        for rel, text in tracked_texts():
+            if "/fonts/" in rel or rel.endswith("OFL.txt"):
+                continue
+            self.assertNotIn("apache", text.lower(), rel)
+
     def test_json_files_parse(self):
         core = json.loads(read("core/cd2-varejo/plugin.core.json"))
         skills = json.loads(read("skills.json"))
         harnesses = json.loads(read("harnesses.json"))
-        self.assertEqual(core["version"], "0.1.0")
+        self.assertEqual(core["version"], "0.2.0")
         self.assertEqual(
             {s["name"] for s in skills},
             {

@@ -1,6 +1,6 @@
 # Instruções para agentes neste repositório
 
-Este repositório publica o plugin `cd2-varejo`, da CD2 Tech, para mais de uma plataforma: Claude Code e Claude Cowork, Codex e ChatGPT Work, DeepSeek Harness e GPT Store. Cada skill leva para dentro do assistente a conta de uma calculadora gratuita da CD2.
+Este repositório publica o plugin `cd2-varejo`, da CD2 Tech, para mais de uma plataforma: Claude Code e Claude Cowork, Codex e ChatGPT Work, DeepSeek Harness e GPT Store. São doze skills de quatro tipos: duas calculadoras (cada uma leva para dentro do assistente a conta de uma calculadora gratuita da CD2), oito relatórios gerenciais `relatorio-*`, o painel `painel-varejo` e a ficha `ficha-archeo-mcp`. Relatório não é painel: só o `painel-varejo` entrega painel visual, e as outras palavras ficam separadas nos textos.
 
 Nomes fixos: repositório `cd2tec/cd2-skills`, marketplace `cd2-skills`, plugin `cd2-varejo`. A titular é só a CD2 Tech, em todos os arquivos.
 
@@ -21,11 +21,12 @@ O CI roda o `--check` e os testes. O `--check` falha se uma cópia divergir de `
 | Caminho | O que é | Edita à mão? |
 |---|---|---|
 | `core/cd2-varejo/skills/<skill>/` | Fonte única de cada skill: `SKILL.md`, `references/`, `scripts/`, `assets/` | Sim |
-| `core/cd2-varejo/shared/` | O que vai para dentro de toda skill: `scripts/brand.py`, `references/fluxo-conversa.md`, `references/marca.md` e as logos em `assets/brand/` | Sim |
+| `core/cd2-varejo/shared/` | O que vai para dentro de toda skill: `scripts/brand.py`, `references/marca.md` e as logos em `assets/brand/` | Sim |
+| `core/cd2-varejo/kits/<kit>/` | O que vai só para as skills dos tipos que usam o kit (veja a tabela de kits abaixo). Mesma estrutura de `shared/`: `scripts/`, `references/`, `assets/` | Sim |
 | `core/cd2-varejo/gpts/` | `_preamble.md` comum e, por skill, `instructions.md` e `gpt.json` do GPT | Sim |
 | `core/cd2-varejo/plugin.core.json` | Nome e versão de referência do plugin | Sim |
-| `skills.json` | Lista das skills (nome, título, resumo, site, regra e status). Gera a tabela do README e os cards do site | Sim |
-| `harnesses.json` | Plataformas do plugin, caminho, manifesto, layout e `utm_source` de cada uma | Sim |
+| `skills.json` | Lista das skills: nome, título, resumo, site, regra, status, `tipo` e `gpt`. Gera a tabela do README e os cards do site | Sim |
+| `harnesses.json` | Plataformas do plugin (caminho, manifesto, layout e `utm_source` de cada uma) e, em `kits`, quais kits cada `tipo` recebe | Sim |
 | `plugins/<plataforma>/cd2-varejo/` (manifesto, `README.md`, no Claude o ícone `.claude-plugin/icon.png` e, no DSH, `install.py`) | Empacotamento próprio da plataforma. O ícone do Claude é cópia de `docs/assets/icon-512.png` | Sim |
 | `plugins/<plataforma>/cd2-varejo/skills/` e `gpts/<skill>/` | Cópias geradas | **Não** |
 | `gpts/README.md` | Passo a passo para publicar os GPTs | Sim |
@@ -34,19 +35,39 @@ O CI roda o `--check` e os testes. O `--check` falha se uma cópia divergir de `
 | `docs/assets/` | Logos, símbolo, ícone e a fonte Manrope do site | Sim, copiando de `core/cd2-varejo/shared/assets/brand/` |
 | `LICENSE`, `NOTICE`, `COMMERCIAL.md` | Licença CC BY-NC-ND 4.0, atribuição e licença comercial | Sim, com cuidado: valem para todos os pacotes |
 
+## Tipos de skill e kits
+
+Cada item do `skills.json` tem `tipo` e `gpt`. O `tipo` escolhe os kits que o sync soma à skill, pela tabela `kits` do `harnesses.json`. O sync acusa skill sem `tipo`, tipo sem entrada em `kits` e kit que não existe em `core/`.
+
+| `tipo` | Skills | Kits | Entrega |
+|---|---|---|---|
+| `calculadora` | `fim-escala-6x1`, `custo-vrva` | `calculadora` | A conta da calculadora gratuita, em `calc.py` e `render.py` |
+| `relatorio` | os oito `relatorio-*` | `sql`, `dados`, `relatorio` | Relatório gerencial com a prova, em `render_relatorio.py` |
+| `painel` | `painel-varejo` | `sql`, `dados` | Painel visual, em `build_dashboard.py` |
+| `ficha` | `ficha-archeo-mcp` | `sql` | Ficha de ferramenta do Archeo MCP Creator da CD2 |
+
+O que cada kit traz:
+
+- `kits/calculadora/`: o roteiro de conversa das calculadoras, `references/fluxo-conversa.md`.
+- `kits/sql/`: `references/regras-sql.md`, as regras para escrever SQL de leitura.
+- `kits/dados/`: o roteiro de conversa e o método de análise (`fluxo-dados.md`, `metodo-analise.md`), os indicadores, o mapeamento de ERP, as regras de SQLite, o carregador de arquivo `scripts/dados_arquivo.py` e a fonte Manrope.
+- `kits/relatorio/`: `scripts/render_relatorio.py`, `references/formato-relatorio.md` e `assets/relatorio-template.html`.
+
+O campo `gpt` é booleano e **vale só para calculadoras**: só as skills com `gpt: true` viram pacote de GPT, e relatório, painel e ficha ficam em `false`. O sync continua acusando GPT faltando em calculadora.
+
 ## Layouts de plataforma
 
 O campo `layout` de cada entrada em `harnesses.json` diz como o sync monta o pacote:
 
-- **`plugin`** (padrão; Claude e Codex): `skills/<skill>/` copiado do core, com o conteúdo de `shared/` somado no mesmo caminho relativo dentro de cada skill (`shared/scripts/brand.py` vai para `scripts/`, `shared/references/` para `references/` e `shared/assets/brand/` para `assets/brand/`). Cada skill fica autocontida. `LICENSE`, `NOTICE` e `COMMERCIAL.md` vão na raiz do pacote.
+- **`plugin`** (padrão; Claude e Codex): `skills/<skill>/` copiado do core, com o conteúdo de `shared/` e dos kits do tipo da skill somado no mesmo caminho relativo dentro de cada skill (`shared/scripts/brand.py` vai para `scripts/`, `shared/references/` para `references/` e `shared/assets/brand/` para `assets/brand/`). Cada skill fica autocontida. `LICENSE`, `NOTICE` e `COMMERCIAL.md` vão na raiz do pacote.
 - **`flat-skills`** (DeepSeek Harness): o mesmo conteúdo por skill, mais `LICENSE`, `NOTICE` e `COMMERCIAL.md` dentro de cada `skills/<skill>/`, porque o DSH lê cada skill solta, sem raiz de plugin. O `install.py` do pacote copia as skills para o diretório que o DSH lê.
-- **`gpt`** (GPT Store): `gpts/<skill>/instructions.md` (o `_preamble.md` mais as instruções do GPT da skill), `gpts/<skill>/gpt.json` e `gpts/<skill>/knowledge/` com a skill autocontida, menos o `SKILL.md`. O ChatGPT achata o upload numa pasta só, então nenhum arquivo do conhecimento pode repetir nome, e os scripts acham os vizinhos nos dois layouts.
+- **`gpt`** (GPT Store, só para as skills com `gpt: true`, ou seja, as calculadoras): `gpts/<skill>/instructions.md` (o `_preamble.md` mais as instruções do GPT da skill), `gpts/<skill>/gpt.json` e `gpts/<skill>/knowledge/` com a skill autocontida, menos o `SKILL.md`. O ChatGPT achata o upload numa pasta só, então nenhum arquivo do conhecimento pode repetir nome, e os scripts acham os vizinhos nos dois layouts.
 
-Um arquivo de `shared/` com o mesmo caminho de um arquivo da skill é erro: o compartilhado nunca sobrescreve o da skill.
+Um arquivo de `shared/` ou de um kit com o mesmo caminho de um arquivo da skill (ou de outro kit) é erro: o compartilhado nunca sobrescreve nada.
 
 ## Somar uma calculadora nova
 
-Cada calculadora gratuita nova da CD2 ganha uma skill aqui. Em ordem:
+Cada calculadora gratuita nova da CD2 ganha uma skill aqui. Esta lista vale só para calculadoras: relatório, painel e ficha seguem as seções abaixo. Em ordem:
 
 1. **Crie `core/cd2-varejo/skills/<nome>/`** com:
    - `SKILL.md`, com frontmatter `name` igual ao nome da pasta e `description` com as palavras que a pessoa usaria;
@@ -56,16 +77,36 @@ Cada calculadora gratuita nova da CD2 ganha uma skill aqui. Em ordem:
    - `assets/template.html` e `assets/fonts/` (Manrope e `OFL.txt`).
 2. **Escreva os testes** em `tests/test_calc_<apelido>.py` e `tests/test_render_<apelido>.py`, como os de hoje (`test_calc_6x1.py`, `test_render_vrva.py`): os valores de exemplo da metodologia e os casos do `calculator.test.ts` do site viram testes. Some o nome da skill nos testes que listam as skills (`tests/test_repo.py` e `tests/test_sync.py`).
 3. **Crie o GPT** em `core/cd2-varejo/gpts/<nome>/`: `instructions.md` (com o preâmbulo, até 8.000 caracteres) e `gpt.json` (nome, descrição, conversation starters, capacidades e `profile_picture`). Atualize a tabela do `gpts/README.md`.
-4. **Registre no `skills.json`** com nome, título, resumo, `site_url` (com barra no fim), regra e status.
+4. **Registre no `skills.json`** com nome, título, resumo, `site_url` (com barra no fim), regra, status, `"tipo": "calculadora"` e `"gpt": true`.
 5. **Atualize as descrições e as palavras-chave** dos manifestos (`plugins/*/cd2-varejo/` e os dois marketplaces) e dos READMEs dos pacotes, que citam as skills pelo nome.
 6. **Escreva a ponte** com as outras skills, quando fizer sentido: uma frase no fechamento, nunca um desvio da conversa.
 7. **Some um exemplo de conversa** no `README.md` e no `docs/index.html`, fora dos marcadores.
 8. **Rode o sync**, o `--check` e os testes. A tabela do README, os cards do site, os pacotes e os GPTs saem daí.
 9. **Suba a versão** (minor) e escreva a entrada no `CHANGELOG.md`, como em [Versão e release](#versão-e-release).
 
+## Somar um relatório novo
+
+Um relatório novo entra de dois jeitos: como seção nova de um dos oito `relatorio-*` ou, se for um assunto que nenhum cobre, como skill nova do tipo `relatorio`. Relatório não tem calculadora, GPT nem site próprio: a conta é SQL, rodada no banco conectado ou no SQLite que o `dados_arquivo.py` monta a partir do arquivo exportado.
+
+Seção nova em uma skill existente, em `core/cd2-varejo/skills/relatorio-<assunto>/references/relatorios.md`:
+
+1. Numere a seção `3.N` e escreva a pergunta que ela responde, as colunas, a consulta-modelo (em SQL Server, com marcadores `<assim>`, e dito se é **[modelo]** ou **[validado]**) e a prova obrigatória.
+2. Termine a seção com **Para exportar:** o que pedir ao ERP, em colunas lógicas (produto, loja, data, valor líquido), sem citar tela de fornecedor nenhum; as colunas mínimas; e o que fica de fora sem cada coluna opcional. Se o relatório não sai só com arquivo, diga isso e o motivo. O teste `tests/test_skills_relatorio.py` falha se uma seção `3.N` não tiver essa linha.
+3. Some a linha do relatório na tabela do `SKILL.md` (pedido, relatório, seção) e na tabela de provas.
+
+Skill nova do tipo `relatorio`:
+
+1. Crie `core/cd2-varejo/skills/relatorio-<assunto>/` com `SKILL.md` (frontmatter `name` igual à pasta e `description` que cita o arquivo exportado) e `references/relatorios.md`. Os scripts, o método, o roteiro e o template vêm dos kits `sql`, `dados` e `relatorio`; não copie nada deles para a skill e não use caminho `../`.
+2. Registre no `skills.json` com `"tipo": "relatorio"`, `"gpt": false`, `site_url` do Archeo MCP Creator da CD2 (`https://archeo.cd2.com.br/`) e `rule` vazia.
+3. No JSON da entrega, `origem` é obrigatória (`banco`, `outro-mcp`, `arquivo` ou `digitado`): é o `render_relatorio.py` que escolhe o selo. De `arquivo` e `digitado` sai "Conferido só contra o arquivo", nunca "Prova fechada".
+4. Fiscal e contábil são conferência, não documento oficial. Só eles perguntam "uso o que sei ou pesquiso novidades?".
+5. Some a skill ao conjunto esperado em `tests/test_repo.py`, atualize descrições e palavras-chave dos manifestos e marketplaces e dos READMEs dos pacotes, rode o sync, o `--check` e os testes, e suba a versão como em [Versão e release](#versão-e-release).
+
+Os nomes `relatorio-*`, `painel-varejo` e `ficha-archeo-mcp` são fixos. Nenhum arquivo cita os nomes de um repositório antigo de skills; o `tests/test_repo.py` falha se algum voltar.
+
 ## Sincronia com os sites
 
-As calculadoras ficam em repositórios privados da organização `cd2tec` no GitHub e nunca são citadas como fonte para quem usa a skill. A sincronia é manual, sem job no CI, para não exigir segredo num repositório público.
+Esta seção vale para as calculadoras. As calculadoras ficam em repositórios privados da organização `cd2tec` no GitHub e nunca são citadas como fonte para quem usa a skill. A sincronia é manual, sem job no CI, para não exigir segredo num repositório público.
 
 | Skill | Site |
 |---|---|
@@ -107,7 +148,9 @@ Cada skill mostra a data de conferência dos parâmetros, e a pergunta sobre nov
 - Português do Brasil, frases curtas, "você" para quem lê e "nós" para a CD2. Títulos em caixa normal, só a primeira letra em maiúscula.
 - Sem emoji e sem travessão (os caracteres U+2014 e U+2013). Use ponto, vírgula, dois-pontos ou parênteses. Os testes conferem isso no README, no site e nestes guias.
 - Nenhum arquivo cita pessoa física como autora ou titular: a titular é a CD2 Tech.
-- O tom do convite comercial é convite, não ameaça. Quem não é cliente está avaliando.
+- O tom do convite comercial é convite, não ameaça. Quem não é cliente está testando.
+- Ao falar do Archeo MCP Creator da CD2, use só o que as skills fazem: lê o banco todo, confere cada total no banco, os dados vêm online, a conexão só lê e cada consulta é um SELECT fixo que o servidor valida. Nunca prometa que o dado não sai da empresa.
+- Na primeira menção, "Archeo MCP Creator da CD2"; depois pode ser "MCP Creator".
 - Design system da CD2 Tech: as cores de `brand.TOKENS` em `core/cd2-varejo/shared/scripts/brand.py`, fonte Manrope com fallback `system-ui`, raios de 6, 12, 24 e 999px, marca plana (sem sombra em card), sem degradê decorativo e sem card com borda lateral de destaque. Nunca use texto `blue-sky`, `gray-solution` ou `yellow-like` sobre fundo claro.
 - Escreva as skills de forma neutra quanto à plataforma. Quando um passo depender de recurso exclusivo (artefato no Claude, busca na web, rodar código), diga isso na skill e traga a alternativa.
 

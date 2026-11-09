@@ -1,5 +1,6 @@
 """Testes do README, do site do GitHub Pages e dos guias do repositório."""
 import codecs
+import json
 import re
 import unittest
 from pathlib import Path
@@ -86,6 +87,48 @@ class ReadmeTest(unittest.TestCase):
             self.assertIn("utm_source=github&utm_medium=skill&utm_campaign=", url, url)
 
 
+    def test_readme_explica_com_e_sem_conexao(self):
+        text = read("README.md")
+        for needle in (
+            "## Relatórios e painel",
+            "Com conexão",
+            "Sem conexão",
+            "Conferido só contra o arquivo",
+            "Prova fechada",
+            "Para exportar",
+            "relatorio-vendas",
+            "painel-varejo",
+            "ficha-archeo-mcp",
+            "Archeo MCP Creator da CD2",
+        ):
+            self.assertIn(needle, text)
+        # A conexão se defende só com o que as skills fazem: lê o banco todo, confere no banco, só lê.
+        for needle in ("só lê", "SELECT", "Online"):
+            self.assertIn(needle, text)
+        self.assertNotRegex(text, r"(?i)dados? (nunca )?sa[ei]m? da (sua )?empresa|nada sai da")
+        # Relatório não é painel: o painel é uma skill só.
+        self.assertRegex(text, r"(?s)relat[óo]rios?.{0,200}painel")
+
+    def test_gpt_so_nas_calculadoras(self):
+        skills = json.loads(read("skills.json"))
+        com_gpt = {s["name"] for s in skills if s.get("gpt")}
+        self.assertEqual(com_gpt, {"fim-escala-6x1", "custo-vrva"})
+        self.assertEqual(sorted(p.name for p in (ROOT / "gpts").iterdir() if p.is_dir()), sorted(com_gpt))
+        for rel in ("README.md", "docs/index.html"):
+            text = read(rel)
+            self.assertIn("só para as duas calculadoras", text, rel)
+            self.assertNotIn("um GPT para cada skill", text, rel)
+
+    def test_teste_sem_prazo_nao_fala_em_periodo(self):
+        for rel in ("README.md", "docs/index.html", "AGENTS.md"):
+            text = read(rel)
+            self.assertNotIn("Nesse período", text, rel)
+            self.assertNotIn("está avaliando", text, rel)
+        self.assertIn("Nesse uso de teste", read("README.md"))
+        self.assertIn("Nesse uso de teste", read("docs/index.html"))
+        self.assertIn("está testando", read("AGENTS.md"))
+
+
 class ReadmeExampleTest(unittest.TestCase):
     """Os números dos exemplos de conversa saem das contas dos scripts, com os dados ao lado."""
 
@@ -125,6 +168,24 @@ class ReadmeExampleTest(unittest.TestCase):
         for needle in ("7 dias abertos, 13h por dia", "Caixa: 14 pessoas, R$ 1.900,00", "5 postos",
                        "Açougue: 6 pessoas, R$ 2.600,00", "Padaria: 5 pessoas, R$ 2.200,00", "encargos de 70%"):
             self.assertIn(needle, text)
+
+    def test_relatorio_example_abc_numbers(self):
+        # Mercearia de exemplo do README e do site: seis produtos, cortes de 80% (A) e 95% (B).
+        values = [5000, 3000, 1000, 500, 300, 200]
+        total = sum(values)
+        acc, classes = 0, {"A": [], "B": [], "C": []}
+        for v in values:
+            acc += v
+            classes["A" if acc / total <= 0.80 else "B" if acc / total <= 0.95 else "C"].append(v)
+        self.assertEqual({k: len(v) for k, v in classes.items()}, {"A": 2, "B": 2, "C": 2})
+        self.assertEqual(sum(classes["A"]), 8000)
+        self.assertEqual(round(100 * sum(classes["B"]) / total), 15)
+        self.assertEqual(round(100 * sum(classes["C"]) / total), 5)
+        for rel in ("README.md", "docs/index.html"):
+            text = read(rel)
+            self.assertIn("Dois produtos fazem 80% da venda: R$ 8.000,00 de R$ 10.000,00", text, rel)
+            self.assertIn("mais dois, com 15%", text, rel)
+            self.assertIn("R$ 5.000,00, R$ 3.000,00, R$ 1.000,00, R$ 500,00, R$ 300,00 e R$ 200,00", text, rel)
 
     def test_vrva_example_annual_with_cents(self):
         calc = self.load("custo-vrva")
@@ -199,6 +260,28 @@ class SiteTest(unittest.TestCase):
         # Marca plana: sem sombra e sem degradê.
         self.assertNotIn("box-shadow", self.html.replace("box-shadow: none", ""))
         self.assertNotIn("gradient", self.html)
+
+    def test_site_tem_secao_de_relatorios(self):
+        html = self.html
+        self.assertIn('id="relatorios"', html)
+        self.assertIn('href="#relatorios"', html)
+        section = html.split('id="relatorios"', 1)[1].split("</section>", 1)[0]
+        for skill in ("relatorio-vendas", "relatorio-estoque", "relatorio-compras", "relatorio-precos",
+                      "relatorio-perdas", "relatorio-financeiro", "relatorio-fiscal", "relatorio-contabil",
+                      "painel-varejo", "ficha-archeo-mcp"):
+            self.assertIn(skill, section, skill)
+        for needle in ("Com conexão", "Sem conexão", "Conferido só contra o arquivo", "Prova fechada",
+                       "só lê", "SELECT", "Online", "Archeo MCP Creator da CD2"):
+            self.assertIn(needle, section, needle)
+        self.assertRegex(section, r'class="chat"')
+        # O hero e os fatos falam das doze skills, não de duas.
+        self.assertNotIn('<span class="stat">2</span>', html)
+        self.assertIn('<span class="stat">12</span>', html)
+        self.assertNotRegex(html, r"(?i)dados? (nunca )?sa[ei]m? da (sua )?empresa|nada sai da")
+        # Os cards gerados mostram as doze e não fingem calculadora nos relatórios.
+        block = html.split("<!-- skills:start -->")[1].split("<!-- skills:end -->")[0]
+        self.assertEqual(block.count('class="skill-card"'), 12)
+        self.assertEqual(block.count("Abrir a calculadora gratuita"), 2)
 
     def test_site_contact_and_utm(self):
         urls = [u.replace("&amp;", "&") for u in urls_in(self.html)]
@@ -327,11 +410,22 @@ class GuidesTest(unittest.TestCase):
             "core/",
             "flat-skills",
             "Somar uma calculadora nova",
+            "Somar um relatório novo",
+            "kits/",
+            "Para exportar",
+            "harnesses.json",
             "Sincronia com os sites",
             "utm_source",
             "plugin.core.json",
             "CHANGELOG.md",
         ):
+            self.assertIn(needle, text)
+
+    def test_agents_md_descreve_tipos_e_kits(self):
+        text = read("AGENTS.md")
+        for needle in ("`tipo`", "`gpt`", "`kits`", "calculadora", "relatorio", "painel", "ficha",
+                       "kits/sql", "kits/dados", "kits/relatorio", "kits/calculadora",
+                       "vale só para calculadoras"):
             self.assertIn(needle, text)
 
     def test_claude_md_points_to_agents(self):
@@ -341,6 +435,14 @@ class GuidesTest(unittest.TestCase):
         text = read("CHANGELOG.md")
         self.assertIn("## 0.1.0", text)
         self.assertIn("2026-11-07", text)
+
+    def test_changelog_0_2_0(self):
+        text = read("CHANGELOG.md")
+        self.assertLess(text.index("## 0.2.0"), text.index("## 0.1.0"))
+        section = text.split("## 0.2.0", 1)[1].split("## 0.1.0", 1)[0]
+        for needle in ("relatorio-vendas", "painel-varejo", "ficha-archeo-mcp", "sem conexão", "sem prazo",
+                       "nomes novos"):
+            self.assertIn(needle, section, needle)
 
 
 if __name__ == "__main__":

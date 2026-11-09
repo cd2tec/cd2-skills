@@ -1,7 +1,7 @@
 {
   "name": "cd2-varejo",
-  "version": "0.1.0",
-  "description": "Skills da CD2 Tech para o varejo alimentar brasileiro: fim-escala-6x1 calcula o impacto do fim da escala 6x1 (EC 141/2026) na folha e na operação da loja; custo-vrva mostra quanto o VR e o VA custam de verdade frente ao Decreto 12.712/2025. Calculadoras gerenciais para decidir com números.",
+  "version": "0.2.0",
+  "description": "Skills da CD2 Tech para o varejo alimentar brasileiro: duas calculadoras (fim-escala-6x1 mostra o impacto do fim da escala 6x1, EC 141/2026, na folha e na operação; custo-vrva mostra quanto o VR e o VA custam de verdade frente ao Decreto 12.712/2025), oito relatórios gerenciais com a conta conferida (relatorio-vendas, relatorio-estoque, relatorio-compras, relatorio-precos, relatorio-perdas, relatorio-financeiro, relatorio-fiscal e relatorio-contabil), o painel visual painel-varejo e a ficha-archeo-mcp para o Archeo MCP Creator da CD2. Os relatórios e o painel funcionam conectados ao ERP ou com um arquivo exportado.",
   "author": {
     "name": "CD2 Tech",
     "url": "https://cd2.com.br"
@@ -14,7 +14,13 @@
     "jornada",
     "vale-refeicao",
     "vale-alimentacao",
-    "calculadora"
+    "calculadora",
+    "relatorio",
+    "painel",
+    "curva-abc",
+    "estoque",
+    "erp",
+    "archeo"
   ],
   "homepage": "https://cd2tec.github.io/cd2-skills/",
   "repository": "https://github.com/cd2tec/cd2-skills",

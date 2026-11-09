@@ -245,11 +245,19 @@ class SyncTest(unittest.TestCase):
         for path in manifests:
             meta = json.loads(path.read_text(encoding="utf-8"))
             self.assertEqual(meta["name"], PLUGIN, path)
-            self.assertEqual(meta["version"], "0.1.0", path)
+            self.assertEqual(meta["version"], "0.2.0", path)
             self.assertEqual(meta["license"], "CC-BY-NC-ND-4.0", path)
             self.assertEqual(meta["author"], {"name": "CD2 Tech", "url": "https://cd2.com.br"}, path)
             self.assertEqual(meta["homepage"], "https://cd2tec.github.io/cd2-skills/", path)
             self.assertEqual(meta["repository"], "https://github.com/cd2tec/cd2-skills", path)
+        # Manifestos e marketplace falam dos relatórios, do painel e da ficha, e não só das calculadoras.
+        claude_entry = json.loads((ROOT / ".claude-plugin" / "marketplace.json").read_text(encoding="utf-8"))["plugins"][0]
+        for meta in [json.loads(p.read_text(encoding="utf-8")) for p in manifests] + [claude_entry]:
+            self.assertIn("relatorio-", meta["description"])
+            self.assertIn("painel-varejo", meta["description"])
+            self.assertIn("ficha-archeo-mcp", meta["description"])
+            self.assertIn("relatorio", meta["keywords"])
+            self.assertIn("painel", meta["keywords"])
         codex = json.loads(manifests[1].read_text(encoding="utf-8"))["extensions"]["com.openai"]["interface"]
         self.assertEqual(codex["displayName"], "CD2 Varejo")
         self.assertEqual(codex["developerName"], "CD2 Tech")
@@ -429,7 +437,7 @@ class PackageTest(unittest.TestCase):
             )
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
             for harness in ("claude", "codex", "dsh", "gpts"):
-                for name in (f"{PLUGIN}-{harness}.zip", f"{PLUGIN}-{harness}-0.1.0.zip"):
+                for name in (f"{PLUGIN}-{harness}.zip", f"{PLUGIN}-{harness}-0.2.0.zip"):
                     path = out / name
                     self.assertTrue(path.is_file(), name)
                     with zipfile.ZipFile(path) as zf:

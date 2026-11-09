@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>CD2 Skills para o varejo · CD2 Tech</title>
-<meta name="description" content="Plugin cd2-varejo da CD2 Tech: skills de IA para supermercados, padarias e redes do varejo alimentar. Calcula o impacto do fim da escala 6x1 e o custo real do VR/VA com os números da sua loja. Claude Code, Claude Cowork, Codex, ChatGPT Work e DeepSeek Harness, e em breve na GPT Store.">
+<meta name="description" content="Plugin cd2-varejo da CD2 Tech: skills de IA para supermercados, padarias e redes do varejo alimentar. Calcula o impacto do fim da escala 6x1 e o custo real do VR/VA, gera relatórios gerenciais e um painel de varejo com o banco do ERP conectado ou com um arquivo exportado. Claude Code, Claude Cowork, Codex, ChatGPT Work e DeepSeek Harness, e em breve na GPT Store.">
 <meta property="og:title" content="CD2 Skills para o varejo · CD2 Tech">
-<meta property="og:description" content="Skills de IA para o varejo, de graça para testar. A conta da calculadora gratuita da CD2, com os números da sua loja.">
+<meta property="og:description" content="Skills de IA para o varejo, de graça para testar. Calculadoras, relatórios e painel com a conta conferida, com os números da sua loja.">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="pt_BR">
 <meta property="og:url" content="https://cd2tec.github.io/cd2-skills/">
@@ -191,6 +191,17 @@
   .facts > li { min-width: 0; }
   @media (min-width: 768px) { .facts { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-8); } }
 
+  /* Relatórios e painel: dois modos (com e sem conexão) e três motivos para conectar */
+  .modes .block h3, .reasons .block h3 { font: 700 22px/28px var(--font); }
+  .modes .block p, .modes .block li, .reasons .block p { font-size: 15px; line-height: 23px; }
+  .modes ul { padding-left: 1.2em; display: grid; gap: var(--space-2); }
+  .modes, .reasons, .report-kinds { margin-top: var(--space-6); }
+  .report-kinds code { overflow-wrap: anywhere; }
+  .export-note { margin-top: var(--space-4); max-width: 70ch; }
+  .why-head { margin-top: var(--space-12); margin-bottom: var(--space-6); }
+  .why-actions { margin-top: var(--space-6); }
+  .chat-one { max-width: 640px; }
+
   /* Blocos de conexão */
   .block { display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-6); border-radius: var(--radius-lg); min-width: 0; }
   .block--deep { background: var(--blue-experience); color: var(--white-human); }
@@ -339,6 +350,7 @@
     </a>
     <nav aria-label="Principal">
       <a class="link" href="#skills">Skills</a>
+      <a class="link" href="#relatorios">Relatórios e painel</a>
       <a class="link" href="#como-funciona">Como funciona</a>
       <a class="link" href="#instalar">Instalar</a>
       <a class="link" href="#licenca">Licença</a>
@@ -353,7 +365,7 @@
     <div class="wrap">
       <span class="eyebrow">Plugin cd2-varejo · CD2 Tech</span>
       <h1 class="display-xl">Skills de IA para o varejo, <em>de graça para testar</em></h1>
-      <p class="body-lg">A conta das calculadoras gratuitas da CD2, agora dentro do assistente de IA que você já usa. A skill entende a sua loja, faz a conta com os seus números e entrega o que fazer primeiro, com a marca CD2 Tech.</p>
+      <p class="body-lg">A conta das calculadoras gratuitas da CD2, mais relatórios e um painel do seu ERP, dentro do assistente de IA que você já usa. A skill entende a sua loja, faz a conta com os seus números e entrega o que fazer primeiro, com a marca CD2 Tech.</p>
       <div class="actions">
         <a class="btn btn--primary" href="#instalar">Instalar o plugin</a>
         <a class="btn btn--secondary" href="#skills">Ver as skills</a>
@@ -362,7 +374,7 @@
         <li>Claude Code</li><li>Claude Cowork</li><li>Codex</li><li>ChatGPT Work</li><li>DeepSeek Harness</li><li>GPT Store em breve</li>
       </ul>
       <ul class="facts">
-        <li class="block block--deep notch-tr"><span class="stat">2</span><span class="stat-line">skills prontas, uma para cada calculadora gratuita da CD2</span></li>
+        <li class="block block--deep notch-tr"><span class="stat">12</span><span class="stat-line">skills prontas: duas calculadoras gratuitas da CD2, oito relatórios, um painel e uma ficha</span></li>
         <li class="block block--deep"><span class="stat">5</span><span class="stat-line">plataformas a partir de uma fonte só, e a GPT Store em breve</span></li>
         <li class="block block--accent notch-bl"><span class="stat">Sem prazo</span><span class="stat-line">para testar na operação da sua empresa</span></li>
       </ul>
@@ -397,8 +409,8 @@
     <div class="wrap">
       <div class="section-head">
         <span class="eyebrow">As skills</span>
-        <h2 class="heading-md">Uma skill para cada calculadora gratuita da CD2</h2>
-        <p>A mesma conta do site, com os números da sua loja. Mais personalizada, porque lê a sua convenção coletiva ou o extrato da operadora e soma várias lojas. Mais atualizada, porque pode pesquisar novidades antes de calcular.</p>
+        <h2 class="heading-md">Duas calculadoras, oito relatórios, um painel e uma ficha</h2>
+        <p>As duas calculadoras têm a mesma conta do site gratuito da CD2, com os números da sua loja: leem a sua convenção coletiva ou o extrato da operadora, somam várias lojas e podem pesquisar novidades antes de calcular. Os relatórios, o painel e a ficha trabalham com os dados do seu sistema, como mostra a próxima seção.</p>
       </div>
 <!-- skills:start -->
 <div class="skills-grid">
@@ -500,6 +512,96 @@
               <p class="s"><b>Skill</b>Você paga R$ 1.576,67 por mês acima do permitido, ou R$ 18.920,00 por ano. São R$ 1.110,00 de taxa acima do teto e R$ 466,67 de custo do dinheiro parado. A Alelo é a que mais pesa: comece por ela.</p>
             </div>
             <p class="chat__foot">Padaria de exemplo: Alelo, Pluxee, Ticket e VR, dinheiro a 2% ao mês. <a href="https://github.com/cd2tec/cd2-skills/blob/main/core/cd2-varejo/skills/custo-vrva/references/metodologia.md">Como calculamos</a></p>
+          </article>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="relatorios">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">Relatórios e painel</span>
+        <h2 class="heading-md">Com o banco do ERP conectado ou com um arquivo exportado</h2>
+        <p>Dez skills trabalham com os dados do seu sistema. Relatório não é painel, e as skills têm nomes diferentes de propósito. Cada conta é conferida: a soma das partes tem de bater com o total, e, se não bater, a página abre em vermelho.</p>
+      </div>
+      <div class="grid g3 report-kinds">
+        <article class="block block--raised notch-tr">
+          <span class="eyebrow">Oito relatórios</span>
+          <h3>Relatórios gerenciais</h3>
+          <p>Com linhas, classes e a prova da conta, para decidir: <code>relatorio-vendas</code>, <code>relatorio-estoque</code>, <code>relatorio-compras</code>, <code>relatorio-precos</code>, <code>relatorio-perdas</code>, <code>relatorio-financeiro</code>, <code>relatorio-fiscal</code> e <code>relatorio-contabil</code>. O fiscal e o contábil conferem documentos e lançamentos como relatório gerencial, não como documento ou escrituração oficial.</p>
+        </article>
+        <article class="block block--raised">
+          <span class="eyebrow">Um painel</span>
+          <h3>Painel de varejo</h3>
+          <p><code>painel-varejo</code> mostra a operação de relance: totalizadores, linha do tempo, mapa de calor e a leitura do que olhar primeiro.</p>
+        </article>
+        <article class="block block--raised notch-bl">
+          <span class="eyebrow">Uma ficha</span>
+          <h3>Ficha de ferramenta</h3>
+          <p><code>ficha-archeo-mcp</code> prepara a ficha de uma consulta que vale repetir, com nome, descrição, SQL e parâmetros, para cadastrar no Archeo MCP Creator da CD2.</p>
+        </article>
+      </div>
+
+      <div class="grid g2 modes">
+        <article class="block block--raised notch-tr">
+          <span class="eyebrow">Dados do banco</span>
+          <h3>Com conexão</h3>
+          <ul>
+            <li>Os dados vêm do banco do ERP, pelo Archeo MCP Creator da CD2 ou por outro MCP de dados da sessão.</li>
+            <li>A conta é uma consulta no banco, e a prova fecha no próprio banco: selo "Prova fechada".</li>
+            <li>O painel sai como foto do período, ao vivo ou agendado.</li>
+            <li>A ficha explora e valida o SQL no banco.</li>
+          </ul>
+        </article>
+        <article class="block block--raised notch-bl">
+          <span class="eyebrow">Dados do arquivo</span>
+          <h3>Sem conexão</h3>
+          <ul>
+            <li>A skill avisa, sugere conectar uma vez e segue com um arquivo exportado do sistema (CSV ou Excel), dado colado ou números digitados.</li>
+            <li>A conta é uma consulta num banco temporário montado a partir do arquivo, que some no fim. O selo é "Conferido só contra o arquivo", mesmo que o total do ERP seja igual.</li>
+            <li>O painel sai só como foto do período.</li>
+            <li>A ficha sai como rascunho marcado como não validado.</li>
+          </ul>
+        </article>
+      </div>
+      <p class="muted export-note">Cada relatório traz a linha <strong>Para exportar</strong>: que relatório ou planilha pedir ao ERP, as colunas mínimas e o que deixa de sair sem cada coluna. Se um relatório não sai só com arquivo, a skill diz isso e explica o motivo.</p>
+
+      <div class="section-head why-head">
+        <span class="eyebrow">Por que conectar</span>
+        <h3 class="heading-sm">O resultado melhora quando o sistema está conectado</h3>
+        <p>Conectar pelo Archeo MCP Creator da CD2 muda três coisas.</p>
+      </div>
+      <div class="grid g3 reasons">
+        <article class="block block--raised notch-tr">
+          <h3>Resultado melhor</h3>
+          <p>A skill lê o banco inteiro, acha cancelados e campos vazios e confere cada total no próprio banco.</p>
+        </article>
+        <article class="block block--raised">
+          <h3>Online</h3>
+          <p>Os dados vêm direto do sistema, sem exportar planilha toda vez.</p>
+        </article>
+        <article class="block block--raised notch-bl">
+          <h3>Seguro</h3>
+          <p>A conexão só lê: cada consulta é um SELECT fixo que o servidor valida antes de aceitar, e qualquer escrita é recusada.</p>
+        </article>
+      </div>
+      <div class="actions why-actions">
+        <a class="btn btn--primary" href="https://archeo.cd2.com.br/?utm_source=site-skills&amp;utm_medium=skill&amp;utm_campaign=cd2-varejo">Conhecer o Archeo MCP Creator da CD2</a>
+      </div>
+
+      <div class="examples">
+        <h3 class="heading-sm">Exemplo de conversa sem conexão</h3>
+        <div class="chat-one">
+          <article class="chat" aria-label="Exemplo de conversa com a skill relatorio-vendas">
+            <div class="chat__bar">relatorio-vendas</div>
+            <div class="chat__body">
+              <p class="u"><b>Você</b>Faz a curva ABC de venda dos meus produtos.</p>
+              <p class="s"><b>Skill</b>Não encontrei conexão com o seu sistema, então sigo com o arquivo que você me passar. Peça ao ERP o relatório de venda por item do período, em CSV ou Excel, com código, descrição, quantidade e valor líquido.</p>
+              <p class="gap">Você manda o arquivo. A skill carrega num banco temporário, mede linhas, datas e campos vazios, marca as linhas de subtotal para não contar em dobro e roda a consulta.</p>
+              <p class="s"><b>Skill</b>Dois produtos fazem 80% da venda: R$ 8.000,00 de R$ 10.000,00. A classe B tem mais dois, com 15%, e a C fica com os outros dois, 5%. Selo: Conferido só contra o arquivo. Com a conexão, a conta seria conferida no banco.</p>
+            </div>
+            <p class="chat__foot">Mercearia de exemplo, com seis produtos que vendem R$ 5.000,00, R$ 3.000,00, R$ 1.000,00, R$ 500,00, R$ 300,00 e R$ 200,00 no período, e cortes de 80% para a classe A e 95% para a B.</p>
           </article>
         </div>
       </div>
@@ -620,7 +722,7 @@ codex plugin add cd2-varejo@cd2-skills</code></pre><button type="button" class="
           <div class="panel__intro">
             <span class="eyebrow">Em breve</span>
             <h3 class="heading-sm">GPT Store</h3>
-            <p>Em breve na GPT Store, um GPT para cada skill, para quem usa o ChatGPT Plus ou o gratuito. Não vai precisar instalar nada.</p>
+            <p>Em breve na GPT Store, um GPT para cada calculadora, para quem usa o ChatGPT Plus ou o gratuito. Não vai precisar instalar nada. Os GPTs valem só para as duas calculadoras: relatórios, painel e ficha ainda não têm GPT.</p>
           </div>
           <div class="panel__how">
             <ol class="steps-list">
@@ -662,7 +764,7 @@ codex plugin add cd2-varejo@cd2-skills</code></pre><button type="button" class="
         <article class="block block--raised">
           <span class="eyebrow">Para a sua empresa</span>
           <h3>Teste grátis na sua empresa</h3>
-          <p>Sua empresa pode usar as skills na própria operação para testar, livremente e sem prazo. Nesse período não há suporte, garantia nem responsabilidade da CD2.</p>
+          <p>Sua empresa pode usar as skills na própria operação para testar, livremente e sem prazo. Nesse uso de teste não há suporte, garantia nem responsabilidade da CD2.</p>
         </article>
         <article class="block block--brand notch-bl">
           <span class="eyebrow">Para clientes CD2</span>
@@ -701,7 +803,7 @@ codex plugin add cd2-varejo@cd2-skills</code></pre><button type="button" class="
       <div class="block block--brand notch-tr">
         <span class="eyebrow">Archeo MCP Creator</span>
         <h2 class="heading-md">Conecte seu sistema e pare de digitar</h2>
-        <p>A skill pode puxar os números direto do seu ERP, da folha ou do banco de dados. Com o Archeo MCP Creator da CD2, cada consulta vira uma ferramenta que o assistente chama, só de leitura. Sem conexão, a skill segue com os números que você digitar.</p>
+        <p>A skill pode puxar os números direto do seu ERP, da folha ou do banco de dados. Com o Archeo MCP Creator da CD2, cada consulta vira uma ferramenta que o assistente chama, só de leitura. Sem conexão, a skill segue com o arquivo que você exportar ou com os números que você digitar.</p>
         <div class="actions">
           <a class="btn btn--primary" href="https://archeo.cd2.com.br/?utm_source=site-skills&amp;utm_medium=skill&amp;utm_campaign=cd2-varejo">Conhecer o Archeo</a>
           <a class="btn btn--secondary" href="https://cd2.com.br/?utm_source=site-skills&amp;utm_medium=skill&amp;utm_campaign=cd2-varejo">Conhecer a CD2</a>

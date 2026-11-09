@@ -5,13 +5,13 @@
     "url": "https://cd2.com.br"
   },
   "metadata": {
-    "description": "CD2 Skills (CD2 Tech): calculadoras gerenciais para o varejo alimentar brasileiro, com a conta da calculadora gratuita da CD2 e entrega com a marca CD2 Tech."
+    "description": "CD2 Skills (CD2 Tech): calculadoras, relatórios com a conta conferida e painel de varejo para o varejo alimentar brasileiro, com a marca CD2 Tech."
   },
   "plugins": [
     {
       "name": "cd2-varejo",
       "source": "./plugins/claude/cd2-varejo",
-      "description": "Skills da CD2 Tech para o varejo alimentar brasileiro: fim-escala-6x1 calcula o impacto do fim da escala 6x1 (EC 141/2026) na folha e na operação da loja; custo-vrva mostra quanto o VR e o VA custam de verdade frente ao Decreto 12.712/2025. Calculadoras gerenciais para decidir com números.",
+      "description": "Skills da CD2 Tech para o varejo alimentar brasileiro: duas calculadoras (fim-escala-6x1 mostra o impacto do fim da escala 6x1, EC 141/2026, na folha e na operação; custo-vrva mostra quanto o VR e o VA custam de verdade frente ao Decreto 12.712/2025), oito relatórios gerenciais com a conta conferida (relatorio-vendas, relatorio-estoque, relatorio-compras, relatorio-precos, relatorio-perdas, relatorio-financeiro, relatorio-fiscal e relatorio-contabil), o painel visual painel-varejo e a ficha-archeo-mcp para o Archeo MCP Creator da CD2. Os relatórios e o painel funcionam conectados ao ERP ou com um arquivo exportado.",
       "license": "CC-BY-NC-ND-4.0",
       "keywords": [
         "cd2",
@@ -21,7 +21,13 @@
         "jornada",
         "vale-refeicao",
         "vale-alimentacao",
-        "calculadora"
+        "calculadora",
+        "relatorio",
+        "painel",
+        "curva-abc",
+        "estoque",
+        "erp",
+        "archeo"
       ]
     }
   ]

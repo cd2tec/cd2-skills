@@ -1,6 +1,6 @@
 # cd2-varejo para DeepSeek Harness (DSH)
 
-Skills da CD2 Tech para o varejo alimentar brasileiro no [DeepSeek Harness](https://www.deepseek.com/en/harness/): `fim-escala-6x1` (impacto do fim da escala 6x1) e `custo-vrva` (quanto o VR e o VA custam de verdade).
+Skills da CD2 Tech para o varejo alimentar brasileiro no [DeepSeek Harness](https://www.deepseek.com/en/harness/): duas calculadoras (`fim-escala-6x1`, impacto do fim da escala 6x1, e `custo-vrva`, quanto o VR e o VA custam de verdade), oito relatórios gerenciais (`relatorio-vendas`, `relatorio-estoque`, `relatorio-compras`, `relatorio-precos`, `relatorio-perdas`, `relatorio-financeiro`, `relatorio-fiscal` e `relatorio-contabil`), o painel `painel-varejo` e a `ficha-archeo-mcp`. Os relatórios e o painel funcionam com o banco do ERP conectado ou com um arquivo exportado (CSV ou Excel), e sem conexão o selo é "Conferido só contra o arquivo".
 
 O conteúdo das skills é o mesmo dos pacotes para Claude e Codex. Muda só o empacotamento: o DSH lê cada skill solta, uma pasta por skill, então cada pasta de `skills/` já traz tudo o que usa (scripts, referências, template, logos) e também `LICENSE`, `NOTICE` e `COMMERCIAL.md`. Quem gera isso é o `scripts/sync_plugins.py` (layout `flat-skills` em `harnesses.json`). Não edite as cópias.
 
@@ -41,7 +41,7 @@ python3 cd2-skills/plugins/dsh/cd2-varejo/install.py
 
 ## Verificar
 
-Abra uma sessão nova no DSH e peça algo que uma skill cubra, por exemplo *"quantas pessoas vou precisar contratar com o fim da 6x1?"* ou *"quanto eu pago a mais de taxa no vale?"*. A entrega visual sai como arquivo HTML autocontido na pasta de trabalho.
+Abra uma sessão nova no DSH e peça algo que uma skill cubra, por exemplo *"quantas pessoas vou precisar contratar com o fim da 6x1?"*, *"quanto eu pago a mais de taxa no vale?"* ou *"faz a curva ABC de venda desse arquivo"*. A entrega visual sai como arquivo HTML autocontido na pasta de trabalho.
 
 ## Atualizar e remover
 
