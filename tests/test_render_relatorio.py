@@ -654,5 +654,97 @@ class Cli(unittest.TestCase):
             self.assertTrue(destino.read_text(encoding="utf-8").startswith("<!doctype html>"))
 
 
+ATA = json.loads((ROOT / "tests/fixtures/rotina-ata.json").read_text(encoding="utf-8"))
+
+
+def ata():
+    return copy.deepcopy(ATA)
+
+
+def bloco(rel, tipo):
+    return next(b for b in rel["blocos"] if b["tipo"] == tipo)
+
+
+class BlocosDeRotina(unittest.TestCase):
+    def test_ata_aceita_e_titulo_proprio(self):
+        codigo, _ = rodar(ata(), "--format", "markdown")
+        self.assertEqual(codigo, 0)
+        self.assertEqual(rr._titulo_skill(ata()), "Ata de negociação")
+
+    def test_acordo_sem_trecho_recusa(self):
+        for vazio in ("", "   "):
+            rel = ata()
+            bloco(rel, "acordos")["itens"][0]["trecho"] = vazio
+            codigo, saida = rodar(rel, "--format", "markdown")
+            self.assertEqual(codigo, 2, vazio)
+            self.assertIn("trecho", saida)
+
+    def test_pendencia_sem_dono_ou_data_recusa(self):
+        for campo in ("dono", "data"):
+            rel = ata()
+            del bloco(rel, "pendencias")["itens"][0][campo]
+            codigo, saida = rodar(rel, "--format", "markdown")
+            self.assertEqual(codigo, 2, campo)
+            self.assertIn(campo, saida)
+
+    def test_lista_vazia_entrega(self):
+        for tipo in ("agenda", "acordos", "pendencias"):
+            rel = ata()
+            bloco(rel, tipo)["itens"] = []
+            codigo, _ = rodar(rel, "--format", "markdown")
+            self.assertEqual(codigo, 0, tipo)
+            self.assertIn("Sem itens neste recorte", rr.render(rel, "html"), tipo)
+            self.assertIn("Sem itens neste recorte", rr.render(rel, "markdown"), tipo)
+
+    def test_origem_texto_sai_no_html_e_no_markdown(self):
+        for formato in ("html", "markdown"):
+            self.assertIn("De: anotações da visita", rr.render(ata(), formato), formato)
+
+    def test_origem_texto_em_bloco_antigo(self):
+        rel = novo()
+        rel["blocos"][0]["origem_texto"] = "De: venda por dia, banco Exemplo"
+        self.assertIn("De: venda por dia, banco Exemplo", rr.render(rel, "html"))
+
+    def test_origem_texto_nao_texto_recusa(self):
+        rel = ata()
+        rel["blocos"][0]["origem_texto"] = 123
+        codigo, saida = rodar(rel, "--format", "markdown")
+        self.assertEqual(codigo, 2)
+        self.assertIn("origem_texto", saida)
+
+    def test_trecho_com_html_sai_escapado(self):
+        rel = ata()
+        bloco(rel, "acordos")["itens"][0]["trecho"] = "<script>x</script>"
+        pagina = rr.render(rel, "html")
+        self.assertNotIn("<script>x</script>", pagina)
+        self.assertIn("&lt;script&gt;x&lt;/script&gt;", pagina)
+
+    def test_csv_e_whatsapp_com_blocos_novos(self):
+        for formato in ("csv", "whatsapp"):
+            codigo, _ = rodar(ata(), "--format", formato)
+            self.assertEqual(codigo, 0, formato)
+        self.assertIn("fechamos 35 dias", rr.render(ata(), "csv"))
+
+    def test_skill_fora_da_lista_recusa(self):
+        rel = ata()
+        rel["skill"] = "rotina-qualquer"
+        codigo, saida = rodar(rel, "--format", "markdown")
+        self.assertEqual(codigo, 2)
+        self.assertIn("skill", saida)
+
+    def test_cinco_rotinas_aceitas(self):
+        titulos = {
+            "briefing-do-dia": "Briefing do dia", "sinais-da-operacao": "Sinais da operação",
+            "preparo-de-negociacao": "Preparo de negociação", "ata-de-negociacao": "Ata de negociação",
+            "plano-de-ofertas": "Plano de ofertas",
+        }
+        for skill, titulo in titulos.items():
+            rel = ata()
+            rel["skill"] = skill
+            codigo, _ = rodar(rel, "--format", "markdown")
+            self.assertEqual(codigo, 0, skill)
+            self.assertEqual(rr._titulo_skill(rel), titulo)
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -1,0 +1,104 @@
+{
+  "area": "Negociação com fornecedor",
+  "titulo": "Ata da visita da Distribuidora Exemplo",
+  "cliente": "Rede Exemplo, 3 lojas",
+  "gerado_em": "2026-11-08",
+  "origem": "digitado",
+  "skill": "ata-de-negociacao",
+  "fonte": {
+    "nome": "anotações da visita coladas na conversa"
+  },
+  "recorte": {
+    "unidade": "Compras",
+    "periodo": "Visita de 2026-11-08",
+    "filtros": "Sem filtro",
+    "nivel": "Acordos e pendências"
+  },
+  "veredito": {
+    "titulo": "2 acordos fechados e 1 pendência com data",
+    "texto": "O preço do arroz fica congelado até dezembro.",
+    "numeros": []
+  },
+  "resumo": [
+    {
+      "rotulo": "Acordos",
+      "valor": 2,
+      "formato": "inteiro",
+      "legenda": "com trecho de origem"
+    }
+  ],
+  "leitura": [
+    {
+      "nivel": "info",
+      "texto": "Confirme o congelamento por escrito."
+    },
+    {
+      "nivel": "atencao",
+      "texto": "Atualize o custo no ERP."
+    },
+    {
+      "nivel": "info",
+      "texto": "Cobre a verba até sexta."
+    }
+  ],
+  "blocos": [
+    {
+      "tipo": "agenda",
+      "titulo": "Visita",
+      "origem_texto": "De: agenda da conversa",
+      "itens": [
+        {
+          "hora": "14:00",
+          "titulo": "Distribuidora Exemplo",
+          "detalhe": "Comprador da mercearia"
+        }
+      ]
+    },
+    {
+      "tipo": "acordos",
+      "titulo": "Acordos",
+      "origem_texto": "De: anotações da visita",
+      "itens": [
+        {
+          "tema": "Preço",
+          "texto": "Arroz 5 kg congelado até 31/12",
+          "trecho": "seguro o preço do arroz até o fim do ano"
+        },
+        {
+          "tema": "Prazo",
+          "texto": "Pagamento em 35 dias",
+          "trecho": "fechamos 35 dias"
+        }
+      ]
+    },
+    {
+      "tipo": "pendencias",
+      "titulo": "Pendências",
+      "itens": [
+        {
+          "texto": "Enviar verba de aniversário",
+          "dono": "Comprador",
+          "data": "2026-11-14"
+        }
+      ]
+    }
+  ],
+  "prova": {
+    "conferencias": [
+      {
+        "nome": "Todo acordo traz o trecho de origem",
+        "fechou": true,
+        "detalhe": "2 de 2"
+      }
+    ]
+  },
+  "premissas": {
+    "filtros": [],
+    "qualidade": [
+      "Números citados como foram ditos na visita."
+    ],
+    "indisponiveis": [],
+    "consulta": ""
+  },
+  "proximos": []
+}

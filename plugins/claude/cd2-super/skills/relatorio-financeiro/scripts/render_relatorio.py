@@ -42,11 +42,14 @@ from brand import esc, formatar  # noqa: E402
 TEMPLATES = (_AQUI.parent / "assets" / "relatorio-template.html", _AQUI / "assets" / "relatorio-template.html",
              _AQUI / "relatorio-template.html")
 ARCHEO_URL = "https://archeo.cd2.com.br/"
-SKILL_PADRAO = re.compile(r"^relatorio-[a-z]+$")
+SKILL_PADRAO = re.compile(r"^(relatorio-[a-z]+|briefing-do-dia|sinais-da-operacao|preparo-de-negociacao|ata-de-negociacao|plano-de-ofertas)$")
 TITULOS_SKILL = {
     "vendas": "Relatório de vendas", "estoque": "Relatório de estoque", "compras": "Relatório de compras",
     "precos": "Relatório de preços", "perdas": "Relatório de perdas", "financeiro": "Relatório financeiro",
     "fiscal": "Relatório fiscal", "contabil": "Relatório contábil",
+    "briefing-do-dia": "Briefing do dia", "sinais-da-operacao": "Sinais da operação",
+    "preparo-de-negociacao": "Preparo de negociação", "ata-de-negociacao": "Ata de negociação",
+    "plano-de-ofertas": "Plano de ofertas",
 }
 BANCO = ("banco", "outro-mcp")
 SKILLS_CONFERENCIA = ("relatorio-fiscal", "relatorio-contabil")
@@ -60,7 +63,14 @@ CREATOR = ("Seus números estão em um ERP? O Archeo MCP Creator da CD2 conecta 
 SAIDAS = ("html", "csv", "whatsapp", "markdown")
 TEMAS = ("auto", "light", "dark")
 NIVEIS = {"critico": "Urgente", "atencao": "Atenção", "bom": "Bom", "info": "Nota", "dado": "Dado"}
-TIPOS_BLOCO = ("tabela", "pareto", "barras", "linha", "cascata")
+# Blocos de texto das rotinas: (campo, rótulo da coluna, obrigatório).
+BLOCOS_TEXTO = {
+    "agenda": (("hora", "Hora", True), ("titulo", "Compromisso", True), ("detalhe", "Detalhe", False)),
+    "acordos": (("tema", "Tema", True), ("texto", "Acordo", True), ("trecho", "Trecho de origem", True)),
+    "pendencias": (("texto", "Pendência", True), ("dono", "Dono", True), ("data", "Data", True)),
+}
+TIPOS_BLOCO = ("tabela", "pareto", "barras", "linha", "cascata") + tuple(BLOCOS_TEXTO)
+SEM_ITENS = "Sem itens neste recorte."
 FORMATOS_COLUNA = set(brand.FORMATOS) | {"classe"}
 NUMERICOS = {"moeda", "inteiro", "decimal", "pct", "pp", "dias"}
 TOLERANCIA_PADRAO = 2.0
@@ -107,6 +117,20 @@ def _objeto(valor, nome, erros):
     return valor
 
 
+def _validar_itens(bloco, nome, erros):
+    itens = bloco.get("itens")
+    if not isinstance(itens, list):
+        erros.append(f"{nome}: falta a lista 'itens'.")
+        return
+    for i, item in enumerate(itens):
+        if not isinstance(item, dict):
+            erros.append(f"{nome}.itens[{i}]: precisa ser um objeto.")
+            continue
+        for campo, _, obrigatorio in BLOCOS_TEXTO[bloco["tipo"]]:
+            if obrigatorio and not str(item.get(campo) or "").strip():
+                erros.append(f"{nome}.itens[{i}]: falta '{campo}'.")
+
+
 def _validar_bloco(bloco, indice, erros):
     nome = f"blocos[{indice}]"
     tipo = bloco.get("tipo") if isinstance(bloco, dict) else None
@@ -115,7 +139,11 @@ def _validar_bloco(bloco, indice, erros):
         return
     if not bloco.get("titulo"):
         erros.append(f"{nome}: falta o título.")
-    if tipo == "tabela":
+    if bloco.get("origem_texto") is not None and not isinstance(bloco["origem_texto"], str):
+        erros.append(f"{nome}: 'origem_texto' precisa ser texto.")
+    if tipo in BLOCOS_TEXTO:
+        _validar_itens(bloco, nome, erros)
+    elif tipo == "tabela":
         colunas = _lista_de_dicts(bloco.get("colunas"), f"{nome}.colunas", erros)
         if not colunas:
             erros.append(f"{nome}: tabela sem colunas.")
@@ -183,7 +211,7 @@ def validar(rel) -> list[str]:
     if not skill:
         erros.append("Falta 'skill': o nome da skill que gerou o relatório, como relatorio-vendas.")
     elif not isinstance(skill, str) or not SKILL_PADRAO.match(skill):
-        erros.append("'skill' inválida: use o nome da skill, no padrão relatorio-<assunto>, como relatorio-vendas.")
+        erros.append("'skill' inválida: use relatorio-<assunto>, como relatorio-vendas, ou o nome de uma rotina que usa este script.")
     fonte = _objeto(rel.get("fonte"), "fonte", erros)
     campos_fonte = ("nome",) if origem in ("arquivo", "digitado") else ("banco", "engine", "conector")
     for campo in campos_fonte:
@@ -546,7 +574,12 @@ def _bloco_html(bloco, indice):
     tid = f"b{indice}"
     tipo = bloco["tipo"]
     nota = f'<p class="body-sm mut">{esc(bloco["nota"])}</p>' if bloco.get("nota") else ""
-    titulo = f'<div class="secao-topo"><h2 class="heading-md" id="{tid}">{esc(bloco["titulo"])}</h2>{nota}</div>'
+    origem = f'<p class="body-sm mut">{esc(bloco["origem_texto"])}</p>' if bloco.get("origem_texto") else ""
+    titulo = f'<div class="secao-topo"><h2 class="heading-md" id="{tid}">{esc(bloco["titulo"])}</h2>{nota}{origem}</div>'
+    if tipo in BLOCOS_TEXTO:
+        colunas, linhas, _ = _linhas_bloco(bloco)
+        corpo = tabela_html(colunas, linhas) if linhas else f'<p class="body-sm mut">{SEM_ITENS}</p>'
+        return f'<section class="secao" aria-labelledby="{tid}">{titulo}{corpo}</section>'
     if tipo == "tabela":
         linhas = bloco["linhas"]
         corte = ""
@@ -768,6 +801,8 @@ def _md(texto):
 def _linhas_bloco(bloco):
     """Colunas, linhas e total de um bloco, para saídas em texto."""
     tipo = bloco["tipo"]
+    if tipo in BLOCOS_TEXTO:
+        return [{"campo": c, "rotulo": r} for c, r, _ in BLOCOS_TEXTO[tipo]], bloco["itens"], None
     if tipo == "tabela":
         return bloco["colunas"], bloco["linhas"], bloco.get("total")
     if tipo == "pareto":
@@ -820,6 +855,11 @@ def render_markdown(rel, plataforma="Claude"):
         for bloco in rel["blocos"]:
             colunas, linhas, total = _linhas_bloco(bloco)
             saida += ["", f'*{bloco["titulo"]}*']
+            if bloco.get("origem_texto"):
+                saida.append(_md(bloco["origem_texto"]))
+            if bloco["tipo"] in BLOCOS_TEXTO and not linhas:
+                saida.append(SEM_ITENS)
+                continue
             saida += _md_tabela(colunas, linhas[:MAX_LINHAS_PAGINA], total)
             if len(linhas) > MAX_LINHAS_PAGINA:
                 saida.append(f"Mostrando {MAX_LINHAS_PAGINA} de {brand.numero(len(linhas))} linhas. O restante vai na planilha.")
