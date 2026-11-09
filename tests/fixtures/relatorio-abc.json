@@ -5,7 +5,7 @@
   "gerado_em": "2026-11-08",
   "origem": "banco",
   "skill": "relatorio-vendas",
-  "fonte": { "banco": "erp_varejo", "engine": "SQL Server 16", "conector": "Archeo Manager" },
+  "fonte": { "banco": "erp_varejo", "engine": "SQL Server 16", "conector": "Archeo MCP Creator da CD2" },
   "recorte": { "unidade": "Todas as 3 lojas", "periodo": "90 dias até a última venda", "filtros": "Sem filtro", "nivel": "Sintético e os 20 maiores" },
   "veredito": {
     "titulo": "386 produtos fazem 80% da sua venda",

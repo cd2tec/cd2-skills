@@ -199,7 +199,79 @@ class Prova(unittest.TestCase):
         self.assertIn("Prova fechada, diferença de R$ 0,00", rr.render_html(novo()))
 
 
+class TiposErrados(unittest.TestCase):
+    def test_fechou_que_nao_e_booleano_recusa(self):
+        for valor in ("false", "não", "true", 0, 1, None, []):
+            rel = novo()
+            rel["prova"]["conferencias"][1]["fechou"] = valor
+            codigo, saida = rodar(rel, "--format", "html")
+            self.assertEqual(codigo, 2, valor)
+            self.assertIn("fechou", json.dumps(json.loads(saida)["errors"], ensure_ascii=False))
+
+    def test_fechou_false_nao_fecha_a_prova(self):
+        rel = novo()
+        rel["prova"]["conferencias"][1]["fechou"] = False
+        self.assertFalse(rr.avaliar_prova(rel["prova"])[1]["fechou"])
+        self.assertIn("Prova não fechou", rr.render_html(rel))
+
+    def test_formas_erradas_saem_com_codigo_2_e_sem_traceback(self):
+        casos = {
+            "conferencias lista de texto": lambda r: r["prova"].update(conferencias=["x"]),
+            "conferencias texto": lambda r: r["prova"].update(conferencias="x"),
+            "prova texto": lambda r: r.update(prova="x"),
+            "fonte lista": lambda r: r.update(fonte=["x"]),
+            "fonte texto": lambda r: r.update(fonte="x"),
+            "recorte texto": lambda r: r.update(recorte="x"),
+            "recorte lista": lambda r: r.update(recorte=[1]),
+            "veredito texto": lambda r: r.update(veredito="x"),
+            "numeros texto": lambda r: r["veredito"].update(numeros="abc"),
+            "numeros itens texto": lambda r: r["veredito"].update(numeros=["a"]),
+            "leitura texto": lambda r: r.update(leitura="x"),
+            "leitura itens texto": lambda r: r.update(leitura=["x"]),
+            "resumo itens texto": lambda r: r.update(resumo=["x"]),
+            "resumo numero": lambda r: r.update(resumo=3),
+            "colunas texto": lambda r: r["blocos"][4].update(colunas="x"),
+            "colunas itens texto": lambda r: r["blocos"][4].update(colunas=["x"]),
+            "linhas itens texto": lambda r: r["blocos"][4].update(linhas=["x"]),
+            "total texto": lambda r: r["blocos"][4].update(total="x"),
+            "classes itens texto": lambda r: r["blocos"][0].update(classes=["x"]),
+            "barras linhas texto": lambda r: r["blocos"][1].update(linhas="x"),
+            "pontos itens texto": lambda r: r["blocos"][2].update(pontos=["x"]),
+            "etapas itens texto": lambda r: r["blocos"][3].update(etapas=["x", "y"]),
+            "blocos texto": lambda r: r.update(blocos="x"),
+            "bloco texto": lambda r: r.update(blocos=["x"]),
+            "premissas lista": lambda r: r.update(premissas=[]),
+            "premissas filtros texto": lambda r: r["premissas"].update(filtros="x"),
+            "proximos texto": lambda r: r.update(proximos="x"),
+            "avisos texto": lambda r: r.update(avisos="x"),
+            "tolerancia texto": lambda r: r["prova"].update(tolerancia_pct="2"),
+            "titulo numero": lambda r: r.update(titulo=5),
+            "origem lista": lambda r: r.update(origem=["banco"]),
+            "raiz lista": None,
+        }
+        for nome, mexer in casos.items():
+            rel = novo()
+            if mexer is None:
+                rel = ["x"]
+            else:
+                mexer(rel)
+            for fmt in ("html", "csv"):
+                try:
+                    codigo, saida = rodar(rel, "--format", fmt)
+                except Exception as exc:  # pragma: no cover - a falha é o que o teste procura
+                    self.fail(f"{nome}: levantou {type(exc).__name__}: {exc}")
+                self.assertEqual(codigo, 2, nome)
+                self.assertTrue(json.loads(saida)["errors"], nome)
+
+
 class Selo(unittest.TestCase):
+    def test_selo_prova_nao_diz_fechada_para_arquivo(self):
+        res = rr.avaliar_prova(novo()["prova"])
+        for origem in ("arquivo", "digitado"):
+            self.assertEqual(rr.selo_prova(res, origem), "Conferido só contra o arquivo")
+        for origem in ("banco", "outro-mcp"):
+            self.assertTrue(rr.selo_prova(res, origem).startswith("Prova fechada"))
+
     def test_arquivo_nunca_diz_prova_fechada(self):
         for origem in ("arquivo", "digitado"):
             for fmt in ("html", "markdown", "whatsapp", "csv"):
@@ -260,12 +332,14 @@ class Comercial(unittest.TestCase):
             for fmt in ("html", "markdown", "whatsapp"):
                 _, saida = rodar(rel, "--format", fmt)
                 self.assertEqual(saida.count("Archeo MCP Creator da CD2"), 1, (origem, fmt))
+                self.assertEqual(saida.count("conecta o banco do sistema"), 1, (origem, fmt))
                 self.assertIn("utm_campaign=relatorio-vendas", saida, (origem, fmt))
         for origem in ("banco", "outro-mcp"):
             rel = novo(origem)
             for fmt in ("html", "markdown", "whatsapp"):
                 _, saida = rodar(rel, "--format", fmt)
-                self.assertNotIn("Archeo MCP Creator", saida, (origem, fmt))
+                self.assertNotIn("conecta o banco do sistema", saida, (origem, fmt))
+                self.assertNotIn("archeo.cd2.com.br", saida, (origem, fmt))
 
     def test_linha_do_creator_vem_antes_do_rodape(self):
         pagina = rr.render_html(novo("arquivo"))
@@ -360,7 +434,7 @@ class Html(unittest.TestCase):
 class Texto(unittest.TestCase):
     def test_markdown_segue_o_metodo(self):
         texto = rr.render_markdown(novo())
-        marcos = ["**ABC de venda**", "Fonte: erp_varejo (SQL Server 16), via Archeo Manager", "Recorte:", "**Resumo**", "**Relatório**", "**Leitura**", "**Prova**", "**Premissas e qualidade do dado**", "CD2 Tech"]
+        marcos = ["**ABC de venda**", "Fonte: erp_varejo (SQL Server 16), via Archeo MCP Creator da CD2", "Recorte:", "**Resumo**", "**Relatório**", "**Leitura**", "**Prova**", "**Premissas e qualidade do dado**", "CD2 Tech"]
         posicoes = [texto.index(m) for m in marcos]
         self.assertEqual(posicoes, sorted(posicoes))
 

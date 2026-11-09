@@ -82,6 +82,29 @@ def _textos(valor):
             yield from _textos(item)
 
 
+def _lista_de_dicts(valor, nome, erros, obrigatoria=False):
+    """Lista de objetos do JSON. Tipo errado vira erro em português, nunca exceção."""
+    if valor is None:
+        valor = []
+    if not isinstance(valor, list):
+        erros.append(f"'{nome}' precisa ser uma lista.")
+        return []
+    ruins = [i for i, item in enumerate(valor) if not isinstance(item, dict)]
+    if ruins:
+        erros.append(f"'{nome}' precisa ser uma lista de objetos (item {ruins[0] + 1} não é).")
+        return [item for item in valor if isinstance(item, dict)]
+    return valor
+
+
+def _objeto(valor, nome, erros):
+    if valor is None:
+        return {}
+    if not isinstance(valor, dict):
+        erros.append(f"'{nome}' precisa ser um objeto.")
+        return {}
+    return valor
+
+
 def _validar_bloco(bloco, indice, erros):
     nome = f"blocos[{indice}]"
     tipo = bloco.get("tipo") if isinstance(bloco, dict) else None
@@ -91,35 +114,52 @@ def _validar_bloco(bloco, indice, erros):
     if not bloco.get("titulo"):
         erros.append(f"{nome}: falta o título.")
     if tipo == "tabela":
-        colunas = bloco.get("colunas") or []
+        colunas = _lista_de_dicts(bloco.get("colunas"), f"{nome}.colunas", erros)
         if not colunas:
             erros.append(f"{nome}: tabela sem colunas.")
-        if not isinstance(bloco.get("linhas"), list):
+        linhas = bloco.get("linhas")
+        if not isinstance(linhas, list):
             erros.append(f"{nome}: tabela sem a lista de linhas.")
+            linhas = []
+        elif any(not isinstance(l, dict) for l in linhas):
+            erros.append(f"{nome}: as linhas da tabela precisam ser objetos.")
+            linhas = [l for l in linhas if isinstance(l, dict)]
+        if bloco.get("total") is not None and not isinstance(bloco.get("total"), dict):
+            erros.append(f"{nome}: 'total' precisa ser um objeto.")
+            bloco["total"] = None
         for col in colunas:
             if not col.get("campo") or not col.get("rotulo"):
                 erros.append(f"{nome}: coluna sem campo ou rótulo.")
             if col.get("formato") not in FORMATOS_COLUNA | {None}:
                 erros.append(f"{nome}: formato '{col.get('formato')}' inválido.")
             if "cpf" in str(col.get("campo", "")).lower():
-                for linha in bloco.get("linhas") or []:
-                    if re.search(r"\d{3}\D?\d{3}\D?\d{3}", str(linha.get(col["campo"], ""))):
+                for linha in linhas:
+                    if re.search(r"\d{3}\D?\d{3}\D?\d{3}", str(linha.get(col.get("campo"), ""))):
                         erros.append(f"{nome}: coluna de CPF sem máscara. Use ***.123.456-**.")
                         break
     elif tipo == "pareto":
-        classes = bloco.get("classes") or []
+        classes = _lista_de_dicts(bloco.get("classes"), f"{nome}.classes", erros)
         if not classes or any(not brand.e_numero(c.get("itens")) or not brand.e_numero(c.get("valor")) for c in classes):
             erros.append(f"{nome}: pareto precisa de classes com itens e valor numéricos.")
     elif tipo == "barras":
-        if not bloco.get("linhas") or any(not brand.e_numero(l.get("valor")) for l in bloco["linhas"]):
+        linhas = _lista_de_dicts(bloco.get("linhas"), f"{nome}.linhas", erros)
+        if not linhas or any(not brand.e_numero(l.get("valor")) for l in linhas):
             erros.append(f"{nome}: barras precisam de linhas com valor numérico.")
     elif tipo == "linha":
-        if not bloco.get("pontos") or any(not brand.e_numero(p.get("atual")) for p in bloco["pontos"]):
+        pontos = _lista_de_dicts(bloco.get("pontos"), f"{nome}.pontos", erros)
+        if not pontos or any(not brand.e_numero(p.get("atual")) for p in pontos):
             erros.append(f"{nome}: linha precisa de pontos com 'atual' numérico.")
     elif tipo == "cascata":
-        etapas = bloco.get("etapas") or []
+        etapas = _lista_de_dicts(bloco.get("etapas"), f"{nome}.etapas", erros)
         if len(etapas) < 2 or any(not brand.e_numero(e.get("valor")) or e.get("tipo") not in ("inicial", "delta", "final") for e in etapas):
             erros.append(f"{nome}: cascata precisa de etapas com valor e tipo inicial, delta ou final.")
+
+
+def _lista_de_textos(valor, nome, erros):
+    if valor is None:
+        return
+    if not isinstance(valor, list):
+        erros.append(f"'{nome}' precisa ser uma lista.")
 
 
 def validar(rel) -> list[str]:
@@ -129,52 +169,75 @@ def validar(rel) -> list[str]:
     for campo in ("area", "titulo", "cliente", "gerado_em"):
         if not rel.get(campo):
             erros.append(f"Falta '{campo}'.")
+        elif not isinstance(rel[campo], str):
+            erros.append(f"'{campo}' precisa ser texto.")
     origem = rel.get("origem")
     if not origem:
         erros.append(f"Falta 'origem': use {', '.join(brand.ORIGENS)}.")
-    elif origem not in brand.ORIGENS:
+    elif not isinstance(origem, str) or origem not in brand.ORIGENS:
         erros.append(f"'origem' inválida ('{origem}'): use {', '.join(brand.ORIGENS)}.")
+        origem = None
     skill = rel.get("skill")
     if not skill:
         erros.append("Falta 'skill': o nome da skill que gerou o relatório, como relatorio-vendas.")
     elif not isinstance(skill, str) or not SKILL_PADRAO.match(skill):
         erros.append("'skill' inválida: use o nome da skill, no padrão relatorio-<assunto>, como relatorio-vendas.")
-    fonte = rel.get("fonte") or {}
+    fonte = _objeto(rel.get("fonte"), "fonte", erros)
     campos_fonte = ("nome",) if origem in ("arquivo", "digitado") else ("banco", "engine", "conector")
     for campo in campos_fonte:
         if not fonte.get(campo):
             erros.append(f"Falta 'fonte.{campo}'.")
-    recorte = rel.get("recorte") or {}
+    recorte = _objeto(rel.get("recorte"), "recorte", erros)
     for campo in ("unidade", "periodo", "filtros", "nivel"):
         if not recorte.get(campo):
             erros.append(f"Falta 'recorte.{campo}': declare o recorte, mesmo que seja o padrão.")
-    if not (rel.get("veredito") or {}).get("titulo"):
+    veredito = _objeto(rel.get("veredito"), "veredito", erros)
+    if not veredito.get("titulo"):
         erros.append("Falta 'veredito.titulo': o achado principal, em uma frase.")
-    if len((rel.get("veredito") or {}).get("numeros") or []) > 3:
+    numeros = _lista_de_dicts(veredito.get("numeros"), "veredito.numeros", erros)
+    if len(numeros) > 3:
         erros.append("'veredito.numeros' aceita até 3 números.")
-    resumo = rel.get("resumo") or []
+    resumo = _lista_de_dicts(rel.get("resumo"), "resumo", erros)
     if not 1 <= len(resumo) <= 6:
         erros.append("'resumo' precisa de 1 a 6 totais.")
-    leitura = rel.get("leitura") or []
+    leitura = _lista_de_dicts(rel.get("leitura"), "leitura", erros)
     if not 1 <= len(leitura) <= 6:
         erros.append("'leitura' precisa de 1 a 6 itens.")
     for item in leitura:
         if item.get("nivel") not in NIVEIS or not item.get("texto"):
             erros.append(f"Leitura inválida: use nível {', '.join(NIVEIS)} e texto.")
-    conferencias = (rel.get("prova") or {}).get("conferencias") or []
+    prova = _objeto(rel.get("prova"), "prova", erros)
+    if "tolerancia_pct" in prova and not brand.e_numero(prova["tolerancia_pct"]):
+        erros.append("'prova.tolerancia_pct' precisa ser um número.")
+    conferencias = _lista_de_dicts(prova.get("conferencias"), "prova.conferencias", erros)
     if not conferencias:
         erros.append("Relatório sem prova não sai: informe 'prova.conferencias'.")
     for conf in conferencias:
         if not conf.get("nome"):
             erros.append("Conferência sem nome.")
         manual = "fechou" in conf
+        if manual and not isinstance(conf["fechou"], bool):
+            erros.append(f"Conferência '{conf.get('nome')}': 'fechou' precisa ser true ou false, sem aspas.")
         if manual and not conf.get("detalhe"):
             erros.append(f"Conferência '{conf.get('nome')}': quando informa 'fechou', precisa de 'detalhe' com o que foi conferido.")
         if not manual and ("esperado" not in conf or "obtido" not in conf):
             erros.append(f"Conferência '{conf.get('nome')}': informe esperado e obtido, ou fechou e detalhe.")
-    if not isinstance(rel.get("premissas"), dict):
+        if "tolerancia_pct" in conf and not brand.e_numero(conf["tolerancia_pct"]):
+            erros.append(f"Conferência '{conf.get('nome')}': 'tolerancia_pct' precisa ser um número.")
+    premissas = rel.get("premissas")
+    if not isinstance(premissas, dict):
         erros.append("Falta 'premissas' (filtros, qualidade, indisponiveis).")
-    for indice, bloco in enumerate(rel.get("blocos") or []):
+    else:
+        for chave in ("filtros", "qualidade", "indisponiveis"):
+            _lista_de_textos(premissas.get(chave), f"premissas.{chave}", erros)
+    _lista_de_textos(rel.get("avisos"), "avisos", erros)
+    if rel.get("proximos") is not None:
+        _lista_de_dicts(rel.get("proximos"), "proximos", erros)
+    blocos = rel.get("blocos")
+    if blocos is not None and not isinstance(blocos, list):
+        erros.append("'blocos' precisa ser uma lista.")
+        blocos = []
+    for indice, bloco in enumerate(blocos or []):
         _validar_bloco(bloco, indice, erros)
     if any(CPF.search(t) for t in _textos(rel)):
         erros.append("Há CPF sem máscara no relatório. Use ***.123.456-**.")
@@ -189,7 +252,7 @@ def avaliar_prova(prova) -> list[dict]:
     for conf in prova["conferencias"]:
         fmt = conf.get("formato", "moeda")
         if "fechou" in conf:
-            saida.append({"nome": conf["nome"], "fechou": bool(conf["fechou"]), "esperado": "", "obtido": "",
+            saida.append({"nome": conf["nome"], "fechou": conf["fechou"] is True, "esperado": "", "obtido": "",
                           "diferenca": conf["detalhe"], "numerica": False, "abs": 0.0, "formato": fmt})
             continue
         esperado, obtido = conf["esperado"], conf["obtido"]
@@ -205,7 +268,10 @@ def avaliar_prova(prova) -> list[dict]:
     return saida
 
 
-def selo_prova(resultado) -> str:
+def selo_prova(resultado, origem="banco") -> str:
+    """Selo de prova fechada. Só vale com origem banco ou outro-mcp; arquivo e digitado nunca dizem "Prova fechada"."""
+    if origem not in BANCO:
+        return SELO_ARQUIVO
     numericas = [r for r in resultado if r["numerica"] and r["formato"] == "moeda"]
     if numericas:
         return "Prova fechada, diferença de " + brand.moeda(max(r["abs"] for r in numericas))
@@ -607,7 +673,7 @@ def _selo(rel, resultado):
     """Texto do selo quando a prova fechou; None quando não fechou (aí a página abre em vermelho)."""
     if not all(r["fechou"] for r in resultado):
         return None
-    return selo_prova(resultado) if _com_banco(rel) else SELO_ARQUIVO
+    return selo_prova(resultado, rel["origem"])
 
 
 def _link(rel, url):
@@ -755,7 +821,7 @@ def render_whatsapp(rel, plataforma="Claude"):
     if not fechou:
         prova = "NÃO FECHOU, a conferir antes de decidir"
     elif _com_banco(rel):
-        prova = selo_prova(resultado).replace("Prova fechada", "fechou")
+        prova = selo_prova(resultado, rel["origem"]).replace("Prova fechada", "fechou")
     else:
         prova = None
     recorte = rel["recorte"]
