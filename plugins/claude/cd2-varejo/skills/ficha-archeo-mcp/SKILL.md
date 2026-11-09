@@ -65,14 +65,14 @@ Se falhar, siga o diagnóstico em `references/regras-sql.md`, seção 3. Não en
 
 ### 6. Entregue a ficha
 
-Use o formato abaixo, para a pessoa copiar campo a campo. A ficha validada leva `**Validação:** validada em <banco> (<engine e versão>)`, com os cenários testados.
+Use o formato abaixo, para a pessoa copiar campo a campo. Se a ficha não pôde ser validada, o carimbo é "não validada" seguido do motivo: sem banco conectado, ou com banco conectado em que a consulta falhou. A ficha validada leva `**Validação:** validada em <banco> (<engine e versão>)`, com os cenários testados.
 
 ## Sem conexão
 
 A validação precisa do banco: é no banco que o SQL roda de verdade, que se descobre o filtro fixo que faltava e que saem os números do teste. Sem conexão a skill ainda ajuda, com um rascunho:
 
 1. Diga em uma frase que não há banco conectado e que, por isso, a ficha sai como rascunho.
-2. Peça a estrutura: nomes das tabelas e colunas com tipo, e o significado das colunas que mudam a conta (qual é o valor líquido, qual flag marca cancelado). Sem isso, não escreva SQL: não invente tabela nem coluna.
+2. Peça a estrutura: nomes das tabelas e colunas com tipo, e o significado das colunas que mudam a conta (qual é o valor líquido, qual flag marca cancelado). Sem isso, não escreva SQL: não invente tabela nem coluna. **Se a pessoa não tem a estrutura à mão**, o caminho é ela descrever a pergunta de negócio (o que a ferramenta responde, por qual recorte, com quais filtros). Você devolve o esqueleto da ficha, com nome técnico, nome de exibição, descrição, parâmetros e limites propostos, e no campo SQL só o aviso "a preencher quando a estrutura das tabelas estiver disponível", tudo carimbado **Validação:** não validada. Diga que a estrutura pode vir do dicionário de dados do ERP ou de quem administra o banco.
 3. Escreva a ficha no mesmo formato, com a linha **Validação:** não validada. Os valores da seção "Teste após salvar" ficam como "a preencher depois da validação": sem banco não existe resultado esperado, e a skill não inventa número.
 4. Nas premissas, diga o que a validação ainda precisa confirmar: nomes de tabela e coluna, filtros fixos, formato de data e hora, cobertura e desempenho.
 5. Nunca apresente a ficha não validada como pronta para cadastrar. Diga que o servidor a valida ao salvar, mas que a conta só estará conferida depois de rodar no banco conectado.
@@ -82,7 +82,7 @@ A validação precisa do banco: é no banco que o SQL roda de verdade, que se de
 
 ```
 **Banco:** <nome do banco> (<engine e versão>), via <conector>
-**Validação:** validada em <banco>, nos cenários <...>  |  não validada (rascunho, sem banco conectado)
+**Validação:** validada em <banco>, nos cenários <...>  |  não validada (<motivo: sem banco conectado, a consulta falhou no banco, ...>)
 
 **Campos do formulário**
 | Campo | Valor |

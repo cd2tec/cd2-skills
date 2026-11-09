@@ -48,13 +48,18 @@ window.claude = { use: function(name){ return new Promise(function(res){ setTime
 }, 30); }); } };
 """
 
-async def shot(page, html, path, width, dark=False, init=None):
+USO = "Uso: python3 preview_dashboard.py painel.html [painel-live.html respostas.json]"
+
+
+async def shot(page, html, path, width, tmpdir, dark=False, init=None):
     await page.set_viewport_size({"width": width, "height": 900})
     await page.emulate_media(color_scheme="dark" if dark else "light")
     if init: await page.add_init_script(init)
-    import tempfile, os
-    f = tempfile.NamedTemporaryFile("w", suffix=".html", delete=False, dir=os.getcwd()); f.write(SKEL.replace("{}", html)); f.close()
-    await page.goto("file://" + f.name)
+    # Pagina completa (com doctype) vai como esta; fragmento ganha o esqueleto.
+    doc = html if html.lstrip()[:9].lower() == "<!doctype" else SKEL.replace("{}", html)
+    arq = Path(tmpdir) / f"pagina-{width}-{int(dark)}-{bool(init)}.html"
+    arq.write_text(doc, encoding="utf-8")
+    await page.goto(arq.as_uri())
     await page.wait_for_timeout(600)
     errs = await page.evaluate("window.__errs || []")
     sw = await page.evaluate("document.documentElement.scrollWidth")
@@ -62,26 +67,34 @@ async def shot(page, html, path, width, dark=False, init=None):
     return sw, errs
 
 async def main():
-    html = Path(sys.argv[1]).read_text()
+    import tempfile
+    if len(sys.argv) not in (2, 4):
+        print(USO)
+        sys.exit(2)
+    html = Path(sys.argv[1]).read_text(encoding="utf-8")
     async with async_playwright() as p:
-        b = await p.chromium.launch()
-        out = {}
-        for name, w, dark in [("desk-light", 1280, False), ("desk-dark", 1280, True), ("phone", 400, False)]:
-            pg = await b.new_page(); errs = []
-            pg.on("pageerror", lambda e, errs=errs: errs.append(str(e)))
-            pg.on("console", lambda m, errs=errs: errs.append(m.text) if m.type == "error" else None)
-            sw, _ = await shot(pg, html, f"{name}.png", w, dark)
-            out[name] = {"scrollWidth": sw, "errors": errs}
-        if len(sys.argv) > 2:
-            live = Path(sys.argv[2]).read_text(); rows = Path(sys.argv[3]).read_text()
-            for mode in ["ok", "error"]:
+        try:
+            b = await p.chromium.launch()
+        except Exception:
+            print(AVISO)
+            return
+        # Paginas temporarias ficam numa pasta propria, apagada ao fim; nada na pasta da pessoa.
+        with tempfile.TemporaryDirectory() as tmpdir:
+            out = {}
+            for name, w, dark in [("desk-light", 1280, False), ("desk-dark", 1280, True), ("phone", 400, False)]:
                 pg = await b.new_page(); errs = []
                 pg.on("pageerror", lambda e, errs=errs: errs.append(str(e)))
-                sw, _ = await shot(pg, live, f"live-{mode}.png", 1280, False, MOCK % (rows, json.dumps(mode)))
-                st = await pg.inner_text("#status"); calls = await pg.evaluate("(window.__calls||[]).length")
-                out["live-"+mode] = {"status": st, "calls": calls, "errors": errs, "banner": await pg.inner_text("#banner") if await pg.is_visible("#banner") else ""}
-        print(json.dumps(out, indent=1, ensure_ascii=False))
-        for f in Path.cwd().glob("tmp*.html"):
-            f.unlink()
+                pg.on("console", lambda m, errs=errs: errs.append(m.text) if m.type == "error" else None)
+                sw, _ = await shot(pg, html, f"{name}.png", w, tmpdir, dark)
+                out[name] = {"scrollWidth": sw, "errors": errs}
+            if len(sys.argv) == 4:
+                live = Path(sys.argv[2]).read_text(encoding="utf-8"); rows = Path(sys.argv[3]).read_text(encoding="utf-8")
+                for mode in ["ok", "error"]:
+                    pg = await b.new_page(); errs = []
+                    pg.on("pageerror", lambda e, errs=errs: errs.append(str(e)))
+                    sw, _ = await shot(pg, live, f"live-{mode}.png", 1280, tmpdir, False, MOCK % (rows, json.dumps(mode)))
+                    st = await pg.inner_text("#status"); calls = await pg.evaluate("(window.__calls||[]).length")
+                    out["live-"+mode] = {"status": st, "calls": calls, "errors": errs, "banner": await pg.inner_text("#banner") if await pg.is_visible("#banner") else ""}
+            print(json.dumps(out, indent=1, ensure_ascii=False))
         await b.close()
 asyncio.run(main())

@@ -123,10 +123,57 @@ class Painel(unittest.TestCase):
         cfg = copy.deepcopy(CONFIG_ARQUIVO)
         cfg["rede"] = "__LOGO__"
         cfg["secoes"][1]["dados"][0]["rotulo"] = "</script><img src=x onerror=alert(1)>"
+        cfg["secoes"][1]["dados"].append({"rotulo": "<!--<script>", "valor": 1})
         res, html = construir(cfg)
         self.assertEqual(res.returncode, 0, res.stdout)
         self.assertIn('"rede": "__LOGO__"', html)
         self.assertNotIn("</script><img", html)
+        self.assertNotIn("<!--<script>", html)
+        payload = html.split('id="dash-config">', 1)[1].split("</script>", 1)[0]
+        self.assertNotIn("<", payload)
+        self.assertEqual(json.loads(payload)["secoes"][1]["dados"][1]["rotulo"], "<!--<script>")
+
+    def test_arquivo_entregue_e_documento_completo(self):
+        _, html = construir(CONFIG_ARQUIVO)
+        self.assertTrue(html.startswith("<!doctype html>"))
+        self.assertIn('<html lang="pt-BR">', html)
+        self.assertIn('<meta charset="utf-8">', html)
+        self.assertIn('name="viewport"', html)
+        self.assertLess(html.index("<meta charset"), html.index("<title>"))
+        self.assertTrue(html.rstrip().endswith("</html>"))
+
+    def test_tipo_errado_no_config_nao_da_traceback(self):
+        casos = [
+            {**CONFIG_BANCO, "fonte": "erp"},
+            {**CONFIG_ARQUIVO, "fonte": ["a.csv"]},
+            {**CONFIG_ARQUIVO, "secoes": ["kpis"]},
+            {**CONFIG_ARQUIVO, "secoes": {"id": "x"}},
+            {**CONFIG_ARQUIVO, "secoes": [dict(CONFIG_ARQUIVO["secoes"][1], formato=["moeda"])]},
+            {**CONFIG_ARQUIVO, "secoes": [dict(CONFIG_ARQUIVO["secoes"][1], tipo=["barras"])]},
+            {**CONFIG_ARQUIVO, "leitura": ["texto"]},
+            {**CONFIG_ARQUIVO, "origem": ["arquivo"]},
+        ]
+        for cfg in casos:
+            res, _ = construir(cfg)
+            self.assertEqual(res.returncode, 1, (cfg, res.stdout, res.stderr))
+            self.assertNotIn("Traceback", res.stderr)
+            self.assertIn("Config invalido", res.stdout)
+        res, _ = construir(None, bruto="[1, 2]")
+        self.assertEqual(res.returncode, 1)
+        self.assertNotIn("Traceback", res.stderr)
+
+    def test_outro_mcp_nao_afirma_somente_leitura(self):
+        cfg = {**CONFIG_BANCO, "origem": "outro-mcp"}
+        _, html = construir(cfg)
+        self.assertNotIn("Consultas somente leitura", html)
+        self.assertIn("Fonte: erp_varejo", html)
+
+    def test_preview_usa_pasta_propria_e_valida_argumentos(self):
+        codigo = PREVIEW.read_text(encoding="utf-8")
+        self.assertNotIn("glob(", codigo)
+        self.assertNotIn("getcwd", codigo)
+        self.assertIn("TemporaryDirectory", codigo)
+        self.assertIn('encoding="utf-8"', codigo)
 
     def test_preview_sem_playwright_avisa(self):
         codigo = (
@@ -172,6 +219,9 @@ class Ficha(unittest.TestCase):
         self.assertIn("validação precisa do banco", secao)
         self.assertRegex(secao.lower(), r"nunca[^\n]*pronta para (cadastrar|registrar)|não[^\n]*(oferece|apresenta)[^\n]*pronta", )
         self.assertIn("**Validação:** não validada", self.skill)
+        self.assertIn("não validada (<motivo", self.skill)
+        self.assertIn("esqueleto da ficha", secao)
+        self.assertIn("nem coluna", secao)
         self.assertIn("https://archeo.cd2.com.br/?utm_source={{UTM_SOURCE}}&utm_medium=skill&utm_campaign=ficha-archeo-mcp", self.skill)
 
     def test_ficha_nao_exige_conector(self):

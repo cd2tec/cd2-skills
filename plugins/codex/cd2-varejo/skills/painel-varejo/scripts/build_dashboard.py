@@ -26,12 +26,30 @@ FORMATOS = {None, "moeda", "inteiro", "decimal", "pct", "dias"}
 COM_CONEXAO = ("banco", "outro-mcp")
 
 
+CABECALHO = ('<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">'
+             '<meta name="viewport" content="width=device-width, initial-scale=1">')
+
+
+def documento(template):
+    """O template e um fragmento (title, style e corpo). O arquivo entregue precisa de doctype e charset:
+    aberto do disco, sem eles cai em quirks mode e pode ser lido como Windows-1252."""
+    fim_estilo = template.index("</style>") + len("</style>")
+    return CABECALHO + template[:fim_estilo] + "</head><body>" + template[fim_estilo:] + "</body></html>"
+
+
 def erro(msgs, texto):
     msgs.append(texto)
 
 
 def validar(cfg):
     msgs = []
+    if not isinstance(cfg, dict):
+        return ["o config precisa ser um objeto JSON"]
+    for campo, tipo, nome in (("fonte", dict, "um objeto"), ("secoes", list, "uma lista"), ("leitura", list, "uma lista"),
+                              ("live", dict, "um objeto"), ("veredito", dict, "um objeto"), ("indisponiveis", list, "uma lista")):
+        if cfg.get(campo) is not None and not isinstance(cfg[campo], tipo):
+            erro(msgs, f"{campo} precisa ser {nome}")
+            cfg = {k: v for k, v in cfg.items() if k != campo}
     modo = cfg.get("modo")
     origem = cfg.get("origem")
     if modo not in ("snapshot", "live"):
@@ -62,15 +80,20 @@ def validar(cfg):
                 erro(msgs, f"live.{k} e obrigatorio no modo ao vivo")
     ids = set()
     for i, sec in enumerate(cfg.get("secoes") or []):
+        if not isinstance(sec, dict):
+            erro(msgs, f"secoes[{i}]: precisa ser um objeto")
+            continue
         nome = sec.get("id") or f"secoes[{i}]"
         if not sec.get("id"):
             erro(msgs, f"{nome}: falta id")
+        elif not isinstance(sec["id"], str):
+            erro(msgs, f"{nome}: id precisa ser texto")
         elif sec["id"] in ids:
             erro(msgs, f"{nome}: id repetido")
-        ids.add(sec.get("id"))
-        if sec.get("tipo") not in TIPOS:
+        ids.add(str(sec.get("id")))
+        if not isinstance(sec.get("tipo"), str) or sec.get("tipo") not in TIPOS:
             erro(msgs, f"{nome}: tipo '{sec.get('tipo')}' invalido ({', '.join(sorted(TIPOS))})")
-        if sec.get("formato") not in FORMATOS:
+        if not isinstance(sec.get("formato"), (str, type(None))) or sec.get("formato") not in FORMATOS:
             erro(msgs, f"{nome}: formato '{sec.get('formato')}' invalido")
         if modo == "live" and not sec.get("sql"):
             erro(msgs, f"{nome}: modo ao vivo exige sql em toda secao")
@@ -79,11 +102,13 @@ def validar(cfg):
         if modo == "live" and sec.get("dados"):
             erro(msgs, f"{nome}: no modo ao vivo nao embuta dados; a pagina busca no banco")
         if sec.get("tipo") == "score":
-            comps = sec.get("componentes") or []
+            comps = sec.get("componentes") if isinstance(sec.get("componentes"), list) else []
             if not comps:
                 erro(msgs, f"{nome}: score sem componentes")
             for c in comps:
-                if not all(k in c for k in ("campo", "rotulo", "peso", "ruim", "bom")):
+                if not isinstance(c, dict):
+                    erro(msgs, f"{nome}: componente precisa ser um objeto")
+                elif not all(k in c for k in ("campo", "rotulo", "peso", "ruim", "bom")):
                     erro(msgs, f"{nome}: componente sem campo/rotulo/peso/ruim/bom: {c}")
                 elif c["ruim"] == c["bom"]:
                     erro(msgs, f"{nome}: componente {c['campo']} com ruim == bom")
@@ -91,8 +116,8 @@ def validar(cfg):
             erro(msgs, f"{nome}: kpis sem cards")
         if sec.get("tipo") == "tabela" and not sec.get("colunas"):
             erro(msgs, f"{nome}: tabela sem colunas")
-    for nivel in [x.get("nivel") for x in cfg.get("leitura") or []]:
-        if nivel not in ("critico", "atencao", "bom", "info"):
+    for nivel in [x.get("nivel") if isinstance(x, dict) else None for x in cfg.get("leitura") or []]:
+        if not isinstance(nivel, str) or nivel not in ("critico", "atencao", "bom", "info"):
             erro(msgs, f"leitura com nivel invalido: {nivel}")
     return msgs
 
@@ -104,6 +129,8 @@ def fonte_texto(cfg):
         return f"Fonte: arquivo {fonte['nome']}. Conferido só contra o arquivo, não contra o sistema de origem."
     if cfg["origem"] == "digitado":
         return f"Fonte: {fonte['nome']}. Conferido só contra o que foi informado, não contra o sistema de origem."
+    if cfg["origem"] == "outro-mcp":
+        return f"Fonte: {', '.join(x for x in (fonte['banco'], fonte['engine'], 'via ' + fonte['conector']) if x)}."
     banco = ", ".join(x for x in (fonte["banco"], fonte["engine"], "via " + fonte["conector"]) if x)
     return f"Fonte: {banco}. Consultas somente leitura."
 
@@ -120,7 +147,11 @@ def main():
     if len(sys.argv) != 3:
         print(__doc__)
         sys.exit(2)
-    cfg = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+    try:
+        cfg = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+    except (OSError, ValueError) as exc:
+        print(f"Config invalido: não consegui ler {sys.argv[1]} como JSON UTF-8 ({exc.__class__.__name__}).")
+        sys.exit(1)
     msgs = validar(cfg)
     if msgs:
         print("Config invalido:")
@@ -128,6 +159,7 @@ def main():
             print(" -", m)
         sys.exit(1)
     html = TEMPLATE.read_text(encoding="utf-8")
+    html = documento(html)
     titulo = (cfg.get("titulo") or "Painel do varejo").replace("<", "").replace(">", "")
     if cfg["modo"] == "snapshot":
         ini, fim = html.find("/*LIVE-START*/"), html.find("/*LIVE-END*/")
@@ -135,7 +167,7 @@ def main():
             print("Template sem marcadores LIVE-START/LIVE-END")
             sys.exit(1)
         html = html[:ini] + html[fim + len("/*LIVE-END*/"):]
-    payload = json.dumps({**cfg, "fonteTexto": fonte_texto(cfg)}, ensure_ascii=False).replace("</", "<\\/")
+    payload = json.dumps({**cfg, "fonteTexto": fonte_texto(cfg)}, ensure_ascii=False).replace("<", "\\u003c")
     valores = {"__FONT_FACE__": brand.font_face(), "__TOKENS_CSS__": brand.tokens_css(),
                "__LOGO__": brand.logo_html(),
                "__FOOTER__": brand.footer_dados_html(cfg["origem"], data_do_rodape(cfg)),

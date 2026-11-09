@@ -19,7 +19,7 @@ Siga o roteiro de conversa em `references/fluxo-dados.md` e o método em `refere
 
 ### 1. Identifique de onde vêm os dados
 
-Siga a etapa 2 de `references/fluxo-dados.md`: procure o Archeo MCP Creator da CD2 ou outro MCP de dados, inclusive entre as ferramentas deferidas. Com banco conectado, anote engine e versão com `db_connection_status` e leia `references/regras-sql.md` (seções 1, 3 e 4) antes da primeira consulta. Com vários bancos, pergunte qual.
+Siga a etapa 2 de `references/fluxo-dados.md`: procure o Archeo MCP Creator da CD2 ou outro MCP de dados, inclusive entre as ferramentas deferidas. Com banco conectado, anote engine e versão com `db_connection_status` e leia `references/regras-sql.md` (seções 1, 3 e 4) antes da primeira consulta. Com vários bancos, pergunte qual. **Sem conexão nenhuma, pule o resto desta etapa e as etapas 3 e 4 como estão escritas: vá para a seção "Sem conexão", abaixo, que as substitui.**
 
 ### 2. Combine o escopo em uma pergunta, se precisar
 
@@ -27,7 +27,7 @@ Defaults, quando a pessoa não disser: **todas as lojas**, **últimos 30 dias at
 
 Se o período padrão tiver pouco movimento (menos de ~100 cupons, ou menos de 10% do volume médio da base), diga isso e proponha o recorte com mais movimento antes de seguir.
 
-### 3. Mapeie os dados
+### 3. Mapeie os dados (com conexão)
 
 Siga `references/indicadores-varejo.md`, seção 1: localize venda por cupom, itens vendidos, cadastros de produto, departamento, loja e meio de pagamento, custo, estoque e identificação de cliente. Prefira views de resumo do próprio sistema. Meça antes de usar (`COUNT`, `MIN`/`MAX` de data, nulos, valores distintos de flags): é aqui que se descobre cancelamento, registro indevido, custo estimado e campo nunca preenchido. Evite despejar o catálogo inteiro: filtre `INFORMATION_SCHEMA.COLUMNS` por tabela ou padrão de nome.
 
@@ -37,7 +37,7 @@ Sem banco nem outro MCP, siga `references/metodo-analise.md`, seção 2.7, com `
 
 Diga em uma linha: sem conexão o painel é só o modo snapshot, uma foto do período do arquivo; os modos ao vivo e agendado exigem conexão e são só para quem usa Claude. Use `"origem": "arquivo"` (ou `"digitado"`) no config e `"fonte": {"nome": "<nome do arquivo>"}`. O rodapé e a linha de fonte dizem que o painel foi conferido só contra o arquivo, nunca contra o banco. O arquivo mostra só o que foi exportado: cancelados e devoluções podem ter ficado de fora, e a leitura não conclui sobre o que o arquivo não traz.
 
-### 4. Calcule cada seção
+### 4. Calcule cada seção (com conexão ou com o arquivo carregado)
 
 Use o catálogo de `references/indicadores-varejo.md`: para cada seção há o dado necessário, a consulta-modelo, o gráfico e a regra de quando omitir. Antes de aceitar um número:
 
