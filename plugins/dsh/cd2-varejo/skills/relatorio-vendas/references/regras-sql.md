@@ -1,6 +1,8 @@
 # Regras de SQL para consultas ao banco conectado
 
-Vale para qualquer banco conectado pelo Archeo MCP Creator da CD2. Escreva os parâmetros sempre como `$1`, `$2`, ... independentemente da engine: é a sintaxe do Archeo MCP Creator. O resto do SQL segue o dialeto da engine informada por `db_connection_status`.
+Vale para qualquer banco conectado pelo Archeo MCP Creator da CD2 e, no que couber, por outro MCP que rode SQL. O SQL segue o dialeto da engine informada por `db_connection_status`. Sem conexão, a consulta roda sobre o arquivo exportado e as regras são as de `regras-sqlite.md`.
+
+Nas fichas de ferramenta, escreva os parâmetros sempre como `$1`, `$2`, ... independentemente da engine: é a sintaxe do Archeo MCP Creator. Em relatórios e painéis, a consulta roda com o período e os filtros já escritos no SQL, então a seção 2 só importa nas partes de intervalo de datas e de tipo de coluna.
 
 Marcação de confiança: **[validado]** foi confirmado contra um banco real pelo conector; **[hipótese]** é sintaxe padrão da engine, ainda não exercitada pelo conector. Em hipóteses, o passo de validação é o que decide.
 
@@ -18,7 +20,7 @@ Marcação de confiança: **[validado]** foi confirmado contra um banco real pel
 
 Sistemas legados costumam guardar data e hora como número ou texto (`AAAAMMDD`, `HHMM`, `HHMMSS`). Confirme o formato olhando dados reais na exploração antes de escrever filtros ou agrupamentos, e não confie só no nome da coluna nem no manual do sistema: views podem mudar o formato do campo bruto.
 
-## 2. Parâmetros
+## 2. Parâmetros (fichas de ferramenta)
 
 ### Tipo na tela x cast no SQL
 
@@ -83,7 +85,7 @@ Comportamentos que podem aparecer conforme a engine e a versão do conector. Ver
 4. **Descrição de tabela ou view indisponível.** Alternativa: consultar o catálogo pela ferramenta de query (`INFORMATION_SCHEMA.COLUMNS` em SQL Server, PostgreSQL e MySQL; `ALL_TAB_COLUMNS` em Oracle).
 5. **Saída grande demais** em tabelas largas. Selecione só as colunas necessárias em vez de amostrar a tabela inteira.
 
-## 5. Checklist antes de entregar
+## 5. Checklist antes de entregar uma ficha
 
 - [ ] A ficha cita o banco, a engine e o conector usados.
 - [ ] Um único SELECT, sem `;` final, sem escrita, sem identificador vindo de parâmetro.

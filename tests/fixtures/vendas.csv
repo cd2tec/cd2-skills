@@ -1,0 +1,13 @@
+Data;Codigo;Descricao;Departamento;Loja;Quantidade;Valor Liquido;Situacao
+15/08/2026;0101;Arroz tipo 1 5 kg;Mercearia;1;320;3.200,00;Normal
+20/09/2026;0101;Arroz tipo 1 5 kg;Mercearia;1;180;1.800,00;Normal
+20/09/2026;0101;Arroz tipo 1 5 kg;Mercearia;1;99;999,00;Cancelado
+10/09/2026;0102;Feijão carioca 1 kg;Mercearia;1;250;2.000,00;Normal
+12/09/2026;0103;Café torrado 500 g;Mercearia;2;100;1.500,00;Normal
+05/10/2026;0104;Açúcar cristal 1 kg;Mercearia;2;200;1.000,00;Normal
+06/10/2026;0105;Óleo de soja 900 ml;Mercearia;1;40;300,00;Normal
+07/10/2026;0106;Sal refinado 1 kg;Mercearia;1;100;200,00;Normal
+08/10/2026;0107;Vela comum;Bazar;1;-5;(50,00);Normal
+15/07/2026;0108;Fósforo;Bazar;1;350;700,00;Normal
+Subtotal;;;;;;9.950,00;
+TOTAL GERAL;;;;;;10.650,00;
