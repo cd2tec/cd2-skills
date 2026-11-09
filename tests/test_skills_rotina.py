@@ -187,6 +187,57 @@ class Ofertas(unittest.TestCase):
         self.assertNotIn("reaproveita", item("comunicacao-de-ofertas"))
 
 
+class AposRevisao(unittest.TestCase):
+    def test_frases_legais_obrigatorias_completas(self):
+        regras = texto_kit("regras-de-oferta.md")
+        self.assertIn("O Ministério da Saúde informa: o aleitamento materno evita infecções e alergias e é recomendado até os 2 (dois) anos de idade ou mais", regras)
+        self.assertIn("O Ministério da Saúde informa: após os 6 (seis) meses de idade continue amamentando seu filho e ofereça novos alimentos", regras)
+
+    def test_preparo_concentracao_sobre_todos_os_fornecedores(self):
+        self.assertIn("Na seção 3.7, calcule sobre todos os fornecedores", skill_md("preparo-de-negociacao"))
+
+    def test_briefing_diz_o_que_fazer_sem_meta_valida(self):
+        texto = skill_md("briefing-do-dia")
+        self.assertIn("código 2", texto)
+        self.assertIn("Nunca mude `mes`", texto)
+
+    def test_briefing_usa_o_total_do_script(self):
+        self.assertIn("`total`", skill_md("briefing-do-dia"))
+
+    def test_perfil_guarda_o_mes_da_meta(self):
+        self.assertIn("AAAA-MM", texto_kit("perfil-da-operacao.md"))
+
+    def test_post_automatico_definido(self):
+        texto = skill_md("briefing-do-dia")
+        self.assertIn("segundo JSON", texto)
+        self.assertIn("`--format markdown`", texto)
+
+    def test_post_sem_nome_de_operador(self):
+        self.assertIn("operador só por código ou pela loja", texto_kit("regras-rotina.md"))
+
+    def test_sem_numero_do_erp_nao_inventa_conferencia(self):
+        fluxo = texto_kit("fluxo-rotina.md")
+        self.assertIn("Sem nenhum número do ERP", fluxo)
+        self.assertIn("nunca invente conferência", fluxo)
+
+    def test_preparo_sem_linhas_usa_tabela(self):
+        self.assertIn("sem linhas, use `tabela`", skill_md("preparo-de-negociacao"))
+
+    def test_plano_diz_de_onde_vem_o_preco_proposto(self):
+        texto = skill_md("plano-de-ofertas")
+        self.assertIn("preço proposto vem", texto)
+        self.assertIn("margem no preço proposto", texto)
+        self.assertIn("`a preencher`", texto)
+
+    def test_sinais_nomeia_o_indicador_de_servico(self):
+        self.assertIn("atendimento %", skill_md("sinais-da-operacao"))
+
+    def test_instrucao_de_consulta_pode_ser_seguida(self):
+        for nome in ("briefing-do-dia", "preparo-de-negociacao"):
+            self.assertNotIn("Não crie consulta nova", skill_md(nome), nome)
+        self.assertIn("a definição, as colunas e a prova da seção", texto_kit("regras-rotina.md"))
+
+
 class Sinais(unittest.TestCase):
     def test_sinais_reaproveita(self):
         self.assertEqual(

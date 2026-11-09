@@ -36,6 +36,8 @@ Sem cada um deles, veja `references/conectores.md`.
 | Calendário e canais | Perfil e pesquisa, quando houver |
 | Metas e como medir | Venda e margem esperadas, com a base usada |
 
+O preço proposto vem da pessoa, da condição da verba ou da última promoção do item (seção 3.5). Sem nenhum deles, deixe o campo como `a preencher`. A margem no preço proposto e o custo de cada isca saem de uma consulta de leitura ou de um script, com o custo validado pelo guia, nunca de cabeça. Venda esperada é projeção: diga a base usada.
+
 Isca com margem negativa é decisão, não acidente: mostre o quanto custa. Item na lista de produtos sem oferta do `references/regras-de-oferta.md` não entra no plano: avise a pessoa.
 
 ## Entrega

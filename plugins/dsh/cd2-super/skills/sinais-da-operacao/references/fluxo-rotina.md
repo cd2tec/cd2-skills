@@ -34,6 +34,8 @@ O que pular de `references/fluxo-dados.md` antes da primeira entrega:
 
 Siga a seção "Entrega" da skill. Toda entrega traz a origem de cada bloco, e a resposta na conversa tem duas ou três linhas sobre o que mais importa, mais o selo e o caminho da página.
 
+Sem nenhum número do ERP, seja qual for a rotina, não use o render e nunca invente conferência: faça a sua única pergunta para pedir o arquivo e, sem ele, entregue na conversa, sem número calculado, o que viu nas outras fontes. Essa regra não vale para a ata, cujos números são citação.
+
 No Claude, briefing e sinais são artefatos que se atualizam no lugar nas execuções seguintes. Nas outras plataformas, entregue HTML autocontido. Sem nenhum dos dois, entregue em texto e diga isso em uma linha.
 
 ## 6. Ação

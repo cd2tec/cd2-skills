@@ -28,7 +28,7 @@ A comparação é período contra período nos próprios dados. O plugin não gu
 
 | Sinal | Corte padrão | De onde vem |
 |---|---|---|
-| Fornecedor atrasando | Nível de serviço abaixo de 90% em 30 dias | `references/relatorios-compras.md`, seção 3.4 |
+| Fornecedor atrasando | Coluna atendimento % abaixo de 90% em 30 dias | `references/relatorios-compras.md`, seção 3.4 |
 | Custo sem repasse | Custo subiu 5% ou mais e o preço não acompanhou | `references/relatorios-compras.md`, seção 3.5, e `references/relatorios-precos.md`, seção 3.3 |
 | Item A em ruptura | Classe A sem saldo | `references/relatorios-estoque.md`, seção 3.4, com a curva de `references/relatorios-vendas.md`, seção 3.1 |
 | Item sem giro | Com saldo e sem venda há 30 dias | `references/relatorios-estoque.md`, seção 3.5 |

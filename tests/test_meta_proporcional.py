@@ -71,7 +71,29 @@ class MetaProporcional(unittest.TestCase):
     def test_cli_devolve_json(self):
         codigo, saida = cli([linha()])
         self.assertEqual(codigo, 0)
-        self.assertEqual(json.loads(saida)[0]["atingimento_pct"], 95.0)
+        self.assertEqual(json.loads(saida)["lojas"][0]["atingimento_pct"], 95.0)
+
+    def test_loja_sem_meta_e_sem_mes_nao_derruba_as_outras(self):
+        codigo, saida = cli([linha(), {"loja": "L9", "acumulado": 10}])
+        self.assertEqual(codigo, 0)
+        lojas = json.loads(saida)["lojas"]
+        self.assertEqual(lojas[0]["situacao"], "ok")
+        self.assertEqual(lojas[1]["situacao"], "sem_meta")
+
+    def test_total_da_rede_deixa_fora_quem_nao_tem_meta(self):
+        linhas = [linha(), linha(loja="Loja 2", meta=150000, acumulado=44000), linha(loja="Loja 3", meta=None, acumulado=9000)]
+        total = mp.total_da_rede(mp.comparar(linhas, NOV8))
+        self.assertEqual(total["acumulado"], 120000.0)
+        self.assertEqual(total["meta_ate_a_data"], 120000.0)
+        self.assertEqual(total["diferenca"], 0.0)
+        self.assertEqual(total["atingimento_pct"], 100.0)
+        self.assertEqual(total["lojas_com_meta"], 2)
+        self.assertEqual(total["lojas_sem_meta"], 1)
+
+    def test_total_sem_nenhuma_meta(self):
+        total = mp.total_da_rede(mp.comparar([linha(meta=None)], NOV8))
+        self.assertIsNone(total["atingimento_pct"])
+        self.assertEqual(total["lojas_com_meta"], 0)
 
     def test_modelo_metas_tem_colunas(self):
         with (SKILL / "assets/modelo-metas.csv").open(encoding="utf-8") as fh:

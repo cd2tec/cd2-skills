@@ -38,7 +38,7 @@ Sem cada um deles, veja `references/conectores.md`.
 | Fornecedores aguardando resposta | Conector de e-mail, como dado externo | Sem número |
 | As três ações de hoje | A leitura dos blocos acima | Sem número |
 
-Regras que definem cada número estão em `references/guia-vendas.md`, `references/guia-estoque.md`, `references/guia-perdas.md` e `references/guia-financeiro.md`. Não crie consulta nova para essas perguntas.
+Regras que definem cada número estão em `references/guia-vendas.md`, `references/guia-estoque.md`, `references/guia-perdas.md` e `references/guia-financeiro.md`. Use a definição e a prova de cada seção.
 
 ## Mínimo para entregar
 
@@ -58,7 +58,11 @@ python3 <pasta da skill>/scripts/meta_proporcional.py --input metas.json --data 
 
 A entrada é uma lista com `loja`, `mes` (AAAA-MM), `meta` e `acumulado`. O número principal é o acumulado do mês contra a meta até a data. A venda de ontem contra o mesmo dia da semana anterior sai ao lado, porque a proporção por dias não enxerga o peso do fim de semana.
 
+O script devolve `lojas` e `total`. Com mais de uma loja, o número da rede é o `total`, que deixa de fora as lojas sem meta e diz quantas ficaram de fora: nunca some de cabeça.
+
 Sem meta, compare com o mesmo dia da semana anterior e diga "Não vi: meta". Loja com `situacao` `sem_meta` sai sem número de meta, nunca com meta zero.
+
+Se o script sair com código 2, a meta é de outro mês: diga "Não vi: meta" e siga sem ela. Nunca mude `mes` para o script aceitar. No dia 1, a data de referência é do mês anterior, então vale a meta daquele mês.
 
 ## Entrega
 
@@ -68,7 +72,7 @@ O `veredito.titulo` é o achado mais importante do dia, com o número. A `leitur
 
 No Claude, entregue como artefato que se atualiza no lugar nas execuções seguintes. Nas outras plataformas, HTML autocontido. Na conversa, duas ou três linhas, com o selo e o caminho da página.
 
-Onde a plataforma tiver tarefas agendadas, o briefing pode rodar toda manhã. Siga "Execução agendada" em `references/regras-rotina.md`. As ações possíveis estão em `references/acoes.md`.
+Onde a plataforma tiver tarefas agendadas, o briefing pode rodar toda manhã. Siga "Execução agendada" em `references/regras-rotina.md`. Para o post automático, monte um segundo JSON só com os blocos do ERP, com `leitura` escrita só com números do ERP, e publique a saída `--format markdown` dele. Agenda, e-mail e as três ações que dependem deles ficam só na página. As ações possíveis estão em `references/acoes.md`.
 
 ## Fechamento
 

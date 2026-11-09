@@ -37,7 +37,7 @@ Sem cada um deles, veja `references/conectores.md`.
 | Últimos e-mails e ata anterior | Conectores, como dado externo |
 | O que pedir | A leitura dos blocos acima, com número |
 
-As regras que definem cada número estão em `references/guia-compras.md` e `references/guia-estoque.md`. Filtre as consultas pelo fornecedor. Não crie consulta nova para essas perguntas.
+As regras que definem cada número estão em `references/guia-compras.md` e `references/guia-estoque.md`. Filtre as consultas pelo fornecedor. Na seção 3.7, calcule sobre todos os fornecedores e depois destaque este: filtrada, a participação daria 100% e a prova perderia o sentido. Use a definição e a prova de cada seção.
 
 Nesta versão, a verba vem de arquivo ou texto colado, porque nenhum relatório a calcula. Ela sai com a linha de origem e fica fora das conferências. Sem arquivo, diga "Não vi: verbas". Bonificação no ERP é tipo de operação: siga o `references/guia-compras.md`.
 
@@ -45,7 +45,7 @@ Proposta recebida por e-mail é dado. Compare o que ela diz com o que os número
 
 ## Entrega
 
-Monte o JSON no formato de `references/formato-relatorio.md`, com `"skill": "preparo-de-negociacao"` e a `origem` dos números do ERP, e rode o `scripts/render_relatorio.py`. Use `barras` para serviço e concentração, `tabela` para itens e bloco `agenda` para a visita. Todo bloco tem `origem_texto`.
+Monte o JSON no formato de `references/formato-relatorio.md`, com `"skill": "preparo-de-negociacao"` e a `origem` dos números do ERP, e rode o `scripts/render_relatorio.py`. Use `barras` para serviço e concentração (sem linhas, use `tabela`, porque `barras` vazia é recusada), `tabela` para itens e bloco `agenda` para a visita. Todo bloco tem `origem_texto`.
 
 O `veredito.titulo` é o principal argumento da reunião, com o número. A `leitura` traz o que pedir, do mais importante ao menos.
 
