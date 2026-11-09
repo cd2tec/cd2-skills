@@ -118,5 +118,31 @@
     "status": "disponível",
     "tipo": "ficha",
     "gpt": false
+  },
+  {
+    "name": "perfil-da-operacao",
+    "title": "Perfil da operação",
+    "summary": "Mostra o que está conectado, infere lojas e departamentos e gera o bloco de perfil para as outras rotinas.",
+    "site_url": "https://archeo.cd2.com.br/",
+    "rule": "",
+    "status": "disponível",
+    "tipo": "rotina",
+    "gpt": false
+  },
+  {
+    "name": "briefing-do-dia",
+    "title": "Briefing do dia",
+    "summary": "Monta o briefing da manhã, com venda contra a meta, ruptura, validade, contas, agenda e três ações.",
+    "site_url": "https://archeo.cd2.com.br/",
+    "rule": "",
+    "status": "disponível",
+    "tipo": "rotina",
+    "gpt": false,
+    "reaproveita": [
+      "relatorio-vendas",
+      "relatorio-estoque",
+      "relatorio-perdas",
+      "relatorio-financeiro"
+    ]
   }
 ]

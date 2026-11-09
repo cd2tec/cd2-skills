@@ -6,7 +6,7 @@ Estas são instruções para você, modelo. Valem para toda skill do tipo rotina
 
 - Trabalhe em silêncio entre as chamadas. Agrupe as leituras independentes numa rodada só e fale quando tiver o que entregar.
 - Use os nomes que o ERP usa (loja, departamento, fornecedor), mapeados como em `references/mapeamento-erp.md`. Não invente nome de campo.
-- Rotina compõe, não reimplementa. A consulta e a regra de cada número estão nos arquivos `references/relatorios-<assunto>.md` e `references/guia-<assunto>.md` que a skill cita. Rotina nunca escreve SQL próprio para uma pergunta que um relatório já responde.
+- Rotina compõe, não reimplementa. A consulta e a regra de cada número estão nos arquivos de relatórios e guias que a skill cita (relatorios-compras.md e guia-compras.md, por exemplo, na pasta references). Rotina nunca escreve SQL próprio para uma pergunta que um relatório já responde.
 - Número calculado sai de consulta ou de script, nunca de cabeça. Número dito numa reunião é citação: sai como foi dito, com o trecho de origem.
 
 ## Origem de cada bloco

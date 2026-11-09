@@ -67,5 +67,60 @@ class KitRotina(unittest.TestCase):
         self.assertIn("não grava nada", texto_kit("perfil-da-operacao.md"))
 
 
+ROTINAS = {"perfil-da-operacao", "briefing-do-dia"}
+
+
+def skill_md(nome):
+    return (CORE / "skills" / nome / "SKILL.md").read_text(encoding="utf-8")
+
+
+def item(nome):
+    return next(s for s in rotinas_no_skills_json() if s["name"] == nome)
+
+
+class CadaRotina(unittest.TestCase):
+    def test_conjunto_registrado(self):
+        self.assertEqual({s["name"] for s in rotinas_no_skills_json()}, ROTINAS)
+
+    def test_cada_rotina(self):
+        for nome in sorted(ROTINAS):
+            texto = skill_md(nome)
+            self.assertIn(f"name: {nome}\n", texto, nome)
+            self.assertIn("Obrigatório?", texto, nome)
+            self.assertIn("`references/regras-rotina.md`", texto, nome)
+            self.assertIn("`references/fluxo-rotina.md`", texto, nome)
+            self.assertIn(f"utm_campaign={nome}", texto, nome)
+            self.assertIs(item(nome)["gpt"], False, nome)
+            self.assertEqual(item(nome)["site_url"], "https://archeo.cd2.com.br/", nome)
+            self.assertEqual(item(nome)["rule"], "", nome)
+
+
+class SeuDia(unittest.TestCase):
+    def test_briefing_reaproveita(self):
+        self.assertEqual(
+            set(item("briefing-do-dia")["reaproveita"]),
+            {"relatorio-vendas", "relatorio-estoque", "relatorio-perdas", "relatorio-financeiro"},
+        )
+
+    def test_briefing_usa_a_meta_e_discrimina_painel(self):
+        texto = skill_md("briefing-do-dia")
+        self.assertIn("`scripts/meta_proporcional.py`", texto)
+        self.assertIn("painel-varejo", texto)
+        self.assertIn("mesmo dia da semana anterior", texto)
+
+    def test_briefing_minimo_e_nao_vi(self):
+        texto = skill_md("briefing-do-dia")
+        self.assertIn("um arquivo de venda basta", texto)
+        self.assertIn("Não vi:", texto)
+
+    def test_perfil_sem_numero_e_sem_painel(self):
+        texto = skill_md("perfil-da-operacao")
+        self.assertNotIn("painel inicial", texto)
+        self.assertIn("visão inicial", texto)
+        self.assertIn("sem número de negócio", texto)
+        self.assertIn("`references/perfil-da-operacao.md`", texto)
+        self.assertNotIn("reaproveita", item("perfil-da-operacao"))
+
+
 if __name__ == "__main__":
     unittest.main()

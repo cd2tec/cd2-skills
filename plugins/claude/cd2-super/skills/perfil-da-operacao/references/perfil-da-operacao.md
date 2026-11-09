@@ -1,0 +1,21 @@
+# Bloco de perfil da operação
+
+O perfil é um bloco de texto que a skill `perfil-da-operacao` gera e a pessoa salva nas instruções do projeto. O plugin não grava nada: sem o bloco nas instruções, a próxima conversa começa inferindo de novo.
+
+Toda rotina procura este bloco antes de perguntar qualquer coisa. O que a pessoa escreveu vale mais do que o que foi inferido.
+
+```text
+PERFIL DA OPERAÇÃO
+Empresa: <nome>
+Papel de quem usa: <dono, gerente, comprador, comercial, financeiro>
+Lojas: <código e nome de cada loja>
+Departamentos: <nomes como estão no ERP>
+Banco: <nome da conexão, se houver mais de uma>
+Metas: <arquivo de metas ou "loja: meta do mês">
+Horários: <abertura das lojas, hora do briefing>
+Tom da comunicação: <uma linha, como "direto e próximo, sem gíria">
+Canais de oferta: <encarte, WhatsApp, app, rádio de loja, cartaz>
+Cortes dos sinais: <só o que mudar do padrão de sinais-da-operacao>
+```
+
+Campo sem resposta fica com `a confirmar`, e a rotina segue sem ele.

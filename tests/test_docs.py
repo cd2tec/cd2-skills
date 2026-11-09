@@ -280,7 +280,7 @@ class SiteTest(unittest.TestCase):
         self.assertNotRegex(html, r"(?i)dados? (nunca )?sa[ei]m? da (sua )?empresa|nada sai da")
         # Os cards gerados mostram as doze e não fingem calculadora nos relatórios.
         block = html.split("<!-- skills:start -->")[1].split("<!-- skills:end -->")[0]
-        self.assertEqual(block.count('class="skill-card"'), 12)
+        self.assertEqual(block.count('class="skill-card"'), len(json.loads(read("skills.json"))))
         self.assertEqual(block.count("Abrir a calculadora gratuita"), 2)
 
     def test_site_contact_and_utm(self):
