@@ -68,7 +68,7 @@ class KitRotina(unittest.TestCase):
 
 
 ROTINAS = {"perfil-da-operacao", "briefing-do-dia", "preparo-de-negociacao", "ata-de-negociacao",
-           "plano-de-ofertas", "comunicacao-de-ofertas"}
+           "plano-de-ofertas", "comunicacao-de-ofertas", "sinais-da-operacao"}
 
 
 def skill_md(nome):
@@ -185,6 +185,30 @@ class Ofertas(unittest.TestCase):
 
     def test_comunicacao_sem_reaproveita(self):
         self.assertNotIn("reaproveita", item("comunicacao-de-ofertas"))
+
+
+class Sinais(unittest.TestCase):
+    def test_sinais_reaproveita(self):
+        self.assertEqual(
+            set(item("sinais-da-operacao")["reaproveita"]),
+            {"relatorio-compras", "relatorio-precos", "relatorio-estoque", "relatorio-vendas", "relatorio-perdas"},
+        )
+
+    def test_sinais_cortes_padrao(self):
+        texto = skill_md("sinais-da-operacao")
+        for corte in ("90%", "5%", "30 dias", "4 semanas"):
+            self.assertIn(corte, texto)
+
+    def test_sinais_so_propoe(self):
+        self.assertIn("nunca age sozinha", skill_md("sinais-da-operacao"))
+
+    def test_sinais_sem_estado(self):
+        texto = skill_md("sinais-da-operacao")
+        self.assertIn("período contra período", texto)
+        self.assertIn("não guarda nada", texto)
+
+    def test_sinais_ponte_ficha(self):
+        self.assertIn("ficha-archeo-mcp", skill_md("sinais-da-operacao"))
 
 
 if __name__ == "__main__":

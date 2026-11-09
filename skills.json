@@ -146,6 +146,23 @@
     ]
   },
   {
+    "name": "sinais-da-operacao",
+    "title": "Sinais da operação",
+    "summary": "Aponta o que mudou e merece atenção, como fornecedor atrasando, custo sem repasse e margem negativa.",
+    "site_url": "https://archeo.cd2.com.br/",
+    "rule": "",
+    "status": "disponível",
+    "tipo": "rotina",
+    "gpt": false,
+    "reaproveita": [
+      "relatorio-compras",
+      "relatorio-precos",
+      "relatorio-estoque",
+      "relatorio-vendas",
+      "relatorio-perdas"
+    ]
+  },
+  {
     "name": "preparo-de-negociacao",
     "title": "Preparo de negociação",
     "summary": "Prepara a visita de um fornecedor, com compra, custo, serviço, ruptura e o que pedir.",
