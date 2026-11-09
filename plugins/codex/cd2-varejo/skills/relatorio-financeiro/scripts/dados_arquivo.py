@@ -44,6 +44,8 @@ _RE_TOTAL = re.compile(
     r"^\s*(sub\s*-?\s*total(\s+.*)?|total|totais|soma|total\s+geral|total\s+d[aoe]s?\b.*"
     r"|total\s+(depto|departamento|loja|filial|grupo|secao|categoria|fornecedor|cliente|vendedor|mes|dia)(\s*\d+)?)\s*:?\s*$",
     re.IGNORECASE)
+# Mais largo que _RE_TOTAL: pega "Total Depto Mercearia" e tambem "Total Clean Detergente". Sozinho nunca move linha.
+_RE_TOTAL_AMPLO = re.compile(r"^\s*total\s+\S+", re.IGNORECASE)
 _DATAS_ZERADAS = ("00/00/0000", "00/00/00", "00.00.0000", "0000-00-00")
 _RE_CPF = re.compile(r"^\d{3}\.\d{3}\.\d{3}-\d{2}$")
 _RE_DATA_BR = re.compile(r"^(\d{1,2})[/.-](\d{1,2})[/.-](\d{4}|\d{2})(?:[ T](\d{1,2}):(\d{2})(?::(\d{2}))?)?$")
@@ -422,6 +424,39 @@ def _fecha_grupos(dados: list[list[str]], chave: tuple[int, str]) -> bool:
     return bool(colunas) and all(_soma_fecha(total, g, j) for j in colunas for total, g in grupos)
 
 
+def _indice_total_amplo(celulas: list[str]) -> int | None:
+    return next((i for i, c in enumerate(celulas) if _RE_TOTAL_AMPLO.match(_sem_acento(str(c)))), None)
+
+
+def _comeca_com_total(celulas: list[str]) -> bool:
+    primeira = next((c for c in celulas if c), "")
+    return bool(_RE_TOTAL_AMPLO.match(_sem_acento(str(primeira))))
+
+
+def _fecha_toda_coluna(total: list[str], grupo: list[list[str]]) -> bool:
+    colunas = [j for j, c in enumerate(total) if normalizar_numero(str(c))]
+    return bool(colunas) and all(_soma_fecha(total, grupo, j) for j in colunas)
+
+
+def _totais_com_nome(dados: list[list[str]]) -> set[int]:
+    """Linhas "Total <palavra>" que sao total de fato (id de cada uma), como Total Depto Mercearia.
+
+    O nome nao separa de produto (Total Clean Detergente), entao a prova e a conta: duas ou mais dessas linhas
+    fecham, em toda coluna numerica, a soma de ao menos duas linhas acima, desde o total anterior. A que nao
+    fecha conta como linha comum do grupo. Um fechamento so pode ser coincidencia e nao move nada.
+    """
+    fechadas, atual = [], []
+    for l in dados:
+        if _indice_rotulo(l) is not None:
+            atual = []
+        elif _comeca_com_total(l) and len(atual) >= 2 and _fecha_toda_coluna(l, atual):
+            fechadas.append(l)
+            atual = []
+        else:
+            atual.append(l)
+    return {id(l) for l in fechadas} if len(fechadas) >= 2 else set()
+
+
 class _ContextoTotais:
     """O que a regra de total precisa saber da tabela inteira.
 
@@ -435,7 +470,8 @@ class _ContextoTotais:
     """
 
     def __init__(self, dados: list[list[str]]):
-        comuns = [l for l in dados if _indice_rotulo(l) is None and not _sem_rotulo(l)]
+        self.com_nome = _totais_com_nome(dados)
+        comuns = [l for l in dados if _indice_rotulo(l) is None and not _sem_rotulo(l) and id(l) not in self.com_nome]
         largura = len(dados[0]) if dados else 0
         self.densas = {j for j in range(largura) if comuns and sum(1 for l in comuns if l[j]) >= 0.9 * len(comuns)}
         rotuladas = collections.defaultdict(list)
@@ -462,6 +498,8 @@ def e_linha_total(celulas: list[str], contexto: _ContextoTotais | None = None) -
     O rotulo e a primeira celula preenchida, ou a linha deixa vazia uma coluna densa. Sem contexto, vale so a
     primeira condicao. Rotulo que e categoria da coluna (Baixa=Total) nao faz da linha um total.
     """
+    if contexto is not None and id(celulas) in contexto.com_nome:
+        return True
     indice = _indice_rotulo(celulas)
     if indice is None or not any(normalizar_numero(str(c)) is not None for c in celulas):
         return False
@@ -648,16 +686,25 @@ def _indice_do_cabecalho(linhas: list[list[str]], cabecalho: int | None, arquivo
 
 
 def _avisar_rotulos_na_principal(principais, originais, arquivo: str, avisos: list[str]) -> None:
-    """Linha com rotulo de total e numero que ficou na tabela: a soma pode contar em dobro, e so a pessoa sabe."""
+    """Linha com cara de total e numero que ficou na tabela: a soma pode contar em dobro, e so a pessoa sabe.
+
+    Rotulo conhecido avisa um por rotulo. "Total <palavra>" pode ser produto, e avisa uma vez por coluna.
+    """
     ficaram = collections.defaultdict(list)
     for l in principais:
+        if not any(normalizar_numero(c) is not None for c in l):
+            continue
         indice = _indice_rotulo(l)
-        if indice is not None and any(normalizar_numero(c) is not None for c in l):
+        if indice is not None:
             ficaram[_chave_rotulo(l, indice)].append(l[indice])
-    for (indice, _), rotulos in ficaram.items():
-        avisos.append(f"{arquivo}: na coluna \"{originais[indice]}\", {len(rotulos)} linha(s) com o rótulo "
-                      f"\"{rotulos[0]}\" ficaram na tabela. Se forem totais, a soma conta em dobro: pergunte à pessoa "
-                      "e, se forem, filtre essas linhas na consulta antes de calcular.")
+        elif (amplo := _indice_total_amplo(l)) is not None:
+            ficaram[(amplo, None)].append(l[amplo])
+    for (indice, rotulo), celulas in ficaram.items():
+        citada = _linha_para_aviso([celulas[0]])
+        descricao = f"com o rótulo \"{citada}\"" if rotulo is not None else f"que começam com \"Total\", como \"{citada}\","
+        avisos.append(f"{arquivo}: na coluna \"{originais[indice]}\", {len(celulas)} linha(s) {descricao} ficaram na "
+                      "tabela. Se forem totais, a soma conta em dobro: pergunte à pessoa e, se forem, filtre essas "
+                      "linhas na consulta antes de calcular.")
 
 
 def _carregar_um(con, caminho: Path, tabela: str, avisos: list[str], linha_cabecalho: int | None = None) -> dict:

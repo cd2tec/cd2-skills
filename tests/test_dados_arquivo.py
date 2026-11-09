@@ -676,6 +676,111 @@ class TestTotaisReexame(Base):
         self.assertEqual(self.soma(), 15.0)
 
 
+class TestTotalComNome(Base):
+    def carga(self, conteudo):
+        arq = self.csv("t.csv", conteudo)
+        perfil = carregar([arq], self.base)
+        return perfil, perfil["tabelas"][0]
+
+    def soma(self):
+        return self.sql("SELECT ROUND(SUM(valor), 2) FROM t")["linhas"][0][0]
+
+    def dobro(self, perfil):
+        return [a for a in perfil["avisos"] if "dobro" in a]
+
+    def confere_movido(self, conteudo, soma, linhas, totais):
+        perfil, tab = self.carga(conteudo)
+        self.assertEqual(self.soma(), soma)
+        self.assertEqual((tab["linhas"], tab["linhas_total"]), (linhas, totais))
+        self.assertEqual(self.dobro(perfil), [])
+
+    def test_total_depto_em_coluna_de_depto(self):
+        # 1 + 2 + 1 + 2 = 6; os dois totais de 3 ficam fora.
+        self.confere_movido("Depto;Produto;Valor\nMercearia;Arroz;1,00\nMercearia;Feijao;2,00\nTotal Depto Mercearia;;3,00\n"
+                            "Frios;Queijo;1,00\nFrios;Presunto;2,00\nTotal Depto Frios;;3,00\n", 6.0, 4, 2)
+
+    def test_total_depto_na_primeira_coluna_com_produtos(self):
+        # 1 + 2 + 1 + 2 = 6; a quantidade também fecha: 1 + 1 = 2.
+        self.confere_movido("Produto;Qtd;Valor\nArroz;1;1,00\nFeijao;1;2,00\nTotal Depto Mercearia;2;3,00\n"
+                            "Queijo;1;1,00\nSal;1;2,00\nTotal Depto Frios;2;3,00\n", 6.0, 4, 2)
+
+    def test_total_grupo_em_coluna_propria(self):
+        # 10 + 20 + 10 + 20 = 60.
+        self.confere_movido("Grupo;Produto;Valor\nAlimentos;Arroz;10,00\nAlimentos;Feijao;20,00\nTotal Grupo Alimentos;;30,00\n"
+                            "Limpeza;Sabao;10,00\nLimpeza;Pano;20,00\nTotal Grupo Limpeza;;30,00\n", 60.0, 4, 2)
+
+    def test_total_grupo_na_primeira_coluna_com_produtos(self):
+        # 10 + 20 + 10 + 20 = 60.
+        self.confere_movido("Produto;Qtd;Valor\nArroz;1;10,00\nFeijao;1;20,00\nTotal Grupo Alimentos;2;30,00\n"
+                            "Sabao;1;10,00\nPano;1;20,00\nTotal Grupo Alimentos;2;30,00\n", 60.0, 4, 2)
+
+    def test_coincidencia_unica_fica_e_avisa(self):
+        # 10 + 10 + 20 = 40: uma só linha fechando não é evidência.
+        perfil, tab = self.carga("Produto;Qtd;Valor\nArroz;1;10,00\nFeijao;1;10,00\nTotal Clean Detergente;2;20,00\n")
+        self.assertEqual(self.soma(), 40.0)
+        self.assertEqual((tab["linhas"], tab["linhas_total"]), (3, 0))
+        aviso = self.dobro(perfil)
+        self.assertEqual(len(aviso), 1)
+        self.assertIn('"Produto"', aviso[0])
+        self.assertIn("Total Clean Detergente", aviso[0])
+
+    def test_um_total_depto_so_fica_e_avisa(self):
+        # 1 + 2 + 3 = 6: sem segundo fechamento, nada sai da tabela.
+        perfil, tab = self.carga("Depto;Produto;Valor\nMercearia;Arroz;1,00\nMercearia;Feijao;2,00\nTotal Depto Mercearia;;3,00\n")
+        self.assertEqual(self.soma(), 6.0)
+        self.assertEqual(tab["linhas_total"], 0)
+        self.assertTrue(self.dobro(perfil))
+
+    def test_produto_total_dia_so_avisa(self):
+        # 5 + 7 = 12.
+        perfil, tab = self.carga("Produto;Valor\nTotal Dia Sabonete;5,00\nArroz;7,00\n")
+        self.assertEqual(self.soma(), 12.0)
+        self.assertEqual((tab["linhas"], tab["linhas_total"]), (2, 0))
+        aviso = self.dobro(perfil)
+        self.assertTrue(aviso and "Total Dia Sabonete" in aviso[0])
+
+    def test_grupo_de_uma_linha_nao_fecha(self):
+        # 5 + 5 + 7 + 7 = 24: dois fechamentos, mas cada um com uma linha só.
+        perfil, tab = self.carga("Produto;Qtd;Valor\nArroz;1;5,00\nTotal Alfa;1;5,00\nFeijao;1;7,00\nTotal Beta;1;7,00\n")
+        self.assertEqual(self.soma(), 24.0)
+        self.assertEqual(tab["linhas_total"], 0)
+        self.assertTrue(self.dobro(perfil))
+
+    def test_coluna_numerica_que_nao_fecha_impede(self):
+        # Valor fecha, Qtd (9) não: 1 + 2 + 3 + 1 + 2 + 3 = 12.
+        perfil, tab = self.carga("Produto;Qtd;Valor\nArroz;1;1,00\nFeijao;1;2,00\nTotal Depto A;9;3,00\n"
+                                 "Queijo;1;1,00\nSal;1;2,00\nTotal Depto B;9;3,00\n")
+        self.assertEqual(self.soma(), 12.0)
+        self.assertEqual(tab["linhas_total"], 0)
+        self.assertTrue(self.dobro(perfil))
+
+    def test_produto_com_total_no_nome_entra_na_soma_do_grupo(self):
+        # 1 + 2 fecham em 3 mesmo com o produto Total Clean no grupo: 1 + 2 + 1 + 2 = 6.
+        perfil, tab = self.carga("Produto;Qtd;Valor\nArroz;1;1,00\nTotal Clean;1;2,00\nTotal Depto A;2;3,00\n"
+                                 "Queijo;1;1,00\nSal;1;2,00\nTotal Depto B;2;3,00\n")
+        self.assertEqual(self.soma(), 6.0)
+        self.assertEqual((tab["linhas"], tab["linhas_total"]), (4, 2))
+        aviso = self.dobro(perfil)
+        self.assertEqual(len(aviso), 1)
+        self.assertIn("Total Clean", aviso[0])
+
+    def test_varios_produtos_geram_um_aviso_por_coluna(self):
+        # 1 + 2 + 3 + 4 = 10.
+        perfil, _ = self.carga("Produto;Valor\nTotal Alfa;1,00\nTotal Beta;2,00\nTotal Gama;3,00\nArroz;4,00\n")
+        self.assertEqual(self.soma(), 10.0)
+        aviso = self.dobro(perfil)
+        self.assertEqual(len(aviso), 1)
+        self.assertIn("3 linha", aviso[0])
+
+    def test_acento_e_caixa_nao_importam_no_aviso(self):
+        perfil, _ = self.carga("Produto;Valor\nTOTÁL Depósito;1,00\nArroz;4,00\n")
+        self.assertTrue(self.dobro(perfil))
+
+    def test_palavra_total_sozinha_ou_no_meio_nao_avisa(self):
+        perfil, _ = self.carga("Produto;Valor\nSubtotalzinho;1,00\nArroz Total;4,00\n")
+        self.assertEqual(self.dobro(perfil), [])
+
+
 class TestDataZerada(Base):
     def carga(self):
         linhas = "".join(f"{i};{'00/00/0000' if i <= 12 else f'{i:02d}/01/2026'}\n" for i in range(1, 21))
