@@ -36,7 +36,9 @@ README.md e os cards do docs/index.html, entre os marcadores
 
 O --check falha quando: alguma cópia difere; um instructions.md de GPT passa de
 8.000 caracteres; o name do frontmatter difere da pasta; um manifesto tem nome,
-versão ou licença diferente do core e de CC-BY-NC-ND-4.0; uma referência entre
+versão ou licença diferente do core e de CC-BY-NC-ND-4.0; o name ou a description
+do frontmatter quebram o YAML (': ' ou caractere especial no início, sem aspas);
+uma referência entre
 crases aponta para arquivo inexistente; ou sobra placeholder de UTM nas cópias.
 Um arquivo de shared/ ou de um kit com o mesmo caminho de um arquivo da skill
 (ou de outro kit) também é erro: o compartilhado nunca sobrescreve nada. Kit
@@ -68,6 +70,8 @@ GPT_LIMIT = 8000
 JUNK_DIRS = {"__pycache__"}
 JUNK_FILES = {".DS_Store"}
 IGNORED = shutil.ignore_patterns("__pycache__", "*.pyc", ".DS_Store")
+# Caracteres que não podem abrir um valor de YAML sem aspas.
+YAML_INDICATORS = "!&*[]{}#|>%@`,'\""
 # Caminho relativo entre crases apontando para um arquivo da skill.
 REF_PATTERN = re.compile(r"`((?:\.\./|references/|assets/|scripts/)[^`\s]+\.(?:md|py|html|json))`")
 LAYOUTS = ("plugin", "flat-skills", "gpt")
@@ -254,7 +258,23 @@ def check_frontmatter(core: Path) -> list[str]:
             problems.append(f"{shown(skill_md, ROOT)}: name diferente da pasta '{folder}'")
         if not re.search(r"^description:\s*\S", front, re.M):
             problems.append(f"{shown(skill_md, ROOT)}: sem description")
+        for campo in ("name", "description"):
+            found = re.search(rf"^{campo}:\s*(.+)$", front, re.M)
+            motivo = yaml_scalar_problem(found.group(1).strip()) if found else None
+            if motivo:
+                problems.append(f"{shown(skill_md, ROOT)}: {campo} {motivo}")
     return problems
+
+
+def yaml_scalar_problem(value: str) -> str | None:
+    """Por que um valor de frontmatter sem aspas quebra num leitor de YAML. Só biblioteca padrão, sem parser."""
+    if len(value) >= 2 and value[0] == value[-1] and value[0] in "\"'":
+        return None
+    if ": " in value or value.endswith(":"):
+        return "tem ': ' sem aspas, o YAML recusa"
+    if value[0] in YAML_INDICATORS or value[:2] in ("- ", "? "):
+        return f"começa com '{value[0]}' sem aspas, o YAML recusa"
+    return None
 
 
 def check_skills_json(skills: list[dict]) -> list[str]:

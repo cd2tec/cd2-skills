@@ -13,7 +13,8 @@ Relatório sem prova não sai: sai com código 2 e {"errors": [...]} em portugu�
 
 O selo da prova depende da origem dos dados. Com `origem` banco ou outro-mcp, a
 prova fechada vale contra o banco conectado. Com arquivo ou digitado, o relatório
-só foi conferido contra o arquivo, e nenhuma saída diz "Prova fechada".
+só foi conferido contra o arquivo: nenhuma saída diz "Prova fechada" e o título
+da seção é "Conferência".
 """
 from __future__ import annotations
 
@@ -48,6 +49,7 @@ TITULOS_SKILL = {
     "fiscal": "Relatório fiscal", "contabil": "Relatório contábil",
 }
 BANCO = ("banco", "outro-mcp")
+SKILLS_CONFERENCIA = ("relatorio-fiscal", "relatorio-contabil")
 SELO_ARQUIVO = "Conferido só contra o arquivo"
 NOTA_ARQUIVO = "Os números batem entre si, mas não foram comparados com o sistema de origem."
 LEITURA_POR_ORIGEM = {"banco": "DO SEU BANCO", "outro-mcp": "DO SEU BANCO", "arquivo": "DO SEU ARQUIVO", "digitado": "DOS SEUS DADOS"}
@@ -241,6 +243,10 @@ def validar(rel) -> list[str]:
         blocos = []
     for indice, bloco in enumerate(blocos or []):
         _validar_bloco(bloco, indice, erros)
+    if origem in ("arquivo", "digitado"):
+        for campo in ("veredito", "resumo", "leitura"):
+            if any("prova fechada" in t.lower() for t in _textos(rel.get(campo))):
+                erros.append(f"'{campo}' diz \"Prova fechada\", mas a origem é {origem}. Escreva \"Conferido só contra o arquivo\".")
     if any(CPF.search(t) for t in _textos(rel)):
         erros.append("Há CPF sem máscara no relatório. Use ***.123.456-**.")
     return erros
@@ -585,7 +591,7 @@ def _hero_html(rel, resultado):
         numeros = (f'<div class="veredito-numeros"><div><p class="stat stat-sm num">{esc(f["esperado"])}</p><p class="stat-line">esperado</p></div>'
                    f'<div><p class="stat stat-sm num">{esc(f["obtido"])}</p><p class="stat-line">obtido</p></div>'
                    f'<div><p class="stat stat-sm num">{esc(f["diferenca"])}</p><p class="stat-line">diferença</p></div></div>')
-    alerta = (f'<section class="bloco b-red" role="alert" aria-labelledby="v"><span class="selo">Prova não fechou</span>'
+    alerta = (f'<section class="bloco b-red" role="alert" aria-labelledby="v"><span class="selo">{_nome_prova(rel)} não fechou</span>'
               f'<h1 class="display-lg" id="v">Este relatório ainda não fechou</h1>'
               f'<p class="veredito-sub">{esc(f["nome"])}{esc(resto)}. Investigue a diferença antes de decidir com os números abaixo.</p>{numeros}</section>')
     pendente = (f'<section class="bloco b-raised" aria-labelledby="v2"><p class="eyebrow">O QUE OS NÚMEROS INDICAM, A CONFERIR</p>'
@@ -609,7 +615,7 @@ def _leitura_html(leitura, grifo):
             f'<span class="grifo">{esc(grifo)}</span><h2 class="heading-md" id="t-leitura">Leitura</h2><ol class="leit">{itens}</ol></section>')
 
 
-def _prova_html(prova, resultado):
+def _prova_html(prova, resultado, titulo):
     linhas = []
     for r in resultado:
         pill = f'<span class="pill ok">{CHECK}Fechou</span>' if r["fechou"] else '<span class="pill falha">Não fechou</span>'
@@ -617,7 +623,7 @@ def _prova_html(prova, resultado):
                       f'<td class="n" data-label="Obtido">{esc(r["obtido"])}</td><td class="n" data-label="Diferença">{esc(r["diferenca"])}</td>'
                       f'<td data-label="Situação">{pill}</td></tr>')
     tol = brand.numero(prova.get("tolerancia_pct", TOLERANCIA_PADRAO), 1).replace(",0", "")
-    return ('<section class="bloco b-raised" aria-labelledby="t-prova"><div class="secao-topo"><h2 class="heading-md" id="t-prova">Prova</h2>'
+    return (f'<section class="bloco b-raised" aria-labelledby="t-prova"><div class="secao-topo"><h2 class="heading-md" id="t-prova">{titulo}</h2>'
             f'<p class="body-sm mut">Tolerância de {tol}%, salvo indicação na conferência.</p></div>'
             '<table class="tabela"><thead><tr><th scope="col">Conferência</th><th scope="col" class="n">Esperado</th><th scope="col" class="n">Obtido</th>'
             f'<th scope="col" class="n">Diferença</th><th scope="col">Situação</th></tr></thead><tbody>{"".join(linhas)}</tbody></table></section>')
@@ -669,6 +675,16 @@ def _titulo_skill(rel):
 
 def _com_banco(rel):
     return rel["origem"] in BANCO
+
+
+def _nome_prova(rel):
+    """Título da prova. Arquivo e digitado não têm prova contra a origem: têm conferência."""
+    return "Prova" if _com_banco(rel) else "Conferência"
+
+
+def _tem_aviso_conferencia(rel):
+    """Fiscal e contábil sempre levam o aviso, mesmo que o JSON esqueça o campo."""
+    return rel["skill"] in SKILLS_CONFERENCIA or bool(rel.get("conferencia"))
 
 
 def _selo(rel, resultado):
@@ -723,13 +739,13 @@ def render_html(rel, tema="auto", plataforma="Claude"):
     gerado = brand.data_br(rel["gerado_em"])
     topo = (f'<header class="topo"><div>{brand.logo_html()}</div><div class="topo-meta"><p class="eyebrow">{esc(rel["area"].upper())}</p>'
             f'<p class="para">{esc(rel["cliente"])}</p><p class="caption">Fonte: {esc(_fonte_texto(rel))}. Gerado em {esc(gerado)}.</p></div></header>')
-    avisos = ([AVISO_CONFERENCIA] if rel.get("conferencia") else []) + list(rel.get("avisos") or [])
+    avisos = ([AVISO_CONFERENCIA] if _tem_aviso_conferencia(rel) else []) + list(rel.get("avisos") or [])
     avisos_html = "".join(f'<p class="aviso-topo" role="note">{esc(a)}</p>' for a in avisos)
     dl = "".join(f"<div><dt>{r}</dt><dd>{esc(recorte[c])}</dd></div>" for r, c in (("Unidade", "unidade"), ("Período", "periodo"), ("Recorte", "filtros"), ("Nível", "nivel")))
     corpo = [topo, avisos_html, _hero_html(rel, resultado), f'<dl class="recorte">{dl}</dl>', _resumo_html(rel["resumo"]),
              _leitura_html(rel["leitura"], LEITURA_POR_ORIGEM[rel["origem"]])]
     corpo += [_bloco_html(b, i) for i, b in enumerate(rel.get("blocos") or [])]
-    corpo += [_prova_html(rel["prova"], resultado), _premissas_html(rel["premissas"]), _proximos_html(rel.get("proximos")),
+    corpo += [_prova_html(rel["prova"], resultado, _nome_prova(rel)), _premissas_html(rel["premissas"]), _proximos_html(rel.get("proximos")),
               _html_comercial(rel, plataforma), brand.footer_dados_html(rel["origem"], gerado)]
     valores = {
         "THEME_ATTR": f' data-theme="{tema}"' if tema in ("light", "dark") else "",
@@ -789,12 +805,12 @@ def render_markdown(rel, plataforma="Claude"):
     fechou = all(r["fechou"] for r in resultado)
     saida = [f'**{rel["titulo"]}**', f'Fonte: {_fonte_texto(rel)}',
              f'Recorte: {recorte["unidade"]} | {recorte["periodo"]} | {recorte["filtros"]} | {recorte["nivel"]}', ""]
-    if rel.get("conferencia"):
+    if _tem_aviso_conferencia(rel):
         saida += [AVISO_CONFERENCIA, ""]
     saida += [str(a) for a in rel.get("avisos") or []] + ([""] if rel.get("avisos") else [])
     if not fechou:
         falha = next(r for r in resultado if not r["fechou"])
-        saida += [f'**A prova não fechou: {falha["nome"]}.** Investigue a diferença antes de decidir com os números abaixo.', ""]
+        saida += [f'**A {_nome_prova(rel).lower()} não fechou: {falha["nome"]}.** Investigue a diferença antes de decidir com os números abaixo.', ""]
     if fechou:
         saida += [f'**{_selo(rel, resultado)}**'] + ([] if _com_banco(rel) else [NOTA_ARQUIVO]) + [""]
     saida += [f'**{rel["veredito"]["titulo"]}**'] + ([rel["veredito"]["texto"]] if rel["veredito"].get("texto") else []) + [""]
@@ -809,7 +825,7 @@ def render_markdown(rel, plataforma="Claude"):
                 saida.append(f"Mostrando {MAX_LINHAS_PAGINA} de {brand.numero(len(linhas))} linhas. O restante vai na planilha.")
         saida.append("")
     saida += ["**Leitura**"] + [f'{i}. {item["texto"]}' for i, item in enumerate(rel["leitura"], 1)] + [""]
-    saida += ["**Prova**"]
+    saida += [f"**{_nome_prova(rel)}**"]
     for r in resultado:
         estado = "fechou" if r["fechou"] else "não fechou"
         detalhe = f'esperado {r["esperado"]}, obtido {r["obtido"]}, diferença {r["diferenca"]}' if r["esperado"] else r["diferenca"]
@@ -838,7 +854,7 @@ def render_whatsapp(rel, plataforma="Claude"):
         saida.append(f'{numeros[0].get("legenda", "").capitalize()}: {formatar(numeros[0].get("valor"), numeros[0].get("formato"))}.')
     saida += ["", "O que olhar primeiro:"]
     saida += [f'{i}. {item["texto"]}' for i, item in enumerate(rel["leitura"][:3], 1)]
-    saida += ["", f"Prova: {prova}." if prova else f"{SELO_ARQUIVO}."]
+    saida += ["", f"{_nome_prova(rel)}: {prova}." if prova else f"{SELO_ARQUIVO}."]
     saida += [""] + _linhas_comercial(rel, plataforma)
     saida += ["", brand.footer_dados_text(rel["origem"], brand.data_br(rel["gerado_em"]))]
     return "\n".join(saida) + "\n"
@@ -864,7 +880,7 @@ def render_csv(rel):
     linhas = [[_csv_texto(rel["titulo"]), _csv_texto(rel["cliente"])], [_csv_texto("Fonte: " + _fonte_texto(rel))]]
     recorte = rel["recorte"]
     linhas.append([_csv_texto(f'{recorte["unidade"]} | {recorte["periodo"]} | {recorte["filtros"]} | {recorte["nivel"]}')])
-    linhas.append(["Selo", _csv_texto(_selo(rel, resultado) or "Prova não fechou")])
+    linhas.append(["Selo", _csv_texto(_selo(rel, resultado) or f"{_nome_prova(rel)} não fechou")])
     linhas += [[], ["Resumo"]] + [[_csv_texto(r.get("rotulo")), _csv_valor(r.get("valor"), r.get("formato"))] for r in rel["resumo"]]
     for bloco in rel.get("blocos") or []:
         colunas, dados, total = _linhas_bloco(bloco)
@@ -872,7 +888,7 @@ def render_csv(rel):
         linhas += [[_csv_valor(d.get(c["campo"]), c.get("formato")) for c in colunas] for d in dados]
         if total:
             linhas.append([_csv_valor(total.get(c["campo"]), c.get("formato")) for c in colunas])
-    linhas += [[], ["Prova"], ["Conferência", "Esperado", "Obtido", "Diferença", "Situação"]]
+    linhas += [[], [_nome_prova(rel)], ["Conferência", "Esperado", "Obtido", "Diferença", "Situação"]]
     linhas += [[_csv_texto(r["nome"]), _csv_texto(r["esperado"]), _csv_texto(r["obtido"]), _csv_texto(r["diferenca"]), "Fechou" if r["fechou"] else "Não fechou"] for r in resultado]
     premissas = rel["premissas"]
     linhas += [[], ["Premissas"]] + [[_csv_texto(t)] for t in (premissas.get("filtros") or []) + (premissas.get("qualidade") or []) + _indisponiveis(premissas)]
@@ -918,8 +934,7 @@ def main(argv=None) -> int:
     Path(args.output).write_text(saida, encoding="utf-8", newline="")
     fechou = all(r["fechou"] for r in avaliar_prova(rel["prova"]))
     # Relatório de arquivo ou digitado nunca é descrito como provado, nem no texto que o CLI devolve.
-    rotulo = "Prova" if _com_banco(rel) else "Conferência"
-    print(f"OK: {args.output} ({len(saida) // 1024} KB). {rotulo}: {'fechou' if fechou else 'NÃO FECHOU'}.")
+    print(f"OK: {args.output} ({len(saida) // 1024} KB). {_nome_prova(rel)}: {'fechou' if fechou else 'NÃO FECHOU'}.")
     return 0
 
 

@@ -96,6 +96,13 @@ class Painel(unittest.TestCase):
         self.assertIn("os dados do banco conectado", banco)
         self.assertNotIn("Conferido só contra o arquivo", banco)
 
+    def test_digitado_tem_o_mesmo_selo_do_relatorio(self):
+        cfg = {**CONFIG_ARQUIVO, "origem": "digitado", "fonte": {"nome": "números informados na conversa"}}
+        res, html = construir(cfg)
+        self.assertEqual(res.returncode, 0, res.stdout)
+        self.assertIn("Conferido só contra o arquivo", html)
+        self.assertNotIn("Prova fechada", html)
+
     def test_painel_sem_conexao_so_snapshot(self):
         for origem in ("arquivo", "digitado"):
             live = {**CONFIG_ARQUIVO, "origem": origem, "modo": "live", "live": {"server": "s", "tool": "t"}}

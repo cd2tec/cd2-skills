@@ -439,6 +439,200 @@ class TestXlsx(Base):
             carregar([ruim], self.base)
 
 
+class TestCabecalho(Base):
+    def colunas(self, perfil):
+        return [c["nome"] for c in perfil["tabelas"][0]["colunas"]]
+
+    def test_titulo_e_periodo_antes_do_cabecalho(self):
+        arq = self.csv("v.csv", "Relatório de vendas\nPeriodo:;01/01/2026 a 31/01/2026\n"
+                                "Loja;Produto;Valor\nA;X;100,00\nB;Y;200,00\n")
+        perfil = carregar([arq], self.base)
+        self.assertEqual(self.colunas(perfil), ["loja", "produto", "valor"])
+        self.assertEqual(perfil["tabelas"][0]["linhas"], 2)
+        self.assertEqual(self.sql("SELECT SUM(valor) FROM v")["linhas"][0][0], 300.0)
+        aviso = [a for a in perfil["avisos"] if "antes do cabeçalho" in a]
+        self.assertEqual(len(aviso), 1)
+        self.assertIn("Relatório de vendas", aviso[0])
+        self.assertIn("Periodo:", aviso[0])
+
+    def test_vazias_a_direita_nao_contam_na_largura(self):
+        arq = self.csv("v.csv", "Titulo;;;\nEmissao;hoje;;\nA;B;C;D\n1;2;3;4\n5;6;7;8\n")
+        self.assertEqual(self.colunas(carregar([arq], self.base)), ["a", "b", "c", "d"])
+
+    def test_aviso_cita_no_maximo_tres_linhas(self):
+        arq = self.csv("v.csv", "L1\nL2\nL3\nL4\nL5\nA;B;C\n1;2;3\n4;5;6\n")
+        perfil = carregar([arq], self.base)
+        aviso = [a for a in perfil["avisos"] if "antes do cabeçalho" in a][0]
+        self.assertIn("5", aviso)
+        self.assertIn("L3", aviso)
+        self.assertNotIn("L4", aviso)
+
+    def test_periodo_com_dois_pontos_nao_vira_cabecalho_de_duas_colunas(self):
+        arq = self.csv("v.csv", "Titulo\nPeriodo:;01/01/2026 a 31/01/2026\nItem;Valor\nA;1,00\nB;2,00\n")
+        self.assertEqual(self.colunas(carregar([arq], self.base)), ["item", "valor"])
+
+    def test_cabecalho_mais_largo_que_as_linhas_de_dado(self):
+        # Última coluna quase vazia: a largura dominante é menor que a do cabeçalho.
+        arq = self.csv("v.csv", "Cod;Nome;Grupo;Valor;Obs\nA;Arroz;Merc;1,00;\nB;Pao;Merc;2,00;\nC;Sal;Merc;3,00;x\n")
+        perfil = carregar([arq], self.base)
+        self.assertEqual(self.colunas(perfil), ["cod", "nome", "grupo", "valor", "obs"])
+        self.assertEqual(perfil["tabelas"][0]["linhas"], 3)
+        self.assertFalse(any("antes do cabeçalho" in a for a in perfil["avisos"]))
+
+    def test_cabecalho_com_anos_cai_na_primeira_linha_da_largura(self):
+        arq = self.csv("v.csv", "Comparativo\nProduto;2025;2026\nArroz;1;2\nPao;3;4\n")
+        self.assertEqual(self.colunas(carregar([arq], self.base)), ["produto", "c_2025", "c_2026"])
+
+    def test_cpf_em_linha_descartada_nao_vai_para_o_aviso(self):
+        arq = self.csv("v.csv", "Cliente 123.456.789-09\nA;B\n1;2\n3;4\n")
+        perfil = carregar([arq], self.base)
+        self.assertNotIn("123.456.789-09", json.dumps(perfil, ensure_ascii=False))
+        self.assertTrue(any("***.456.789-**" in a for a in perfil["avisos"]))
+
+    def test_opcao_cabecalho(self):
+        arq = self.csv("v.csv", "a;b;c\nx;y;z\n1;2;3\n")
+        perfil = carregar([arq], self.base, cabecalho=2)
+        self.assertEqual(self.colunas(perfil), ["x", "y", "z"])
+        self.assertEqual(perfil["tabelas"][0]["linhas"], 1)
+
+    def test_opcao_cabecalho_fora_do_arquivo_ou_em_linha_vazia(self):
+        arq = self.csv("v.csv", "a;b\n\n1;2\n")
+        for linha in (0, 2, 9):
+            with self.assertRaises(ErroDados, msg=linha):
+                carregar([arq], self.base, cabecalho=linha)
+
+    def test_opcao_cabecalho_na_linha_de_comando(self):
+        arq = self.csv("v.csv", "a;b;c\nx;y;z\n1;2;3\n")
+        saida = io.StringIO()
+        with redirect_stdout(saida):
+            codigo = da.main(["carregar", "--base", str(self.base), "--cabecalho", "2", str(arq)])
+        self.assertEqual(codigo, 0)
+        self.assertEqual(json.loads(saida.getvalue())["tabelas"][0]["colunas"][0]["nome"], "x")
+
+    def test_opcao_cabecalho_usa_a_linha_real_do_xlsx(self):
+        ns = 'xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"'
+        def celula(ref, texto):
+            return f'<c r="{ref}" t="inlineStr"><is><t>{texto}</t></is></c>'
+        caminho = self.dir / "g.xlsx"
+        with zipfile.ZipFile(caminho, "w") as z:
+            z.writestr("xl/workbook.xml", f'<workbook {ns}><sheets><sheet name="A" sheetId="1"/></sheets></workbook>')
+            z.writestr("xl/worksheets/sheet1.xml",
+                       f'<worksheet {ns}><sheetData><row r="2">{celula("A2", "Titulo")}</row>'
+                       f'<row r="4">{celula("A4", "x")}{celula("B4", "y")}</row>'
+                       f'<row r="5"><c r="A5"><v>1</v></c><c r="B5"><v>2</v></c></row></sheetData></worksheet>')
+        perfil = carregar([caminho], self.base, cabecalho=4)
+        self.assertEqual(self.colunas(perfil), ["x", "y"])
+
+
+class TestTotais(Base):
+    def carga(self, conteudo):
+        arq = self.csv("t.csv", conteudo)
+        perfil = carregar([arq], self.base)
+        return perfil, perfil["tabelas"][0]
+
+    def soma(self):
+        return self.sql("SELECT ROUND(SUM(valor), 2) FROM t")["linhas"][0][0]
+
+    def test_total_de_grupo_na_quarta_coluna_nao_conta_em_dobro(self):
+        _, tab = self.carga("Loja;Depto;Cod;Descricao;Valor\n1;Merc;10;Arroz;100,00\n1;Merc;11;Feijao;200,00\n"
+                            "1;Merc;;Total Depto;300,00\n;;;Total Geral;300,00\n")
+        self.assertEqual(self.soma(), 300.0)
+        self.assertEqual((tab["linhas"], tab["linhas_total"]), (2, 2))
+
+    def test_subtotal_sem_rotulo_vai_para_totais_com_aviso_proprio(self):
+        perfil, tab = self.carga("Loja;Prod;Valor\nA;X;100,00\nA;Y;200,00\n;;300,00\n")
+        self.assertEqual(self.soma(), 300.0)
+        self.assertEqual(tab["linhas_total"], 1)
+        self.assertEqual(self.sql("SELECT valor FROM t__totais")["linhas"], [[300.0]])
+        self.assertTrue(any("possível subtotal sem rótulo" in a for a in perfil["avisos"]))
+
+    def test_primeiras_colunas_vazias_na_maioria_nao_sao_subtotal(self):
+        _, tab = self.carga("a;b;valor\n;;1,00\n;;2,00\nx;y;3,00\n")
+        self.assertEqual((tab["linhas"], tab["linhas_total"]), (3, 0))
+
+    def test_linha_sem_rotulo_com_data_nao_e_subtotal(self):
+        _, tab = self.carga("a;b;d;valor\nx;y;01/02/2026;1,00\nz;w;02/02/2026;2,00\n;;03/02/2026;3,00\n")
+        self.assertEqual((tab["linhas"], tab["linhas_total"]), (3, 0))
+
+    def test_baixa_total_e_categoria_e_fica_na_tabela(self):
+        _, tab = self.carga("Titulo;Baixa;Valor\nT1;Total;100,00\nT2;Parcial;50,00\nT3;Total;200,00\n")
+        self.assertEqual((tab["linhas"], tab["linhas_total"]), (3, 0))
+        self.assertEqual(self.soma(), 350.0)
+
+    def test_categoria_na_primeira_coluna_fica_na_tabela(self):
+        _, tab = self.carga("Baixa;Titulo;Valor\nTotal;T1;100,00\nParcial;T2;50,00\nTotal;T3;200,00\nParcial;T4;10,00\n")
+        self.assertEqual((tab["linhas"], tab["linhas_total"]), (4, 0))
+
+    def test_total_clean_continua_na_tabela(self):
+        _, tab = self.carga("Cod;Descricao;Valor\n1;Arroz;5,00\n2;Total Clean Detergente;4,99\n")
+        self.assertEqual((tab["linhas"], tab["linhas_total"]), (2, 0))
+
+    def test_arquivo_pequeno_com_uma_linha_de_total(self):
+        _, tab = self.carga("item;valor\nA;10,00\nB;20,00\nTotal;30,00\n")
+        self.assertEqual(tab["linhas_total"], 1)
+        self.assertEqual(self.soma(), 30.0)
+
+    def test_subtotal_repetido_em_grupos_pequenos_nao_vira_categoria(self):
+        _, tab = self.carga("Depto;Produto;Valor\nMerc;Arroz;100,00\nMerc;Feijao;200,00\nSubtotal;;300,00\n"
+                            "Frios;Queijo;50,00\nSubtotal;;50,00\nTotal Geral;;350,00\n")
+        self.assertEqual(self.soma(), 350.0)
+        self.assertEqual((tab["linhas"], tab["linhas_total"]), (3, 3))
+
+
+class TestDataComLixo(Base):
+    def test_data_invalida_vira_nulo_com_aviso(self):
+        linhas = "".join(f"{i};{i:02d}/01/2026\n" for i in range(1, 10)) + "10;00/00/0000\n"
+        perfil = carregar([self.csv("d.csv", "id;data\n" + linhas)], self.base)
+        coluna = perfil["tabelas"][0]["colunas"][1]
+        self.assertEqual(coluna["tipo"], "data")
+        self.assertEqual((coluna["min"], coluna["max"]), ("2026-01-01", "2026-01-09"))
+        self.assertEqual(self.sql("SELECT data FROM d WHERE id = 10")["linhas"], [[None]])
+        self.assertEqual(self.sql("SELECT COUNT(*) FROM d WHERE data >= '2026-01-05'")["linhas"][0][0], 5)
+        aviso = [a for a in perfil["avisos"] if '"data"' in a]
+        self.assertTrue(aviso and "00/00/0000" in aviso[0])
+
+    def test_abaixo_de_80_por_cento_continua_texto(self):
+        perfil = carregar([self.csv("d.csv", "id;d\n1;01/01/2026\n2;abc\n3;def\n")], self.base)
+        self.assertEqual(perfil["tabelas"][0]["colunas"][1]["tipo"], "texto")
+
+    def test_data_valida_nao_gera_aviso(self):
+        perfil = carregar([self.csv("d.csv", "id;data\n1;01/01/2026\n2;02/01/2026\n")], self.base)
+        self.assertFalse(any('"data"' in a for a in perfil["avisos"]))
+
+
+class TestPerfilValores(Base):
+    def coluna(self, perfil, nome):
+        return next(c for c in perfil["tabelas"][0]["colunas"] if c["nome"] == nome)
+
+    def test_coluna_de_texto_lista_valores_distintos(self):
+        perfil = carregar([self.csv("v.csv", "id;status\n1;Ativo\n2;Cancelado\n3;Ativo\n4;\n")], self.base)
+        self.assertEqual(self.coluna(perfil, "status")["valores"],
+                         [{"valor": "Ativo", "linhas": 2}, {"valor": "Cancelado", "linhas": 1}])
+
+    def test_acima_de_20_valores_nao_lista(self):
+        linhas = "".join(f"{i};v{i}\n" for i in range(21))
+        self.assertNotIn("valores", self.coluna(carregar([self.csv("v.csv", "id;s\n" + linhas)], self.base), "s"))
+
+    def test_20_valores_ainda_lista(self):
+        linhas = "".join(f"{i};v{i}\n" for i in range(20))
+        self.assertEqual(len(self.coluna(carregar([self.csv("v.csv", "id;s\n" + linhas)], self.base), "s")["valores"]), 20)
+
+    def test_coluna_numerica_nao_lista(self):
+        self.assertNotIn("valores", self.coluna(carregar([self.csv("v.csv", "id;s\n1;x\n2;y\n")], self.base), "id"))
+
+    def test_possivel_cpf_nao_aparece_no_perfil(self):
+        for nome, valores in (("n", ("12345678909", "98765432100")), ("z", ("01234567890", "09876543210"))):
+            with self.subTest(nome):
+                arq = self.csv(f"{nome}.csv", f"id;doc\n1;{valores[0]}\n2;{valores[1]}\n")
+                perfil = carregar([arq], self.base)
+                coluna = self.coluna(perfil, "doc")
+                self.assertNotIn("min", coluna)
+                self.assertNotIn("max", coluna)
+                self.assertNotIn("valores", coluna)
+                for valor in valores:
+                    self.assertNotIn(valor, json.dumps(perfil, ensure_ascii=False))
+
+
 class TestConsultar(Base):
     def setUp(self):
         super().setUp()

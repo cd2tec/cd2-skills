@@ -2,6 +2,8 @@
 
 Todas as skills `relatorio-*` do plugin seguem este método, com o banco conectado ou com um arquivo exportado. A conversa está em `references/fluxo-dados.md`. Cada skill acrescenta o catálogo de relatórios, as colunas para exportar e as provas do seu domínio em `relatorios.md`.
 
+**No `painel-varejo`:** valem as seções 1, 2, 3, 5 e 6. O painel não tem `relatorios.md`, `formato-relatorio.md`, `render_relatorio.py` nem linha **Para exportar**. O que exportar está na seção "Sem conexão" do `SKILL.md` dele, o formato está em `config.md` e quem gera a página é `build_dashboard.py`. A seção 4 e as menções a esses arquivos valem só para os relatórios.
+
 Conteúdo:
 1. Princípios
 2. Fluxo
@@ -137,7 +139,7 @@ Tabela com as colunas do catálogo. Até 30 linhas na conversa; o restante vai e
 1. ... (número, o que significa, o que fazer)
 
 **Prova**
-O que foi reconciliado, o resultado e a diferença. Com arquivo ou números digitados: "Conferido só contra o arquivo".
+O que foi reconciliado, o resultado e a diferença. Com arquivo ou números digitados, o título é **Conferência**, com a frase "Conferido só contra o arquivo", e o que não bate é "Conferência não fechou".
 
 **Premissas e qualidade do dado**
 Filtros fixos aplicados, significados assumidos, campos indisponíveis, relatórios pedidos que não puderam ser gerados e por quê.

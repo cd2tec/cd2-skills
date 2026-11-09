@@ -135,7 +135,7 @@ def fonte_texto(cfg):
     if cfg["origem"] == "arquivo":
         return f"Fonte: arquivo {fonte['nome']}. Conferido só contra o arquivo, não contra o sistema de origem."
     if cfg["origem"] == "digitado":
-        return f"Fonte: {fonte['nome']}. Conferido só contra o que foi informado, não contra o sistema de origem."
+        return f"Fonte: {fonte['nome']}. Conferido só contra o arquivo, não contra o sistema de origem."
     if cfg["origem"] == "outro-mcp":
         return f"Fonte: {', '.join(x for x in (fonte['banco'], fonte['engine'], 'via ' + fonte['conector']) if x)}."
     banco = ", ".join(x for x in (fonte["banco"], fonte["engine"], "via " + fonte["conector"]) if x)

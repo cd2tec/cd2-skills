@@ -56,8 +56,8 @@ Em snapshot e agendado, escreva também o `veredito`: uma frase com o achado pri
 ### 6. Monte e entregue
 
 1. Escreva o config JSON no formato de `references/config.md`, com a `origem` certa.
-2. Gere a página: `python3 scripts/build_dashboard.py config.json painel.html`. O script valida o config, recusa formato errado e exige `origem`.
-3. Confira a renderização uma vez: `python3 scripts/preview_dashboard.py painel.html` gera capturas em tema claro, escuro e celular e lista erros de JavaScript e rolagem lateral. Olhe a captura principal antes de entregar (rótulos sobrepostos, seção vazia, número estranho). O script usa Playwright, que é opcional: se não estiver instalado ele avisa e sai, e você diz à pessoa que a renderização não foi conferida em vez de omitir o passo.
+2. Gere a página: `python3 <pasta da skill>/scripts/build_dashboard.py config.json painel.html`. O script valida o config, recusa formato errado e exige `origem`.
+3. Confira a renderização uma vez: `python3 <pasta da skill>/scripts/preview_dashboard.py painel.html` gera capturas em tema claro, escuro e celular e lista erros de JavaScript e rolagem lateral. Olhe a captura principal antes de entregar (rótulos sobrepostos, seção vazia, número estranho). O script usa Playwright, que é opcional: se não estiver instalado ele avisa e sai, e você diz à pessoa que a renderização não foi conferida em vez de omitir o passo.
 4. **Onde há artefato (Claude):** carregue as skills `artifact-design` e, no modo ao vivo, `artifact-capabilities` antes de publicar, como o Artifact tool exige. Publique com ícone `chart`, título com o nome da rede ou da operação (ex.: "Painel Rede Exemplo") e uma frase de descrição com período e fonte. Modo ao vivo e agendado: siga `references/modos-atualizacao.md`.
 5. **Sem artefato, ou sem conexão:** entregue o `painel.html` como arquivo, que abre em qualquer navegador e não tem dependência externa. É só o modo snapshot. Os modos ao vivo e agendado dependem de conexão e de recursos do Claude; diga isso em uma linha.
 

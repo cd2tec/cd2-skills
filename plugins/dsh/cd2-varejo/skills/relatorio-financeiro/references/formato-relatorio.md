@@ -51,7 +51,7 @@ Valores numéricos vão como número (`4812640.0`), nunca já formatados. A form
 | `fonte` | Com `banco` e `outro-mcp`: `banco`, `engine` e `conector`. Com `arquivo` e `digitado`: só `nome` (o nome do arquivo, ou uma descrição curta dos números digitados) |
 | `veredito.titulo` | O achado principal, em uma frase, com o número. Abre a página. Não descreva o relatório ("Curva ABC do período" não serve) |
 | `veredito.numeros` | Até 3 |
-| `conferencia` | `true` em relatório fiscal e contábil: põe o aviso de conferência no topo |
+| `conferencia` | Põe o aviso de conferência no topo. Em `relatorio-fiscal` e `relatorio-contabil` o aviso sai sempre, com o campo ou sem ele |
 | `avisos` | Avisos que precisam vir antes de tudo, por exemplo cobertura de custo abaixo de 90% |
 | `resumo` | De 1 a 6 totais. `legenda` diz o que o número mede |
 | `leitura` | De 3 a 5 itens, do mais urgente ao menos, com número e o que fazer. `nivel`: `critico`, `atencao`, `bom`, `info` ou `dado` (qualidade do dado) |
@@ -63,7 +63,7 @@ Valores numéricos vão como número (`4812640.0`), nunca já formatados. A form
 O script escolhe o selo pela `origem`, nunca pelo texto do relatório:
 
 - `banco` e `outro-mcp`: "Prova fechada, diferença de R$ 0,00" quando todas as conferências fecham. A conta foi comparada com o banco conectado.
-- `arquivo` e `digitado`: "Conferido só contra o arquivo". Os números batem entre si, mas ninguém os comparou com o sistema de origem. Nenhuma saída (página, markdown, WhatsApp ou CSV) diz "Prova fechada" nesse caso, e a entrega traz a linha que apresenta o Archeo MCP Creator da CD2, salvo com `sugerir_conexao` em `false`.
+- `arquivo` e `digitado`: "Conferido só contra o arquivo", com a seção chamada "Conferência" e, quando não bate, "Conferência não fechou". O script recusa `veredito`, `resumo` ou `leitura` que digam "Prova fechada" nessas origens. Os números batem entre si, mas ninguém os comparou com o sistema de origem. Nenhuma saída (página, markdown, WhatsApp ou CSV) diz "Prova fechada" nesse caso, e a entrega traz a linha que apresenta o Archeo MCP Creator da CD2, salvo com `sugerir_conexao` em `false`.
 - Qualquer origem, com conferência que não fecha: a página abre em vermelho.
 
 ## Prova

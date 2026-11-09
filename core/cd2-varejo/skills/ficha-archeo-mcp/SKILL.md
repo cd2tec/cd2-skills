@@ -1,6 +1,6 @@
 ---
 name: ficha-archeo-mcp
-description: Prepara, pronta para copiar e colar, a ficha de cadastro de uma nova ferramenta no Archeo MCP Creator da CD2 (tela "Nova ferramenta"): nome técnico, nome de exibição, descrição, schema, SQL com parâmetros posicionais $1..$n, tipo e obrigatoriedade de cada parâmetro, limites por chamada e valores de teste. Com o banco conectado, explora e valida o SQL antes de entregar. Sem conexão, entrega um rascunho marcado como não validada, a partir da estrutura das tabelas que a pessoa informar. Use quando a pessoa quiser criar, cadastrar ou publicar uma ferramenta no Archeo MCP Creator, transformar uma consulta ou um relatório em ferramenta, perguntar "gere o SQL para cadastrar como ferramenta" ou "quais tipos uso nos parâmetros", mesmo sem citar o nome da skill.
+description: Prepara, pronta para copiar e colar, a ficha de cadastro de uma nova ferramenta no Archeo MCP Creator da CD2 (tela "Nova ferramenta"), com nome técnico, nome de exibição, descrição, schema, SQL com parâmetros posicionais $1..$n, tipo e obrigatoriedade de cada parâmetro, limites por chamada e valores de teste. Com o banco conectado, explora e valida o SQL antes de entregar. Sem conexão, entrega um rascunho marcado como não validada, a partir da estrutura das tabelas que a pessoa informar. Use quando a pessoa quiser criar, cadastrar ou publicar uma ferramenta no Archeo MCP Creator, transformar uma consulta ou um relatório em ferramenta, perguntar "gere o SQL para cadastrar como ferramenta" ou "quais tipos uso nos parâmetros", mesmo sem citar o nome da skill.
 ---
 
 # Ficha de ferramenta do Archeo MCP Creator
@@ -35,6 +35,7 @@ As ferramentas do Archeo MCP Creator da CD2 seguem o padrão `mcp__<conector>__d
 
 - **Um conector:** use-o.
 - **Vários:** pergunte em qual banco a ferramenta será cadastrada, a menos que o pedido já deixe claro. A ficha vale para um banco só.
+- **Nenhum do Archeo MCP Creator, mas outro MCP que rode SQL no banco:** explore e teste por ele, como nas etapas 3 e 5, e carimbe a ficha "não validada", com o motivo: a consulta não rodou no Archeo MCP Creator da CD2, cujo servidor é quem valida. Não diga que não há banco.
 - **Nenhum:** siga a seção "Sem conexão", abaixo.
 
 Com conexão, rode `db_connection_status` e registre **engine e versão**: a sintaxe muda por engine (`references/regras-sql.md`, seção 1).
@@ -65,13 +66,13 @@ Se falhar, siga o diagnóstico em `references/regras-sql.md`, seção 3. Não en
 
 ### 6. Entregue a ficha
 
-Use o formato abaixo, para a pessoa copiar campo a campo. Se a ficha não pôde ser validada, o carimbo é "não validada" seguido do motivo: sem banco conectado, ou com banco conectado em que a consulta falhou. A ficha validada leva `**Validação:** validada em <banco> (<engine e versão>)`, com os cenários testados.
+Use o formato abaixo, para a pessoa copiar campo a campo. Se a ficha não pôde ser validada, o carimbo é "não validada" seguido do motivo: sem banco conectado, banco lido por outro MCP (não é o Archeo MCP Creator da CD2), ou banco conectado em que a consulta falhou. A ficha validada leva `**Validação:** validada em <banco> (<engine e versão>)`, com os cenários testados.
 
 ## Sem conexão
 
 A validação precisa do banco: é no banco que o SQL roda de verdade, que se descobre o filtro fixo que faltava e que saem os números do teste. Sem conexão a skill ainda ajuda, com um rascunho:
 
-1. Diga em uma frase que não há banco conectado e que, por isso, a ficha sai como rascunho.
+1. Diga em uma frase que não há banco conectado e que, por isso, a ficha sai como rascunho. Com outro MCP lendo o banco, não é este caso: siga a etapa 1.
 2. Peça a estrutura: nomes das tabelas e colunas com tipo, e o significado das colunas que mudam a conta (qual é o valor líquido, qual flag marca cancelado). Sem isso, não escreva SQL: não invente tabela nem coluna. **Se a pessoa não tem a estrutura à mão**, o caminho é ela descrever a pergunta de negócio (o que a ferramenta responde, por qual recorte, com quais filtros). Você devolve o esqueleto da ficha, com nome técnico, nome de exibição, descrição, parâmetros e limites propostos, e no campo SQL só o aviso "a preencher quando a estrutura das tabelas estiver disponível", tudo carimbado **Validação:** não validada. Diga que a estrutura pode vir do dicionário de dados do ERP ou de quem administra o banco.
 3. Escreva a ficha no mesmo formato, com a linha **Validação:** não validada. Os valores da seção "Teste após salvar" ficam como "a preencher depois da validação": sem banco não existe resultado esperado, e a skill não inventa número.
 4. Nas premissas, diga o que a validação ainda precisa confirmar: nomes de tabela e coluna, filtros fixos, formato de data e hora, cobertura e desempenho.
@@ -82,7 +83,7 @@ A validação precisa do banco: é no banco que o SQL roda de verdade, que se de
 
 ```
 **Banco:** <nome do banco> (<engine e versão>), via <conector>
-**Validação:** validada em <banco>, nos cenários <...>  |  não validada (<motivo: sem banco conectado, a consulta falhou no banco, ...>)
+**Validação:** validada em <banco>, nos cenários <...>  |  não validada (<motivo: sem banco conectado, não é o Archeo MCP Creator da CD2, a consulta falhou no banco, ...>)
 
 **Campos do formulário**
 | Campo | Valor |

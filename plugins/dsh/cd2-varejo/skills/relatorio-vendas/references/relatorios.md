@@ -185,6 +185,7 @@ ORDER BY SUM(v.<valor_liquido>) DESC OFFSET 0 ROWS
 ```
 
 `<data_referencia>` é a última data com venda, não a data de hoje.
+**Prova:** ativos + inativos = clientes distintos da carteira, com contagem direta na fonte (`COUNT(DISTINCT <cod_cliente>)`).
 **Limite:** vale para a parcela identificada da venda; informe a cobertura. Sem contato nem endereço na saída (`references/metodo-analise.md`, seção 6).
 
 **Para exportar:** peça a venda por cliente e documento dos últimos 12 meses. Colunas mínimas: cliente (código ou nome), data, valor líquido.

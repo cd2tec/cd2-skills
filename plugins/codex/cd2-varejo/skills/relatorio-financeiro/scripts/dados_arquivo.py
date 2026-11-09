@@ -5,15 +5,17 @@ So biblioteca padrao. Entende CSV (Windows-1252 ou UTF-8, ponto e virgula, virgu
 tab ou barra vertical) e XLSX (primeira planilha). Numero 1.234,56 e data dd/mm/aaaa
 viram valor e data ISO. Linhas de subtotal e total geral vao para a tabela
 <tabela>__totais e nunca somam na principal. CPF e mascarado ao carregar.
+Titulo e periodo antes do cabecalho sao descartados, com aviso.
 
 Uso:
-  python3 dados_arquivo.py carregar --base B.sqlite ARQ [ARQ ...]
+  python3 dados_arquivo.py carregar --base B.sqlite [--cabecalho N] ARQ [ARQ ...]
   python3 dados_arquivo.py consultar --base B.sqlite --sql "SELECT ..." [--limite 500]
   python3 dados_arquivo.py apagar --base B.sqlite
 
 Erro: codigo de saida 2 e {"errors": [...]} em portugues.
 """
 import argparse
+import collections
 import csv
 import datetime
 import io
@@ -31,12 +33,16 @@ from xml.etree import ElementTree as ET
 LIMITE_BYTES = 200 * 1024 * 1024
 LIMITE_XML_BYTES = 50 * 1024 * 1024
 MAX_COLUNAS_XLSX = 16384
+MAX_LINHAS_XLSX = 1048576
 ASSINATURA_SQLITE = b"SQLite format 3\x00"
 _ERROS_ZIP = (zipfile.BadZipFile, zlib.error, NotImplementedError, RuntimeError, OSError, EOFError)
 LIMITE_LINHAS_PADRAO = 500
+LINHAS_PARA_ACHAR_CABECALHO = 20
+MAX_VALORES_PERFIL = 20
 _DELIMITADORES = [";", "\t", "|", ","]
 _RE_TOTAL = re.compile(
-    r"^\s*(sub\s*-?\s*total(\s+.*)?|total|totais|soma|total\s+geral|total\s+d[aoe]s?\b.*)\s*:?\s*$",
+    r"^\s*(sub\s*-?\s*total(\s+.*)?|total|totais|soma|total\s+geral|total\s+d[aoe]s?\b.*"
+    r"|total\s+(depto|departamento|loja|filial|grupo|secao|categoria|fornecedor|cliente|vendedor|mes|dia)\b.*)\s*:?\s*$",
     re.IGNORECASE)
 _RE_CPF = re.compile(r"^\d{3}\.\d{3}\.\d{3}-\d{2}$")
 _RE_DATA_BR = re.compile(r"^(\d{1,2})[/.-](\d{1,2})[/.-](\d{4}|\d{2})(?:[ T](\d{1,2}):(\d{2})(?::(\d{2}))?)?$")
@@ -83,8 +89,11 @@ def detectar_csv(dados: bytes) -> tuple[str, str]:
             continue
         if not larguras:
             continue
-        moda = max(set(larguras), key=lambda w: (larguras.count(w), w))
-        nota = (1 if moda > 1 else 0, larguras.count(moda), moda, -prioridade)
+        # Bloco de titulo em arquivo pequeno nao pode decidir: linha de uma celula so vale se quase nao houver outra.
+        multiplas = [w for w in larguras if w > 1]
+        votos = multiplas if len(multiplas) * 3 >= len(larguras) else larguras
+        moda = max(set(votos), key=lambda w: (votos.count(w), w))
+        nota = (1 if moda > 1 else 0, votos.count(moda), moda, -prioridade)
         if nota > melhor_nota:
             melhor, melhor_nota = d, nota
     return texto, melhor
@@ -245,6 +254,10 @@ def _linhas_da_folha(folha, compartilhadas, estilos) -> list[list[str]]:
     for row in folha.iter():
         if _local(row.tag) != "row":
             continue
+        # Linha vazia nao vem no XML. Preenche para o indice ser o numero da linha que a pessoa ve no Excel.
+        numero = row.get("r", "")
+        if numero.isdigit() and int(numero) <= MAX_LINHAS_XLSX:
+            linhas.extend([] for _ in range(int(numero) - 1 - len(linhas)))
         celulas = {}
         proxima = 0
         for c in row:
@@ -365,12 +378,68 @@ def normalizar_data(texto: str) -> str | None:
     return f"{data.isoformat()} {hora.isoformat()}"
 
 
-def e_linha_total(celulas: list[str]) -> bool:
-    """Subtotal, total geral e similares: rotulo nas 3 primeiras celulas e ao menos um numero."""
-    rotulo = any(_RE_TOTAL.match(_sem_acento(str(c))) for c in celulas[:3])
-    if not rotulo:
+def _indice_rotulo(celulas: list[str]) -> int | None:
+    """Coluna da primeira celula que e rotulo de total, ou None."""
+    return next((i for i, c in enumerate(celulas) if _RE_TOTAL.match(_sem_acento(str(c)))), None)
+
+
+def _chave_rotulo(celulas: list[str], indice: int) -> tuple[int, str]:
+    return indice, _sem_acento(str(celulas[indice])).strip().lower()
+
+
+def _sem_rotulo(celulas: list[str]) -> bool:
+    """Duas primeiras celulas vazias e todas as demais preenchidas numericas."""
+    if len(celulas) < 3 or celulas[0] or celulas[1]:
         return False
-    return any(normalizar_numero(str(c)) is not None for c in celulas)
+    resto = [c for c in celulas[2:] if c]
+    return bool(resto) and all(normalizar_numero(c) is not None for c in resto)
+
+
+class _ContextoTotais:
+    """O que a regra de total precisa saber da tabela inteira.
+
+    densas: colunas preenchidas em ao menos 90% das linhas comuns (sem rotulo de total e sem cara de subtotal,
+    que furariam a propria medida). categorias: rotulos que sao valor de coluna, como Baixa=Total: mais de 20%
+    das linhas, mais de uma vez, e a maior parte delas sem furo em coluna densa. Subtotal repetido em grupo
+    pequeno passa de 20%, mas deixa a coluna de produto vazia, e por isso continua sendo total.
+    """
+
+    def __init__(self, dados: list[list[str]]):
+        comuns = [l for l in dados if _indice_rotulo(l) is None and not _sem_rotulo(l)]
+        largura = len(dados[0]) if dados else 0
+        self.densas = {j for j in range(largura) if comuns and sum(1 for l in comuns if l[j]) >= 0.9 * len(comuns)}
+        rotuladas = collections.defaultdict(list)
+        for l in dados:
+            indice = _indice_rotulo(l)
+            if indice is not None:
+                rotuladas[_chave_rotulo(l, indice)].append(l)
+        self.categorias = {
+            chave for chave, linhas in rotuladas.items()
+            if len(linhas) >= 2 and len(linhas) > 0.2 * len(dados)
+            and sum(1 for l in linhas if not self.tem_furo(l)) * 2 > len(linhas)
+        }
+        # Se metade ou mais da tabela tem as duas primeiras colunas vazias, elas sao so colunas pouco usadas.
+        self.aceita_sem_rotulo = bool(comuns) and sum(1 for l in dados if _sem_rotulo(l)) * 2 <= len(dados)
+
+    def tem_furo(self, celulas: list[str]) -> bool:
+        return any(not celulas[j] for j in self.densas)
+
+
+def e_linha_total(celulas: list[str], contexto: _ContextoTotais | None = None) -> bool:
+    """Subtotal, total geral e similares: celula de rotulo, ao menos um numero e posicao de total.
+
+    O rotulo e a primeira celula preenchida, ou a linha deixa vazia uma coluna densa. Sem contexto, vale so a
+    primeira condicao. Rotulo que e categoria da coluna (Baixa=Total) nao faz da linha um total.
+    """
+    indice = _indice_rotulo(celulas)
+    if indice is None or not any(normalizar_numero(str(c)) is not None for c in celulas):
+        return False
+    primeira = next(i for i, c in enumerate(celulas) if str(c).strip())
+    if contexto is None:
+        return indice == primeira
+    if indice != primeira and not contexto.tem_furo(celulas):
+        return False
+    return _chave_rotulo(celulas, indice) not in contexto.categorias
 
 
 def nome_seguro(texto: str, usados: set[str]) -> str:
@@ -439,12 +508,18 @@ def _limpo(valor: str) -> str:
 def _inferir_coluna(nome_original: str, valores: list[str], avisos: list[str], arquivo: str):
     """Devolve (tipo, conversor). Valores sao os nao vazios, ja sem CPF.
 
-    Coluna e numero quando ao menos 80% dos valores convertem; o resto vira vazio (NULL) com aviso.
+    Coluna e data ou numero quando ao menos 80% dos valores convertem; o resto vira vazio (NULL) com aviso.
     """
     if not valores:
         return "texto", None
-    if all(normalizar_data(v) is not None for v in valores):
-        return "data", lambda v: normalizar_data(v)
+    datas = [normalizar_data(v) for v in valores]
+    if sum(1 for d in datas if d is not None) / len(datas) >= 0.8:
+        falhas = [v for v, d in zip(valores, datas) if d is None]
+        if falhas:
+            amostra = ", ".join(f"\"{v}\"" for v in falhas[:5])
+            avisos.append(f"Na coluna \"{nome_original}\" de {arquivo}, {len(falhas)} valor(es) não são data e "
+                          f"ficaram vazios: {amostra}.")
+        return "data", normalizar_data
     if any(_RE_CODIGO.match(v.strip()) for v in valores):
         return "texto", None
     tem_virgula = any("," in v for v in valores)
@@ -487,19 +562,68 @@ def _estatisticas(tipo: str, valores: list):
     return None, None, distintos
 
 
-def _carregar_um(con, caminho: Path, tabela: str, avisos: list[str]) -> dict:
+def _largura_util(linha: list[str]) -> int:
+    """Quantidade de celulas, sem contar as vazias a direita."""
+    largura = len(linha)
+    while largura > 0 and not linha[largura - 1]:
+        largura -= 1
+    return largura
+
+
+def _e_texto(celula: str) -> bool:
+    return bool(celula) and normalizar_numero(celula) is None and normalizar_data(celula) is None
+
+
+def _achar_cabecalho(linhas: list[list[str]]) -> int:
+    """Indice do cabecalho: a primeira linha com a largura dominante em que a maioria das celulas e texto.
+
+    Vale linha mais larga que a dominante porque uma ultima coluna pouco preenchida (CPF, observacao) estreita
+    os dados, nao o cabecalho. Linha que abre com "Periodo:" e metadado do relatorio. Se nenhuma servir (colunas
+    com nome de ano, por exemplo), fica a primeira com a largura dominante.
+    """
+    amostra = [i for i, l in enumerate(linhas) if any(l)][:LINHAS_PARA_ACHAR_CABECALHO]
+    larguras = [_largura_util(linhas[i]) for i in amostra]
+    # Linha de uma celula so e titulo: nao define a tabela enquanto houver linha com mais colunas.
+    votos = [w for w in larguras if w > 1] or larguras
+    dominante = max(set(votos), key=lambda w: (votos.count(w), w))
+    candidatas = [i for i, w in zip(amostra, larguras) if w >= dominante]
+    for i in candidatas:
+        celulas = linhas[i][:_largura_util(linhas[i])]
+        if next(c for c in celulas if c).endswith(":"):
+            continue
+        if sum(1 for c in celulas if _e_texto(c)) * 2 > len(celulas):
+            return i
+    return candidatas[0]
+
+
+def _linha_para_aviso(linha: list[str]) -> str:
+    """Trecho de uma linha descartada, sem CPF, para citar no aviso."""
+    texto = " | ".join(_mascarar_celula(c, "")[0] for c in linha if c)
+    return texto if len(texto) <= 80 else texto[:77] + "..."
+
+
+def _indice_do_cabecalho(linhas: list[list[str]], cabecalho: int | None, arquivo: str) -> int:
+    if cabecalho is None:
+        return _achar_cabecalho(linhas)
+    if cabecalho < 1 or cabecalho > len(linhas) or not any(linhas[cabecalho - 1]):
+        raise ErroDados(f"{arquivo}: a linha {cabecalho} não existe ou está vazia. Confira o valor de --cabecalho.")
+    return cabecalho - 1
+
+
+def _carregar_um(con, caminho: Path, tabela: str, avisos: list[str], linha_cabecalho: int | None = None) -> dict:
     linhas = _ler_arquivo(caminho, avisos)
     linhas = [[str(c).strip() for c in l] for l in linhas]
     nao_vazias = [l for l in linhas if any(c for c in l)]
     if not nao_vazias:
         raise ErroDados(f"{caminho.name} está vazio.")
-    candidato = next((i for i, l in enumerate(linhas) if sum(1 for c in l if c) >= 2), None)
-    if candidato is None:
-        candidato = next(i for i, l in enumerate(linhas) if any(l))
+    candidato = _indice_do_cabecalho(linhas, linha_cabecalho, caminho.name)
+    descartadas = [l for l in linhas[:candidato] if any(l)]
+    if descartadas:
+        citadas = "; ".join(f"\"{_linha_para_aviso(l)}\"" for l in descartadas[:3])
+        avisos.append(f"{caminho.name}: ignorei {len(descartadas)} linha(s) antes do cabeçalho, que está na linha "
+                      f"{candidato + 1}: {citadas}. Se o cabeçalho for outro, carregue de novo com --cabecalho.")
     cabecalho = linhas[candidato]
-    largura = len(cabecalho)
-    while largura > 1 and not cabecalho[largura - 1]:
-        largura -= 1
+    largura = max(_largura_util(cabecalho), 1)
     cabecalho = cabecalho[:largura]
     usados: set[str] = set()
     nomes = [nome_seguro(h or f"coluna_{i + 1}", usados) for i, h in enumerate(cabecalho)]
@@ -527,15 +651,25 @@ def _carregar_um(con, caminho: Path, tabela: str, avisos: list[str]) -> dict:
             mascarados += n
     if mascarados:
         avisos.append(f"{caminho.name}: mascarei {mascarados} CPF ao carregar (ficam só os dígitos do meio).")
+    suspeitas_cpf = set()
     for i in range(largura):
         preenchidos = [l[i] for l in dados if l[i]]
         if ("cpf" not in _sem_acento(originais[i]).lower() and preenchidos
                 and sum(1 for v in preenchidos if re.fullmatch(r"\d{11}", v)) * 2 > len(preenchidos)):
+            suspeitas_cpf.add(i)
             avisos.append(f"{caminho.name}: a coluna \"{originais[i]}\" tem valores de 11 dígitos que podem ser "
                           "CPF e não foram mascarados. Confirme com a pessoa e não repita esses números.")
 
-    totais = [l for l in dados if e_linha_total(l)]
-    principais = [l for l in dados if not e_linha_total(l)]
+    contexto = _ContextoTotais(dados)
+    totais, principais, sem_rotulo = [], [], 0
+    for l in dados:
+        if e_linha_total(l, contexto):
+            totais.append(l)
+        elif contexto.aceita_sem_rotulo and _sem_rotulo(l):
+            totais.append(l)
+            sem_rotulo += 1
+        else:
+            principais.append(l)
 
     tipos, conversores, colunas_perfil = [], [], []
     for i in range(largura):
@@ -553,8 +687,7 @@ def _carregar_um(con, caminho: Path, tabela: str, avisos: list[str]) -> dict:
                 saida.append(c)
             else:
                 v = conversores[i](c)
-                numerico = tipos[i] in ("inteiro", "real")
-                saida.append(c if v is None and (manter_texto or not numerico) else v)
+                saida.append(c if v is None and manter_texto else v)
         return saida
 
     sql_tipo = {"inteiro": "INTEGER", "real": "REAL", "data": "TEXT", "texto": "TEXT"}
@@ -568,15 +701,24 @@ def _carregar_um(con, caminho: Path, tabela: str, avisos: list[str]) -> dict:
         con.executemany(f"INSERT INTO {_aspas(tabela + '__totais')} VALUES ({marcas})", [converter(l, True) for l in totais])
         avisos.append(f"{caminho.name}: separei {len(totais)} linha(s) de total ou subtotal na tabela "
                       f"{tabela}__totais. Elas não entram nas somas de {tabela}.")
+    if sem_rotulo:
+        avisos.append(f"{caminho.name}: {sem_rotulo} dessas linha(s) têm só números e as duas primeiras colunas "
+                      "vazias: possível subtotal sem rótulo. Confirme com a pessoa que exportou.")
 
     for i in range(largura):
         col = [r[i] for r in convertidas]
         preenchidos = [v for v in col if v is not None]
         minimo, maximo, distintos = _estatisticas(tipos[i], preenchidos)
         vazios = 100.0 * (len(col) - len(preenchidos)) / len(col) if col else 0.0
-        colunas_perfil.append({"nome": nomes[i], "original": originais[i], "tipo": tipos[i],
-                               "vazios_pct": round(vazios, 1), "min": minimo, "max": maximo,
-                               "distintos": distintos})
+        coluna = {"nome": nomes[i], "original": originais[i], "tipo": tipos[i], "vazios_pct": round(vazios, 1),
+                  "min": minimo, "max": maximo, "distintos": distintos}
+        if i in suspeitas_cpf:
+            # Possivel CPF nao mascarado: nenhum valor da coluna sai no perfil.
+            del coluna["min"], coluna["max"]
+        elif tipos[i] == "texto" and 0 < distintos <= MAX_VALORES_PERFIL:
+            contagem = collections.Counter(preenchidos).items()
+            coluna["valores"] = [{"valor": v, "linhas": n} for v, n in sorted(contagem, key=lambda p: (-p[1], p[0]))]
+        colunas_perfil.append(coluna)
     if not principais:
         avisos.append(f"{caminho.name} tem só o cabeçalho, sem linhas de dados.")
     perfil = {"tabela": tabela, "arquivo": caminho.name, "linhas": len(principais),
@@ -586,8 +728,8 @@ def _carregar_um(con, caminho: Path, tabela: str, avisos: list[str]) -> dict:
     return perfil
 
 
-def carregar(arquivos: list[Path], base: Path) -> dict:
-    """Carrega os arquivos numa base SQLite nova e devolve o perfil."""
+def carregar(arquivos: list[Path], base: Path, cabecalho: int | None = None) -> dict:
+    """Carrega os arquivos numa base SQLite nova e devolve o perfil. cabecalho: linha (base 1), se a deteccao errar."""
     arquivos = [Path(a) for a in arquivos]
     if not arquivos:
         raise ErroDados("Informe pelo menos um arquivo para carregar.")
@@ -607,7 +749,7 @@ def carregar(arquivos: list[Path], base: Path) -> dict:
         tabelas = []
         for arq in arquivos:
             tabela = nome_seguro(arq.stem, usados)
-            tabelas.append(_carregar_um(con, arq, tabela, avisos))
+            tabelas.append(_carregar_um(con, arq, tabela, avisos, cabecalho))
         con.commit()
         sucesso = True
     finally:
@@ -720,6 +862,7 @@ def _parser() -> argparse.ArgumentParser:
     sub = p.add_subparsers(dest="comando", required=True, parser_class=_Parser)
     c = sub.add_parser("carregar")
     c.add_argument("--base", required=True)
+    c.add_argument("--cabecalho", type=int, help="linha do cabeçalho (a primeira é 1), se a detecção errar")
     c.add_argument("arquivos", nargs="+")
     q = sub.add_parser("consultar")
     q.add_argument("--base", required=True)
@@ -734,7 +877,7 @@ def main(argv=None) -> int:
     try:
         args = _parser().parse_args(argv)
         if args.comando == "carregar":
-            saida = carregar([Path(a) for a in args.arquivos], Path(args.base))
+            saida = carregar([Path(a) for a in args.arquivos], Path(args.base), args.cabecalho)
         elif args.comando == "consultar":
             if args.limite < 1:
                 raise ErroDados("O limite precisa ser um número maior que zero.")

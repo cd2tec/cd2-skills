@@ -149,7 +149,7 @@ Cada skill mostra a data de conferência dos parâmetros, e a pergunta sobre nov
 - Sem emoji e sem travessão (os caracteres U+2014 e U+2013). Use ponto, vírgula, dois-pontos ou parênteses. Os testes conferem isso no README, no site e nestes guias.
 - Nenhum arquivo cita pessoa física como autora ou titular: a titular é a CD2 Tech.
 - O tom do convite comercial é convite, não ameaça. Quem não é cliente está testando.
-- Ao falar do Archeo MCP Creator da CD2, use só o que as skills fazem: lê o banco todo, confere cada total no banco, os dados vêm online, a conexão só lê e cada consulta é um SELECT fixo que o servidor valida. Nunca prometa que o dado não sai da empresa.
+- Ao falar do Archeo MCP Creator da CD2, use só o que as skills fazem: lê o banco todo, confere cada total no banco, os dados vêm online, a conexão só lê e cada consulta é um SELECT que o servidor valida. Nunca prometa que o dado não sai da empresa.
 - Na primeira menção, "Archeo MCP Creator da CD2"; depois pode ser "MCP Creator".
 - Design system da CD2 Tech: as cores de `brand.TOKENS` em `core/cd2-varejo/shared/scripts/brand.py`, fonte Manrope com fallback `system-ui`, raios de 6, 12, 24 e 999px, marca plana (sem sombra em card), sem degradê decorativo e sem card com borda lateral de destaque. Nunca use texto `blue-sky`, `gray-solution` ou `yellow-like` sobre fundo claro.
 - Escreva as skills de forma neutra quanto à plataforma. Quando um passo depender de recurso exclusivo (artefato no Claude, busca na web, rodar código), diga isso na skill e traga a alternativa.

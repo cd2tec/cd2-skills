@@ -55,6 +55,12 @@ Aviso de isenção (preencha `{regra}` e `{data}` conforme a skill):
 
 > Estas contas e informações são apenas gerenciais, uma referência. Elas usam os números informados e a nossa leitura da regra em {data} ({regra}), que pode mudar. A CD2 Tech não tem nenhuma responsabilidade sobre estes resultados nem sobre decisões tomadas com base neles. Confira com seu contador e seu advogado antes de agir.
 
+Relatórios e painel não aplicam uma regra: usam dados da pessoa. Neles, o rodapé sai de `footer_dados_html` (HTML) e `footer_dados_text` (CSV, WhatsApp e Markdown), que recebem a origem e a data e escolhem o aviso, sem `{regra}`:
+
+> Estas contas e informações são apenas gerenciais, uma referência. Elas usam {fonte} em {data}. A CD2 Tech não tem nenhuma responsabilidade sobre estes resultados nem sobre decisões tomadas com base neles. Confira com seu contador e seu advogado antes de agir.
+
+`{fonte}` é "os dados do banco conectado" nas origens `banco` e `outro-mcp`, "o arquivo informado" em `arquivo` e "os dados informados" em `digitado`.
+
 ## Links
 
 - Todo link para cd2.com.br, archeo.cd2.com.br e para os sites das calculadoras leva UTM: `utm_source=deepseek&utm_medium=skill&utm_campaign=<skill>`. Use `link()` do `brand.py`.

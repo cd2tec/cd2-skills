@@ -363,7 +363,8 @@ class Selo(unittest.TestCase):
             rel["prova"]["conferencias"][0]["obtido"] = 1.0
             codigo, saida = rodar(rel, "--format", "html")
             self.assertEqual(codigo, 0)
-            self.assertIn("Prova não fechou", saida, origem)
+            esperado = "Prova não fechou" if origem in ("banco", "outro-mcp") else "Conferência não fechou"
+            self.assertIn(esperado, saida, origem)
             self.assertNotIn("Prova fechada", saida, origem)
             self.assertNotIn("Conferido só contra o arquivo", saida, origem)
 
@@ -390,6 +391,90 @@ class Selo(unittest.TestCase):
         self.assertNotIn("DO SEU BANCO", pagina)
         self.assertIn("Fonte: arquivo vendas-outubro.csv", pagina)
         self.assertNotIn("ARCHEO", pagina)
+
+
+class Titulo(unittest.TestCase):
+    MARCAS = {"html": ">Conferência</h2>", "markdown": "**Conferência**", "csv": "\r\nConferência\r\n"}
+    MARCAS_BANCO = {"html": ">Prova</h2>", "markdown": "**Prova**", "csv": "\r\nProva\r\n"}
+
+    def test_arquivo_e_digitado_dizem_conferencia_nos_quatro_formatos(self):
+        for origem in ("arquivo", "digitado"):
+            for fmt in ("html", "markdown", "csv", "whatsapp"):
+                codigo, saida = rodar(novo(origem), "--format", fmt)
+                self.assertEqual(codigo, 0, (origem, fmt))
+                self.assertNotIn("Prova", saida, (origem, fmt))
+                if fmt in self.MARCAS:
+                    self.assertIn(self.MARCAS[fmt], saida, (origem, fmt))
+
+    def test_banco_continua_dizendo_prova(self):
+        for origem in ("banco", "outro-mcp"):
+            for fmt, marca in self.MARCAS_BANCO.items():
+                self.assertIn(marca, rodar(novo(origem), "--format", fmt)[1], (origem, fmt))
+
+    def test_nao_fechou_diz_conferencia_nos_quatro_formatos(self):
+        esperado = {"html": "Conferência não fechou", "markdown": "A conferência não fechou",
+                    "csv": "Conferência não fechou", "whatsapp": "Conferência: NÃO FECHOU"}
+        for origem in ("arquivo", "digitado"):
+            rel = novo(origem)
+            rel["prova"]["conferencias"][0]["obtido"] = 1.0
+            for fmt, marca in esperado.items():
+                _, saida = rodar(rel, "--format", fmt)
+                self.assertIn(marca, saida, (origem, fmt))
+                self.assertNotIn("Prova", saida, (origem, fmt))
+
+    def test_banco_que_nao_fechou_continua_prova(self):
+        esperado = {"html": "Prova não fechou", "markdown": "A prova não fechou",
+                    "csv": "Prova não fechou", "whatsapp": "Prova: NÃO FECHOU"}
+        rel = novo("banco")
+        rel["prova"]["conferencias"][0]["obtido"] = 1.0
+        for fmt, marca in esperado.items():
+            self.assertIn(marca, rodar(rel, "--format", fmt)[1], fmt)
+
+
+class ProvaFechadaNoTexto(unittest.TestCase):
+    def casos(self):
+        return {
+            "veredito": lambda r: r["veredito"].update(texto="Prova fechada, pode confiar."),
+            "resumo": lambda r: r["resumo"][0].update(legenda="prova FECHADA"),
+            "leitura": lambda r: r["leitura"][0].update(texto="A Prova fechada mostra que bate."),
+        }
+
+    def test_arquivo_e_digitado_recusam(self):
+        for origem in ("arquivo", "digitado"):
+            for campo, mexer in self.casos().items():
+                rel = novo(origem)
+                mexer(rel)
+                codigo, texto = rodar(rel, "--format", "markdown")
+                self.assertEqual(codigo, 2, (origem, campo))
+                self.assertIn(campo, json.loads(texto)["errors"][0], (origem, campo))
+
+    def test_banco_aceita(self):
+        for origem in ("banco", "outro-mcp"):
+            for campo, mexer in self.casos().items():
+                rel = novo(origem)
+                mexer(rel)
+                self.assertEqual(rodar(rel, "--format", "markdown")[0], 0, (origem, campo))
+
+
+class AvisoConferencia(unittest.TestCase):
+    AVISO = "Não é documento oficial"
+
+    def test_fiscal_e_contabil_trazem_o_aviso_sem_o_campo(self):
+        for skill in ("relatorio-fiscal", "relatorio-contabil"):
+            for valor in (None, False):
+                rel = novo()
+                rel["skill"] = skill
+                rel.pop("conferencia", None)
+                if valor is False:
+                    rel["conferencia"] = False
+                self.assertIn(self.AVISO, rr.render_html(rel), skill)
+                self.assertIn(self.AVISO, rr.render_markdown(rel), skill)
+
+    def test_outras_skills_nao_trazem(self):
+        rel = novo()
+        rel.pop("conferencia", None)
+        self.assertNotIn(self.AVISO, rr.render_html(rel))
+        self.assertNotIn(self.AVISO, rr.render_markdown(rel))
 
 
 class Comercial(unittest.TestCase):

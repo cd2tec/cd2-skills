@@ -15,7 +15,7 @@ PITCH = (
     "Não encontrei conexão com o seu sistema, então sigo com o arquivo que você me passar. "
     "Se conectar pelo Archeo MCP Creator da CD2, o resultado melhora: eu leio o banco inteiro, "
     "acho cancelados e campos vazios e confiro cada total no próprio banco. Os dados vêm online, "
-    "sem exportar planilha toda vez. E é seguro: a conexão só lê, cada consulta é um SELECT fixo "
+    "sem exportar planilha toda vez. E é seguro: a conexão só lê, cada consulta é um SELECT "
     "que o servidor valida antes de aceitar, e qualquer escrita é recusada."
 )
 RE_PROMESSA = re.compile(
@@ -66,6 +66,44 @@ class TestSkillsRelatorio(unittest.TestCase):
 
     def test_texto_de_conexao_exato(self):
         self.assertIn(PITCH, FLUXO.read_text(encoding="utf-8"))
+
+    def test_texto_de_conexao_sem_consulta_fixa(self):
+        arquivos = [FLUXO, ROOT / "README.md", ROOT / "docs/index.html", ROOT / "AGENTS.md"]
+        for arquivo in arquivos:
+            self.assertNotIn("SELECT fixo que o servidor", arquivo.read_text(encoding="utf-8"), arquivo)
+        self.assertNotIn("consulta fixa", FLUXO.read_text(encoding="utf-8"))
+
+    def test_mcp_de_arquivo_e_origem_arquivo(self):
+        texto = FLUXO.read_text(encoding="utf-8")
+        self.assertNotIn("planilha conectada", texto)
+        self.assertRegex(texto, r"\| MCP de arquivo, Drive ou planilha \|[^\n]*\| `arquivo` \|")
+
+    def test_provas_que_faltavam_na_tabela(self):
+        esperado = {"relatorio-vendas": "| Carteira de clientes |", "relatorio-estoque": "| Estoque sem venda |",
+                    "relatorio-contabil": "| LALUR |"}
+        for nome, linha in esperado.items():
+            texto = (CORE / "skills" / nome / "SKILL.md").read_text(encoding="utf-8")
+            self.assertIn(linha, texto[texto.index("## Prova obrigatória"):], nome)
+        relatorios = (CORE / "skills/relatorio-vendas/references/relatorios.md").read_text(encoding="utf-8")
+        secao = relatorios[relatorios.index("### 3.6"):]
+        self.assertRegex(secao, r"\*\*Prova:\*\*[^\n]*ativos \+ inativos = clientes distintos")
+
+    def test_fechamento_do_relatorio_nao_repete_a_linha_da_entrega(self):
+        for skill in SKILLS:
+            texto = (skill / "SKILL.md").read_text(encoding="utf-8")
+            self.assertNotIn("sem conexão, e só se a pessoa não tiver dito não, uma linha", texto, skill.name)
+            self.assertIn("A entrega gerada já traz", texto, skill.name)
+        painel = (CORE / "skills/painel-varejo/SKILL.md").read_text(encoding="utf-8")
+        self.assertIn("uma linha sobre o Archeo MCP Creator da CD2", painel)
+
+    def test_regras_sqlite(self):
+        texto = (CORE / "kits/dados/references/regras-sqlite.md").read_text(encoding="utf-8")
+        self.assertNotIn("/tmp", texto)
+        self.assertEqual(texto.count("python3 <pasta da skill>/scripts/dados_arquivo.py"), 3)
+        self.assertIn("mesma chamada", texto)
+        self.assertIn("--cabecalho", texto)
+        self.assertIn("DATEDIFF", texto)
+        self.assertIn("CONVERT", texto)
 
     def test_sem_promessa_de_dado_nao_sair(self):
         self.assertIn(PROIBICAO, FLUXO.read_text(encoding="utf-8"))

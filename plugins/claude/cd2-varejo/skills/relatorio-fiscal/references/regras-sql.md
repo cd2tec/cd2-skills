@@ -1,6 +1,6 @@
 # Regras de SQL para consultas ao banco conectado
 
-Vale para qualquer banco conectado pelo Archeo MCP Creator da CD2 e, no que couber, por outro MCP que rode SQL. O SQL segue o dialeto da engine informada por `db_connection_status`. Sem conexão, a consulta roda sobre o arquivo exportado e as regras são as de `regras-sqlite.md`.
+Vale para qualquer banco conectado pelo Archeo MCP Creator da CD2 e, no que couber, por outro MCP que rode SQL. O SQL segue o dialeto da engine informada por `db_connection_status`. Nos relatórios e no painel, sem conexão, a consulta roda sobre o arquivo exportado e as regras são as de `regras-sqlite.md`, que vem junto com essas skills. A ficha de ferramenta não tem esse arquivo: sem conexão ela sai como rascunho, sem consulta rodada.
 
 Nas fichas de ferramenta, escreva os parâmetros sempre como `$1`, `$2`, ... independentemente da engine: é a sintaxe do Archeo MCP Creator. Em relatórios e painéis, a consulta roda com o período e os filtros já escritos no SQL, então a seção 2 só importa nas partes de intervalo de datas e de tipo de coluna.
 

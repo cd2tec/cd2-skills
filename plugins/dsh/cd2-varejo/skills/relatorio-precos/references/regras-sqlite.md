@@ -5,17 +5,22 @@ Quando você não tem conexão com o banco, o relatório roda sobre um arquivo q
 ## Como carregar
 
 ```
-python3 scripts/dados_arquivo.py carregar --base /tmp/base.sqlite ARQUIVO [ARQUIVO ...]
+python3 <pasta da skill>/scripts/dados_arquivo.py carregar --base <pasta temporária>/base.sqlite ARQUIVO [ARQUIVO ...]
 ```
+
+Rode a partir da pasta de trabalho da pessoa, com o caminho completo do script. `<pasta temporária>` é a pasta temporária do sistema, que muda de uma máquina para outra: descubra com `python3 -c "import tempfile; print(tempfile.gettempdir())"`. Use o mesmo caminho em `consultar` e em `apagar`.
+
+**Todos os arquivos vão na mesma chamada.** `carregar` apaga a base que já existe naquele caminho: uma segunda chamada não soma tabelas, troca a base inteira.
 
 - Aceita CSV (Windows-1252 ou UTF-8, separado por ponto e vírgula, vírgula, tab ou barra vertical) e XLSX (só a primeira planilha). Arquivo `.xls` antigo: peça para a pessoa abrir no Excel e salvar como CSV ou XLSX.
 - Cada arquivo vira uma tabela, com o nome do arquivo sem acento e em minúsculas. Cada coluna vira um nome seguro (`Preço Líquido` vira `preco_liquido`). O nome original fica no perfil.
 - Números como `1.234,56` e `(R$ 1.234,50)` viram valor. Datas como `31/01/2026` viram `2026-01-31`. Código com zero à esquerda, código de barras e código de conta contábil como `1.1.01` continuam texto: com ponto como separador, a data exige ano de quatro dígitos.
-- Linhas de subtotal e total geral vão para `<tabela>__totais` e não entram na tabela principal. Só conta como total a linha em que a célula é apenas o rótulo (`Subtotal`, `TOTAL GERAL`, `Total do dia`, `Total:`) e há número na linha; produto chamado "Total Clean Detergente" fica na principal. Some a principal; use a de totais só para conferir.
-- Coluna em que ao menos 80% dos valores são número vira número; o que não for número fica vazio (NULL) e o aviso lista os primeiros valores. Linhas que repetem o cabeçalho (paginação do ERP) saem e entram no aviso.
-- CPF vira `***.456.789-**` ao carregar, em coluna de CPF e em qualquer texto com CPF pontuado. Coluna sem "cpf" no nome com valores de 11 dígitos não é mascarada, mas o aviso aponta. Não peça nem repita o número inteiro.
+- Título, período e outras linhas antes do cabeçalho saem, e o aviso cita até três delas. O cabeçalho é a primeira linha com a largura mais comum do arquivo em que a maioria das células é texto. Se a detecção errar, carregue de novo com `--cabecalho N` (N é a linha do cabeçalho, a primeira é 1), que vale para todos os arquivos da chamada.
+- Linhas de subtotal e total geral vão para `<tabela>__totais` e não entram na tabela principal. É total a linha com número e com uma célula que é apenas o rótulo (`Subtotal`, `TOTAL GERAL`, `Total do dia`, `Total Depto`, `Total:`), em qualquer coluna, desde que o rótulo seja a primeira célula preenchida ou que a linha deixe vazia uma coluna quase sempre preenchida. Produto chamado "Total Clean Detergente" fica na principal, e rótulo que se repete em mais de 20% das linhas completas é categoria (`Baixa = Total`) e também fica. Linha com as duas primeiras colunas vazias e só números vai para os totais, com aviso de possível subtotal sem rótulo. Some a principal; use a de totais só para conferir.
+- Coluna em que ao menos 80% dos valores são número ou data vira número ou data; o que não converter (`n/d`, `00/00/0000`) fica vazio (NULL) e o aviso lista os primeiros valores. Linhas que repetem o cabeçalho (paginação do ERP) saem e entram no aviso.
+- CPF vira `***.456.789-**` ao carregar, em coluna de CPF e em qualquer texto com CPF pontuado. Coluna sem "cpf" no nome com valores de 11 dígitos não é mascarada, mas o aviso aponta e o perfil não mostra `min`, `max` nem `valores` dela. Não peça nem repita o número inteiro.
 - Arquivo que não é base SQLite nunca é apagado nem sobrescrito: `apagar` e `carregar` recusam, e a base não pode ser um dos arquivos de entrada.
-- A resposta é um perfil em JSON: tabelas, linhas, colunas com tipo, percentual de vazios, mínimo, máximo e valores distintos, mais a lista de avisos.
+- A resposta é um perfil em JSON: tabelas, linhas, colunas com tipo, percentual de vazios, mínimo, máximo e quantidade de valores distintos, mais a lista de avisos. Coluna de texto com até 20 valores distintos traz `valores`, com cada valor e quantas linhas ele tem: é onde aparecem status, tipo e cancelado.
 
 Leia os avisos antes de qualquer conta e repasse à pessoa os que mudam o número. O mais importante: coluna sem vírgula com algum valor no formato `1.234` (peso, por exemplo) é lida como decimal, não como milhar, e o aviso diz isso. Se algum valor da coluna tiver dois grupos de ponto (`1.234.567`), todos os pontos são milhar. Confirme com a pessoa antes de seguir.
 
@@ -26,7 +31,7 @@ Antes de consultar, olhe o perfil: quantas linhas, período (`min` e `max` da co
 ## Como consultar
 
 ```
-python3 scripts/dados_arquivo.py consultar --base /tmp/base.sqlite --sql "SELECT ..." [--limite 500]
+python3 <pasta da skill>/scripts/dados_arquivo.py consultar --base <pasta temporária>/base.sqlite --sql "SELECT ..." [--limite 500]
 ```
 
 - Só leitura, uma instrução por vez. `INSERT`, `DROP`, `PRAGMA` e `ATTACH` são recusados.
@@ -39,7 +44,7 @@ python3 scripts/dados_arquivo.py consultar --base /tmp/base.sqlite --sql "SELECT
 Terminou o relatório, apague a base temporária:
 
 ```
-python3 scripts/dados_arquivo.py apagar --base /tmp/base.sqlite
+python3 <pasta da skill>/scripts/dados_arquivo.py apagar --base <pasta temporária>/base.sqlite
 ```
 
 Só apaga arquivo que é base SQLite. A resposta confirma com `"apagado": true`.
@@ -53,6 +58,9 @@ Só apaga arquivo que é base SQLite. A resposta confirma com `"apagado": true`.
 | `DATEADD(day, -30, GETDATE())` | `date('now', '-30 day')` |
 | `DATEADD(month, -1, x)` | `date(x, '-1 month')` |
 | `GETDATE()` | `datetime('now')` |
+| `DATEDIFF(day, a, b)` | `CAST(julianday(date(b)) - julianday(date(a)) AS integer)` |
+| `CONVERT(varchar(10), x, 23)` | `date(x)` |
+| `CONVERT(float, x)` | `CAST(x AS float)` |
 | `CAST(x AS float)` | igual, funciona |
 | `ISNULL(a, b)` | `COALESCE(a, b)` |
 | `LEN(x)` | `LENGTH(x)` |

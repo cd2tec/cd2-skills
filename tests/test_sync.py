@@ -468,5 +468,42 @@ class ClaudeIconTest(unittest.TestCase):
         self.assertLessEqual(len(data), 2 * 1024 * 1024)
         self.assertEqual(data, (ROOT / "docs" / "assets" / "icon-512.png").read_bytes())
 
+class FrontmatterYaml(unittest.TestCase):
+    def conferir(self, descricao, nome="minha-skill"):
+        spec = importlib.util.spec_from_file_location("sync_frontmatter", SYNC)
+        modulo = importlib.util.module_from_spec(spec)
+        sys.modules["sync_frontmatter"] = modulo
+        spec.loader.exec_module(modulo)
+        with tempfile.TemporaryDirectory() as tmp:
+            core = Path(tmp)
+            pasta = core / "skills" / "minha-skill"
+            pasta.mkdir(parents=True)
+            (pasta / "SKILL.md").write_text(f"---\nname: {nome}\ndescription: {descricao}\n---\n\n# T\n", encoding="utf-8")
+            return modulo.check_frontmatter(core)
+
+    def test_dois_pontos_com_espaco_e_acusado(self):
+        problemas = self.conferir('Faz a ficha (tela "Nova"): nome e schema.')
+        self.assertTrue(any("description" in p for p in problemas), problemas)
+
+    def test_comeca_com_caractere_especial_e_acusado(self):
+        for inicio in ("*", "&", "!", "[", "{", "#", "%", "@", "|", ">", "- ", "? ", "`", '"sem fechar', "'sem fechar"):
+            problemas = self.conferir(f"{inicio}texto da skill")
+            self.assertTrue(any("description" in p for p in problemas), (inicio, problemas))
+
+    def test_entre_aspas_passa(self):
+        self.assertEqual(self.conferir('"Faz a ficha (tela Nova): nome e schema."'), [])
+        self.assertEqual(self.conferir("'Faz: a ficha.'"), [])
+
+    def test_texto_comum_passa(self):
+        self.assertEqual(self.conferir("Faz a ficha, com hora 10:30 e link https://cd2.com.br/."), [])
+
+    def test_as_skills_do_core_passam(self):
+        spec = importlib.util.spec_from_file_location("sync_frontmatter_core", SYNC)
+        modulo = importlib.util.module_from_spec(spec)
+        sys.modules["sync_frontmatter_core"] = modulo
+        spec.loader.exec_module(modulo)
+        self.assertEqual(modulo.check_frontmatter(ROOT / "core" / PLUGIN), [])
+
+
 if __name__ == "__main__":
     unittest.main()

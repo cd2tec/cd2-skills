@@ -93,7 +93,7 @@ Conectar pelo [Archeo MCP Creator da CD2](https://archeo.cd2.com.br/?utm_source=
 
 - **Resultado melhor.** A skill lê o banco inteiro, acha cancelados e campos vazios e confere cada total no próprio banco.
 - **Online.** Os dados vêm direto do sistema, sem exportar planilha toda vez.
-- **Seguro.** A conexão só lê: cada consulta é um SELECT fixo que o servidor valida antes de aceitar, e qualquer escrita é recusada.
+- **Seguro.** A conexão só lê: cada consulta é um SELECT que o servidor valida antes de aceitar, e qualquer escrita é recusada.
 
 ### Exemplo de conversa
 
