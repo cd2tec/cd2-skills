@@ -22,19 +22,29 @@ import re
 import sqlite3
 import sys
 import unicodedata
+import urllib.parse
 import zipfile
+import zlib
 from pathlib import Path
 from xml.etree import ElementTree as ET
 
 LIMITE_BYTES = 200 * 1024 * 1024
+LIMITE_XML_BYTES = 50 * 1024 * 1024
+MAX_COLUNAS_XLSX = 16384
+ASSINATURA_SQLITE = b"SQLite format 3\x00"
+_ERROS_ZIP = (zipfile.BadZipFile, zlib.error, NotImplementedError, RuntimeError, OSError, EOFError)
 LIMITE_LINHAS_PADRAO = 500
 _DELIMITADORES = [";", "\t", "|", ","]
-_RE_TOTAL = re.compile(r"^\s*(sub\s*-?\s*total|total(\s+geral|\s+d[ao])?|totais|soma)\b", re.IGNORECASE)
+_RE_TOTAL = re.compile(
+    r"^\s*(sub\s*-?\s*total(\s+.*)?|total|totais|soma|total\s+geral|total\s+d[aoe]s?\b.*)\s*:?\s*$",
+    re.IGNORECASE)
 _RE_CPF = re.compile(r"^\d{3}\.\d{3}\.\d{3}-\d{2}$")
 _RE_DATA_BR = re.compile(r"^(\d{1,2})[/.-](\d{1,2})[/.-](\d{4}|\d{2})(?:[ T](\d{1,2}):(\d{2})(?::(\d{2}))?)?$")
 _RE_DATA_ISO = re.compile(r"^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{1,2}):(\d{2})(?::(\d{2}))?)?$")
 _RE_AGRUPADO = re.compile(r"^\d{1,3}(\.\d{3})+$")
-_RE_TRES_CASAS = re.compile(r"^-?\d+\.\d{3}$")
+_RE_TRES_CASAS = re.compile(r"^\d{1,3}\.\d{3}$")
+_RE_MILHAR_MULTIPLO = re.compile(r"^\d{1,3}(\.\d{3}){2,}$")
+_RE_CPF_SOLTO = re.compile(r"\b\d{3}\.\d{3}\.\d{3}-\d{2}\b")
 _RE_CODIGO = re.compile(r"^(0\d+|\d{12,})$")
 
 
@@ -94,10 +104,10 @@ _FORMATOS_DATA = set(range(14, 23)) | set(range(27, 37)) | set(range(45, 48)) | 
 
 
 def _xml(zf: zipfile.ZipFile, nome: str):
-    info = zf.getinfo(nome)
-    if info.file_size > LIMITE_BYTES:
+    with zf.open(nome) as f:
+        bruto = f.read(LIMITE_XML_BYTES + 1)
+    if len(bruto) > LIMITE_XML_BYTES:
         raise ErroDados("A planilha é grande demais para carregar. Exporte um período menor ou salve como CSV.")
-    bruto = zf.read(nome)
     if b"<!DOCTYPE" in bruto[:2048].upper() or b"<!ENTITY" in bruto[:4096].upper():
         raise ErroDados("A planilha tem um formato que não aceitamos. Salve de novo como XLSX ou CSV.")
     return ET.fromstring(bruto)
@@ -183,6 +193,9 @@ def _coluna_indice(ref: str) -> int:
     n = 0
     for c in letras.group(0).upper():
         n = n * 26 + (ord(c) - 64)
+    if n > MAX_COLUNAS_XLSX:
+        raise ErroDados("A planilha tem referência de coluna fora do limite do Excel. "
+                        "Salve de novo como XLSX ou como CSV.")
     return n - 1
 
 
@@ -209,7 +222,7 @@ def ler_xlsx(caminho: Path) -> list[list[str]]:
     """Linhas da primeira planilha como texto. Datas viram ISO; numeros usam virgula decimal."""
     try:
         zf = zipfile.ZipFile(caminho)
-    except (zipfile.BadZipFile, OSError):
+    except _ERROS_ZIP:
         raise ErroDados(f"{caminho.name}: não consegui abrir como XLSX. Salve de novo como XLSX ou como CSV.")
     with zf:
         try:
@@ -219,8 +232,15 @@ def ler_xlsx(caminho: Path) -> list[list[str]]:
                 compartilhadas = [_texto_si(si) for si in _xml(zf, "xl/sharedStrings.xml") if _local(si.tag) == "si"]
             estilos = _estilos_data(zf)
             folha = _xml(zf, planilhas[0][1])
-        except (ET.ParseError, KeyError, ValueError):
+        except (ET.ParseError, KeyError, ValueError) + _ERROS_ZIP:
             raise ErroDados(f"{caminho.name}: a planilha está com defeito. Salve de novo como XLSX ou como CSV.")
+    try:
+        return _linhas_da_folha(folha, compartilhadas, estilos)
+    except _ERROS_ZIP:
+        raise ErroDados(f"{caminho.name}: a planilha está com defeito. Salve de novo como XLSX ou como CSV.")
+
+
+def _linhas_da_folha(folha, compartilhadas, estilos) -> list[list[str]]:
     linhas = []
     for row in folha.iter():
         if _local(row.tag) != "row":
@@ -275,9 +295,9 @@ def normalizar_numero(texto: str, ponto_milhar: bool | None = None) -> float | N
     if not t:
         return None
     negativo = False
-    if t.startswith("(") and t.endswith(")"):
-        negativo, t = True, t[1:-1].strip()
     t = re.sub(r"R\$|%|\s| ", "", t)
+    if t.startswith("(") and t.endswith(")"):
+        negativo, t = True, t[1:-1]
     if t.endswith("-"):
         negativo, t = not negativo, t[:-1]
     elif t.startswith("-"):
@@ -354,6 +374,8 @@ def nome_seguro(texto: str, usados: set[str]) -> str:
     base = re.sub(r"[^a-z0-9]+", "_", _sem_acento(str(texto)).lower()).strip("_") or "col"
     if base[0].isdigit():
         base = "c_" + base
+    if base.startswith("sqlite_"):
+        base = "t_" + base
     nome, n = base, 2
     while nome in usados:
         nome = f"{base}_{n}"
@@ -365,6 +387,13 @@ def nome_seguro(texto: str, usados: set[str]) -> str:
 def _mascarar_cpf(valor: str) -> str:
     d = re.sub(r"\D", "", valor)
     return f"***.{d[3:6]}.{d[6:9]}-**"
+
+
+def _mascarar_celula(celula: str, cabecalho: str) -> tuple[str, int]:
+    """Mascara CPF na celula: coluna cpf com 11 digitos, ou CPF pontuado em qualquer trecho do texto."""
+    if "cpf" in _sem_acento(cabecalho).lower() and re.fullmatch(r"\d{11}", celula):
+        return _mascarar_cpf(celula), 1
+    return _RE_CPF_SOLTO.subn(lambda m: _mascarar_cpf(m.group(0)), celula)
 
 
 # --- carga ----------------------------------------------------------------------------------------------
@@ -385,7 +414,7 @@ def _ler_arquivo(caminho: Path, avisos: list[str]) -> list[list[str]]:
         try:
             with zipfile.ZipFile(caminho) as zf:
                 outras = [n for n, _ in _planilhas(zf)[1:]]
-        except (zipfile.BadZipFile, ET.ParseError, KeyError, ErroDados):
+        except (ET.ParseError, KeyError, ErroDados) + _ERROS_ZIP:
             outras = []
         linhas = ler_xlsx(caminho)
         if outras:
@@ -399,31 +428,46 @@ def _ler_arquivo(caminho: Path, avisos: list[str]) -> list[list[str]]:
     raise ErroDados(f"{caminho.name}: formato {ext} não suportado. Envie CSV ou XLSX.")
 
 
+def _limpo(valor: str) -> str:
+    return re.sub(r"R\$|\s|\u00a0|[()+-]", "", valor)
+
+
 def _inferir_coluna(nome_original: str, valores: list[str], avisos: list[str], arquivo: str):
-    """Devolve (tipo, conversor). Valores sao os nao vazios, ja sem CPF."""
+    """Devolve (tipo, conversor). Valores sao os nao vazios, ja sem CPF.
+
+    Coluna e numero quando ao menos 80% dos valores convertem; o resto vira vazio (NULL) com aviso.
+    """
     if not valores:
         return "texto", None
     if all(normalizar_data(v) is not None for v in valores):
         return "data", lambda v: normalizar_data(v)
-    if not any(_RE_CODIGO.match(v.strip()) for v in valores):
-        tem_virgula = any("," in v for v in valores)
-        ponto_milhar = True if tem_virgula else None
-        ambigua = (not tem_virgula) and all(_RE_TRES_CASAS.match(re.sub(r"R\$|\s", "", v)) for v in valores)
-        if ambigua:
+    if any(_RE_CODIGO.match(v.strip()) for v in valores):
+        return "texto", None
+    tem_virgula = any("," in v for v in valores)
+    ponto_milhar = None
+    if tem_virgula or any(_RE_MILHAR_MULTIPLO.match(_limpo(v)) for v in valores):
+        ponto_milhar = True
+    else:
+        ambiguos = [v for v in valores if _RE_TRES_CASAS.match(_limpo(v))]
+        if ambiguos:
             ponto_milhar = False
-        numeros = [normalizar_numero(v, ponto_milhar) for v in valores]
-        if all(n is not None for n in numeros):
-            if ambigua:
-                avisos.append(
-                    f"Na coluna \"{nome_original}\" de {arquivo} todos os valores têm 3 casas depois do ponto "
-                    f"(como {valores[0]}) e nenhum tem vírgula. Tratei o ponto como decimal "
-                    f"({valores[0]} = {normalizar_numero(valores[0], False):g}). "
-                    "Se for milhar, confirme com a pessoa que exportou.")
-            inteiro = all(n == int(n) for n in numeros)
-            if inteiro:
-                return "inteiro", lambda v: _como_inteiro(normalizar_numero(v, ponto_milhar))
-            return "real", lambda v: normalizar_numero(v, ponto_milhar)
-    return "texto", None
+            avisos.append(
+                f"Na coluna \"{nome_original}\" de {arquivo} há valores como {ambiguos[0]} (3 casas depois do "
+                f"ponto) e nenhum valor da coluna tem vírgula. Tratei o ponto como decimal "
+                f"({ambiguos[0]} = {normalizar_numero(ambiguos[0], False):g}). "
+                "Se for milhar, confirme com a pessoa que exportou.")
+    numeros = [normalizar_numero(v, ponto_milhar) for v in valores]
+    boas = [n for n in numeros if n is not None]
+    if not boas or len(boas) / len(numeros) < 0.8:
+        return "texto", None
+    falhas = [v for v, n in zip(valores, numeros) if n is None]
+    if falhas:
+        amostra = ", ".join(f"\"{v}\"" for v in falhas[:5])
+        avisos.append(f"Na coluna \"{nome_original}\" de {arquivo}, {len(falhas)} valor(es) não são número e "
+                      f"ficaram vazios: {amostra}.")
+    if all(n == int(n) for n in boas):
+        return "inteiro", lambda v: _como_inteiro(normalizar_numero(v, ponto_milhar))
+    return "real", lambda v: normalizar_numero(v, ponto_milhar)
 
 
 def _como_inteiro(n):
@@ -463,15 +507,28 @@ def _carregar_um(con, caminho: Path, tabela: str, avisos: list[str]) -> dict:
         l = (l + [""] * largura)[:largura]
         dados.append(l)
 
-    # CPF: coluna com "cpf" no nome mascara 11 digitos; qualquer celula com CPF completo e mascarada
+    # cabecalho repetido (paginacao do ERP)
+    chave = [c.lower() for c in cabecalho]
+    sem_repetidos = [l for l in dados if [c.lower() for c in l] != chave]
+    if len(sem_repetidos) != len(dados):
+        avisos.append(f"{caminho.name}: removi {len(dados) - len(sem_repetidos)} linha(s) que repetiam o "
+                      "cabeçalho (paginação do relatório do ERP).")
+    dados = sem_repetidos
+
+    # CPF: coluna cpf com 11 digitos e CPF pontuado em qualquer trecho de texto
     mascarados = 0
     for l in dados:
         for i, c in enumerate(l):
-            if _RE_CPF.match(c) or ("cpf" in _sem_acento(originais[i]).lower() and re.fullmatch(r"\d{11}", c)):
-                l[i] = _mascarar_cpf(c)
-                mascarados += 1
+            l[i], n = _mascarar_celula(c, originais[i])
+            mascarados += n
     if mascarados:
         avisos.append(f"{caminho.name}: mascarei {mascarados} CPF ao carregar (ficam só os dígitos do meio).")
+    for i in range(largura):
+        preenchidos = [l[i] for l in dados if l[i]]
+        if ("cpf" not in _sem_acento(originais[i]).lower() and preenchidos
+                and sum(1 for v in preenchidos if re.fullmatch(r"\d{11}", v)) * 2 > len(preenchidos)):
+            avisos.append(f"{caminho.name}: a coluna \"{originais[i]}\" tem valores de 11 dígitos que podem ser "
+                          "CPF e não foram mascarados. Confirme com a pessoa e não repita esses números.")
 
     totais = [l for l in dados if e_linha_total(l)]
     principais = [l for l in dados if not e_linha_total(l)]
@@ -483,7 +540,7 @@ def _carregar_um(con, caminho: Path, tabela: str, avisos: list[str]) -> dict:
         tipos.append(tipo)
         conversores.append(conv)
 
-    def converter(l):
+    def converter(l, manter_texto=False):
         saida = []
         for i, c in enumerate(l):
             if c in ("", "-"):
@@ -492,7 +549,8 @@ def _carregar_um(con, caminho: Path, tabela: str, avisos: list[str]) -> dict:
                 saida.append(c)
             else:
                 v = conversores[i](c)
-                saida.append(c if v is None else v)
+                numerico = tipos[i] in ("inteiro", "real")
+                saida.append(c if v is None and (manter_texto or not numerico) else v)
         return saida
 
     sql_tipo = {"inteiro": "INTEGER", "real": "REAL", "data": "TEXT", "texto": "TEXT"}
@@ -503,7 +561,7 @@ def _carregar_um(con, caminho: Path, tabela: str, avisos: list[str]) -> dict:
     con.executemany(f"INSERT INTO {_aspas(tabela)} VALUES ({marcas})", convertidas)
     if totais:
         con.execute(f"CREATE TABLE {_aspas(tabela + '__totais')} ({defs})")
-        con.executemany(f"INSERT INTO {_aspas(tabela + '__totais')} VALUES ({marcas})", [converter(l) for l in totais])
+        con.executemany(f"INSERT INTO {_aspas(tabela + '__totais')} VALUES ({marcas})", [converter(l, True) for l in totais])
         avisos.append(f"{caminho.name}: separei {len(totais)} linha(s) de total ou subtotal na tabela "
                       f"{tabela}__totais. Elas não entram nas somas de {tabela}.")
 
@@ -530,24 +588,29 @@ def carregar(arquivos: list[Path], base: Path) -> dict:
     if not arquivos:
         raise ErroDados("Informe pelo menos um arquivo para carregar.")
     base = Path(base)
+    if any(a.resolve() == base.resolve() for a in arquivos):
+        raise ErroDados("A base não pode ser o mesmo arquivo que você está carregando. Use outro caminho em --base.")
     apagar(base)
     avisos: list[str] = []
     if sqlite3.sqlite_version_info < (3, 25, 0):
         avisos.append(f"O SQLite desta máquina é o {sqlite3.sqlite_version}, anterior ao 3.25: "
                       "funções de janela (OVER) não funcionam. Use subconsultas.")
-    con = sqlite3.connect(str(base))
+    sucesso = False
+    con = None
     try:
+        con = sqlite3.connect(str(base))
         usados: set[str] = set()
         tabelas = []
         for arq in arquivos:
             tabela = nome_seguro(arq.stem, usados)
             tabelas.append(_carregar_um(con, arq, tabela, avisos))
         con.commit()
-    except Exception:
-        con.close()
-        apagar(base)
-        raise
-    con.close()
+        sucesso = True
+    finally:
+        if con is not None:
+            con.close()
+        if not sucesso:
+            _remover_base(base)
     return {"sqlite": sqlite3.sqlite_version, "tabelas": tabelas, "avisos": avisos}
 
 
@@ -576,9 +639,9 @@ def consultar(base: Path, sql: str, limite: int = LIMITE_LINHAS_PADRAO) -> dict:
         raise ErroDados("Não achei a base carregada. Rode o comando carregar antes de consultar.")
     if not str(sql).strip():
         raise ErroDados("Informe a consulta SQL.")
-    con = sqlite3.connect(f"file:{base.resolve().as_posix().replace('?', '%3f').replace('#', '%23')}?mode=ro",
-                          uri=True)
+    con = None
     try:
+        con = sqlite3.connect(f"file:{urllib.parse.quote(base.resolve().as_posix(), safe='/')}?mode=ro", uri=True)
         esquema = _esquema(con)
         con.execute("PRAGMA query_only=ON")
         con.set_authorizer(_so_leitura)
@@ -588,8 +651,11 @@ def consultar(base: Path, sql: str, limite: int = LIMITE_LINHAS_PADRAO) -> dict:
             linhas = [list(r) for r in cur.fetchmany(limite + 1)]
         except (sqlite3.Error, sqlite3.Warning) as e:
             raise ErroDados(_traduzir_erro(str(e), esquema))
+    except sqlite3.Error as e:
+        raise ErroDados(f"Não consegui abrir a base: {e}")
     finally:
-        con.close()
+        if con is not None:
+            con.close()
     truncado = len(linhas) > limite
     resultado = {"colunas": colunas, "linhas": linhas[:limite], "truncado": truncado}
     if truncado:
@@ -613,15 +679,29 @@ def _traduzir_erro(msg: str, esquema: dict[str, list[str]]) -> str:
     return f"Erro na consulta: {msg}"
 
 
-def apagar(base: Path) -> dict:
-    base = Path(base)
+def _e_base_sqlite(caminho: Path) -> bool:
+    """Arquivo vazio (recem criado) ou com a assinatura do SQLite."""
+    with caminho.open("rb") as f:
+        inicio = f.read(len(ASSINATURA_SQLITE))
+    return inicio == b"" or inicio == ASSINATURA_SQLITE
+
+
+def _remover_base(base: Path) -> bool:
     apagou = False
     for sufixo in ("", "-wal", "-shm", "-journal"):
         arq = Path(str(base) + sufixo)
         if arq.is_file():
             arq.unlink()
-            apagou = arq == base or apagou
-    return {"apagado": apagou, "base": str(base)}
+            apagou = apagou or arq == base
+    return apagou
+
+
+def apagar(base: Path) -> dict:
+    """Apaga a base e seus arquivos auxiliares. Recusa arquivo que nao seja uma base SQLite."""
+    base = Path(base)
+    if base.is_file() and not _e_base_sqlite(base):
+        raise ErroDados(f"{base.name} não é uma base SQLite criada por este leitor. Não apaguei nada.")
+    return {"apagado": _remover_base(base), "base": str(base)}
 
 
 # --- linha de comando -----------------------------------------------------------------------------------
@@ -659,6 +739,9 @@ def main(argv=None) -> int:
             saida = apagar(Path(args.base))
     except ErroDados as e:
         print(json.dumps({"errors": e.erros}, ensure_ascii=False))
+        return 2
+    except (sqlite3.Error, OSError) as e:
+        print(json.dumps({"errors": [f"Não consegui concluir: {e}"]}, ensure_ascii=False))
         return 2
     print(json.dumps(saida, ensure_ascii=False))
     return 0

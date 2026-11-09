@@ -11,11 +11,13 @@ python3 scripts/dados_arquivo.py carregar --base /tmp/base.sqlite ARQUIVO [ARQUI
 - Aceita CSV (Windows-1252 ou UTF-8, separado por ponto e vírgula, vírgula, tab ou barra vertical) e XLSX (só a primeira planilha). Arquivo `.xls` antigo: peça para a pessoa abrir no Excel e salvar como CSV ou XLSX.
 - Cada arquivo vira uma tabela, com o nome do arquivo sem acento e em minúsculas. Cada coluna vira um nome seguro (`Preço Líquido` vira `preco_liquido`). O nome original fica no perfil.
 - Números como `1.234,56` e `(R$ 1.234,50)` viram valor. Datas como `31/01/2026` viram `2026-01-31`. Código com zero à esquerda e código de barras continuam texto.
-- Linhas de subtotal e total geral vão para `<tabela>__totais` e não entram na tabela principal. Some a principal; use a de totais só para conferir.
-- CPF vira `***.456.789-**` ao carregar. Não peça nem repita o número inteiro.
+- Linhas de subtotal e total geral vão para `<tabela>__totais` e não entram na tabela principal. Só conta como total a linha em que a célula é apenas o rótulo (`Subtotal`, `TOTAL GERAL`, `Total do dia`, `Total:`) e há número na linha; produto chamado "Total Clean Detergente" fica na principal. Some a principal; use a de totais só para conferir.
+- Coluna em que ao menos 80% dos valores são número vira número; o que não for número fica vazio (NULL) e o aviso lista os primeiros valores. Linhas que repetem o cabeçalho (paginação do ERP) saem e entram no aviso.
+- CPF vira `***.456.789-**` ao carregar, em coluna de CPF e em qualquer texto com CPF pontuado. Coluna sem "cpf" no nome com valores de 11 dígitos não é mascarada, mas o aviso aponta. Não peça nem repita o número inteiro.
+- Arquivo que não é base SQLite nunca é apagado nem sobrescrito: `apagar` e `carregar` recusam, e a base não pode ser um dos arquivos de entrada.
 - A resposta é um perfil em JSON: tabelas, linhas, colunas com tipo, percentual de vazios, mínimo, máximo e valores distintos, mais a lista de avisos.
 
-Leia os avisos antes de qualquer conta e repasse à pessoa os que mudam o número. O mais importante: coluna sem vírgula e com todos os valores no formato `1.234` (peso, por exemplo) é lida como decimal, não como milhar. Confirme com a pessoa antes de seguir.
+Leia os avisos antes de qualquer conta e repasse à pessoa os que mudam o número. O mais importante: coluna sem vírgula com algum valor no formato `1.234` (peso, por exemplo) é lida como decimal, não como milhar, e o aviso diz isso. Se algum valor da coluna tiver dois grupos de ponto (`1.234.567`), todos os pontos são milhar. Confirme com a pessoa antes de seguir.
 
 ## Como medir
 

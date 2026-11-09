@@ -52,6 +52,10 @@ class TestNormalizacao(unittest.TestCase):
         self.assertIsNone(normalizar_numero("abc"))
         self.assertIsNone(normalizar_numero(""))
 
+    def test_reais_com_parenteses_por_dentro(self):
+        self.assertEqual(normalizar_numero("R$ (5,00)"), -5.0)
+        self.assertEqual(normalizar_numero("(5,00)"), -5.0)
+
     def test_datas(self):
         self.assertEqual(normalizar_data("31/01/2026"), "2026-01-31")
         self.assertEqual(normalizar_data("2026-01-31"), "2026-01-31")
@@ -70,6 +74,8 @@ class TestNormalizacao(unittest.TestCase):
         self.assertTrue(e_linha_total(["Subtotal", "", "6", "10,00"]))
         self.assertTrue(e_linha_total(["", "TOTAL GERAL", "10"]))
         self.assertTrue(e_linha_total(["Total do dia", "5"]))
+        self.assertTrue(e_linha_total(["Total:", "5"]))
+        self.assertFalse(e_linha_total(["Total Clean Detergente 500ml", "4,99", "3"]))
         self.assertFalse(e_linha_total(["Total", "", ""]))
         self.assertFalse(e_linha_total(["Arroz", "5"]))
 
@@ -196,6 +202,167 @@ class TestCarregar(Base):
         self.assertEqual(da.apagar(self.base)["apagado"], True)
         self.assertFalse(self.base.exists())
         self.assertEqual(da.apagar(self.base)["apagado"], False)
+
+
+class TestRevisao(Base):
+    def avisos(self, nome, conteudo):
+        return carregar([self.csv(nome, conteudo)], self.base)["avisos"]
+
+    def test_produto_com_nome_total_fica_na_tabela_principal(self):
+        arq = self.csv("p.csv", "produto;preco;qtd\nTotal Clean Detergente;4,99;3\nArroz;5,00;2\n"
+                                "Subtotal;;5\nTOTAL GERAL;;5\nTotal do dia;;5\nTotal:;;5\n")
+        perfil = carregar([arq], self.base)
+        self.assertEqual(perfil["tabelas"][0]["linhas"], 2)
+        self.assertEqual(perfil["tabelas"][0]["linhas_total"], 4)
+        r = self.sql("SELECT produto FROM p ORDER BY produto")
+        self.assertEqual([x[0] for x in r["linhas"]], ["Arroz", "Total Clean Detergente"])
+
+    def test_coluna_quase_numerica_nao_vira_texto(self):
+        arq = self.csv("n.csv", "item;valor\nA;1.234,56\nB;n/d\nC;10,00\nD;1,00\nE;2,00\nF;3,00\n")
+        perfil = carregar([arq], self.base)
+        self.assertEqual(self.sql("SELECT ROUND(SUM(valor), 2) FROM n")["linhas"][0][0], 1250.56)
+        self.assertEqual(self.sql("SELECT valor FROM n WHERE item='B'")["linhas"][0][0], None)
+        self.assertEqual(perfil["tabelas"][0]["colunas"][1]["tipo"], "real")
+        aviso = [a for a in perfil["avisos"] if "valor" in a]
+        self.assertTrue(aviso and "n/d" in aviso[0])
+
+    def test_coluna_com_muita_coisa_nao_numerica_continua_texto(self):
+        perfil = carregar([self.csv("m.csv", "a;b\n1;x\n2;y\nz;w\n")], self.base)
+        self.assertEqual(perfil["tabelas"][0]["colunas"][0]["tipo"], "texto")
+
+    def test_aviso_lista_no_maximo_cinco_falhas(self):
+        linhas = "".join(f"i{i};ruim{i}\n" for i in range(10)) + "".join(f"j{i};{i},5\n" for i in range(60))
+        aviso = [a for a in self.avisos("c.csv", "item;v\n" + linhas) if "\"v\"" in a][0]
+        self.assertIn("ruim4", aviso)
+        self.assertNotIn("ruim5", aviso)
+
+    def test_cabecalho_repetido_por_paginacao_sai(self):
+        arq = self.csv("pg.csv", "item;qtd\nA;1\nitem;qtd\nB;2\nITEM;QTD\nC;3\n")
+        perfil = carregar([arq], self.base)
+        self.assertEqual(perfil["tabelas"][0]["linhas"], 3)
+        self.assertEqual(self.sql("SELECT SUM(qtd) FROM pg")["linhas"][0][0], 6)
+        self.assertTrue(any("cabeçalho" in a and "2" in a for a in perfil["avisos"]))
+
+    def test_milhar_ambiguo_em_coluna_mista_avisa(self):
+        arq = self.csv("k.csv", "item;kg\nA;1.234\nB;12\nC;12.345\n")
+        perfil = carregar([arq], self.base)
+        self.assertTrue(any("kg" in a for a in perfil["avisos"]))
+        self.assertEqual([x[0] for x in self.sql("SELECT kg FROM k ORDER BY item")["linhas"]], [1.234, 12.0, 12.345])
+
+    def test_dois_grupos_de_ponto_tudo_vira_milhar(self):
+        arq = self.csv("q.csv", "item;n\nA;1.234\nB;1.234.567\n")
+        perfil = carregar([arq], self.base)
+        self.assertEqual([x[0] for x in self.sql("SELECT n FROM q ORDER BY item")["linhas"]], [1234, 1234567])
+        self.assertFalse(any('"n"' in a for a in perfil["avisos"]))
+
+    def test_cpf_em_texto_livre_e_mascarado(self):
+        arq = self.csv("o.csv", "id;obs\n1;CPF 123.456.789-09 ok\n")
+        perfil = carregar([arq], self.base)
+        self.assertEqual(self.sql("SELECT obs FROM o")["linhas"][0][0], "CPF ***.456.789-** ok")
+        self.assertNotIn("123.456.789-09", json.dumps(perfil))
+
+    def test_onze_digitos_em_coluna_sem_nome_cpf_avisa(self):
+        arq = self.csv("d.csv", "id;doc\n1;12345678909\n2;98765432100\n")
+        perfil = carregar([arq], self.base)
+        self.assertTrue(any("doc" in a and "CPF" in a for a in perfil["avisos"]))
+
+    def test_tabela_sqlite_ganha_prefixo(self):
+        perfil = carregar([self.csv("sqlite_master.csv", "a\n1\n")], self.base)
+        self.assertEqual(perfil["tabelas"][0]["tabela"], "t_sqlite_master")
+
+
+class TestRobustez(Base):
+    def test_apagar_nao_apaga_o_que_nao_e_base(self):
+        txt = self.dir / "naobase.txt"
+        txt.write_text("importante")
+        with self.assertRaises(ErroDados):
+            da.apagar(txt)
+        self.assertTrue(txt.exists())
+
+    def test_carregar_recusa_base_igual_a_entrada(self):
+        entrada = self.csv("v.csv", "a\n1\n")
+        with self.assertRaises(ErroDados):
+            carregar([entrada], entrada)
+        self.assertEqual(entrada.read_text(), "a\n1\n")
+
+    def test_carregar_recusa_sobrescrever_arquivo_alheio(self):
+        alheio = self.dir / "alheio.txt"
+        alheio.write_text("meu")
+        with self.assertRaises(ErroDados):
+            carregar([self.csv("a.csv", "a\n1\n")], alheio)
+        self.assertEqual(alheio.read_text(), "meu")
+
+    def test_falha_no_meio_nao_deixa_base_pela_metade(self):
+        ok = self.csv("ok.csv", "a\n1\n")
+        with self.assertRaises(ErroDados):
+            carregar([ok, self.csv("vazio.csv", "")], self.base)
+        self.assertFalse(self.base.exists())
+
+    def test_xlsx_com_crc_ruim_vira_erro(self):
+        caminho = self.dir / "crc.xlsx"
+        with zipfile.ZipFile(caminho, "w", zipfile.ZIP_STORED) as z:
+            z.writestr("xl/workbook.xml", "<workbook>" + "A" * 200 + "</workbook>")
+        dados = bytearray(caminho.read_bytes())
+        i = dados.index(b"AAAA")
+        dados[i] = ord("B")
+        caminho.write_bytes(bytes(dados))
+        with self.assertRaises(ErroDados):
+            carregar([caminho], self.base)
+        with self.assertRaises(ErroDados):
+            ler_xlsx(caminho)
+
+    def test_xlsx_com_coluna_absurda_recusa(self):
+        ns = 'xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"'
+        caminho = self.dir / "col.xlsx"
+        with zipfile.ZipFile(caminho, "w") as z:
+            z.writestr("xl/workbook.xml", f'<workbook {ns}><sheets><sheet name="A" sheetId="1"/></sheets></workbook>')
+            z.writestr("xl/worksheets/sheet1.xml",
+                       f'<worksheet {ns}><sheetData><row r="1"><c r="ZZZZZ1" t="inlineStr"><is><t>x</t></is></c>'
+                       '</row></sheetData></worksheet>')
+        with self.assertRaises(ErroDados):
+            carregar([caminho], self.base)
+
+    def test_xml_grande_demais_recusa(self):
+        ns = 'xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"'
+        caminho = self.dir / "gg.xlsx"
+        with zipfile.ZipFile(caminho, "w") as z:
+            z.writestr("xl/workbook.xml", f'<workbook {ns}><sheets><sheet name="A" sheetId="1"/></sheets></workbook>')
+            z.writestr("xl/worksheets/sheet1.xml", f'<worksheet {ns}><sheetData/></worksheet>')
+        with mock.patch.object(da, "LIMITE_XML_BYTES", 20):
+            with self.assertRaises(ErroDados):
+                ler_xlsx(caminho)
+
+    def test_caminho_com_interrogacao_na_consulta(self):
+        pasta = self.dir / "a?b#c"
+        pasta.mkdir()
+        base = pasta / "b.sqlite"
+        carregar([self.csv("t.csv", "a\n1\n")], base)
+        self.assertEqual(consultar(base, "SELECT a FROM t")["linhas"], [[1]])
+
+    def test_cli_erro_de_so_sistema_sai_com_2(self):
+        saida = io.StringIO()
+        with redirect_stdout(saida):
+            codigo = da.main(["apagar", "--base", str(self.dir)])
+        self.assertIn(codigo, (0, 2))
+        arq = self.dir / "x.txt"
+        arq.write_text("nao e base")
+        saida = io.StringIO()
+        with redirect_stdout(saida):
+            codigo = da.main(["apagar", "--base", str(arq)])
+        self.assertEqual(codigo, 2)
+        self.assertIn("errors", json.loads(saida.getvalue()))
+        self.assertTrue(arq.exists())
+
+    def test_cli_arquivo_ilegivel_sai_com_2(self):
+        arq = self.dir / "ruim.csv"
+        arq.write_text("a\n1\n")
+        arq.chmod(0)
+        self.addCleanup(arq.chmod, 0o600)
+        saida = io.StringIO()
+        with redirect_stdout(saida):
+            codigo = da.main(["carregar", "--base", str(self.base), str(arq)])
+        self.assertEqual(codigo, 2)
+        self.assertIn("errors", json.loads(saida.getvalue()))
 
 
 class TestXlsx(Base):
