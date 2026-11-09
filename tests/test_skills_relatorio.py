@@ -4,7 +4,7 @@ import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-CORE = ROOT / "core/cd2-varejo"
+CORE = ROOT / "core/cd2-super"
 SKILLS = sorted((CORE / "skills").glob("relatorio-*"))
 FLUXO = CORE / "kits/dados/references/fluxo-dados.md"
 KITS = [CORE / "kits" / kit / "references" for kit in ("dados", "sql", "relatorio")]

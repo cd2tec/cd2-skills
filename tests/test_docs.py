@@ -46,9 +46,9 @@ class ReadmeTest(unittest.TestCase):
             "GPT Store",
             "CC BY-NC-ND 4.0",
             "Teste grátis na sua empresa",
-            "/plugin marketplace add cd2tec/cd2-skills",
-            "/plugin install cd2-varejo@cd2-skills",
-            "codex plugin marketplace add cd2tec/cd2-skills",
+            "/plugin marketplace add cd2tec/super",
+            "/plugin install cd2-super@super",
+            "codex plugin marketplace add cd2tec/super",
         ):
             self.assertIn(needle, text)
 
@@ -69,7 +69,7 @@ class ReadmeTest(unittest.TestCase):
         ):
             self.assertIn(needle, text)
         for pkg in ("claude", "codex", "dsh", "gpts"):
-            self.assertIn(f"releases/latest/download/cd2-varejo-{pkg}.zip", text)
+            self.assertIn(f"releases/latest/download/cd2-super-{pkg}.zip", text)
 
     def test_readme_contact_and_utm(self):
         text = read("README.md")
@@ -135,11 +135,11 @@ class ReadmeExampleTest(unittest.TestCase):
     def load(self, skill):
         import importlib.util
         import sys
-        shared = str(ROOT / "core" / "cd2-varejo" / "shared" / "scripts")
+        shared = str(ROOT / "core" / "cd2-super" / "shared" / "scripts")
         if shared not in sys.path:
             sys.path.insert(0, shared)
         name = f"readme_example_{skill.replace('-', '_')}"
-        spec = importlib.util.spec_from_file_location(name, ROOT / "core" / "cd2-varejo" / "skills" / skill / "scripts" / "calc.py")
+        spec = importlib.util.spec_from_file_location(name, ROOT / "core" / "cd2-super" / "skills" / skill / "scripts" / "calc.py")
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
         return module
@@ -248,8 +248,8 @@ class SiteTest(unittest.TestCase):
             "Sem prazo",
             "CD2 Escala 6x1",
             "CD2 VR/VA: quanto custa",
-            "/plugin marketplace add cd2tec/cd2-skills",
-            "codex plugin marketplace add cd2tec/cd2-skills",
+            "/plugin marketplace add cd2tec/super",
+            "codex plugin marketplace add cd2tec/super",
             "SIL Open Font License",
             ':root[data-theme="dark"]',
             ":focus-visible",
@@ -359,10 +359,10 @@ class LaunchTruthTest(unittest.TestCase):
                     self.check_gpt_store_text(variant, rel)
 
     def test_codex_command_agrees_everywhere(self):
-        for rel in ("README.md", "docs/index.html", "plugins/codex/cd2-varejo/README.md"):
+        for rel in ("README.md", "docs/index.html", "plugins/codex/cd2-super/README.md"):
             text = read(rel)
-            self.assertIn("codex plugin marketplace add cd2tec/cd2-skills", text, rel)
-            self.assertIn("codex plugin add cd2-varejo@cd2-skills", text, rel)
+            self.assertIn("codex plugin marketplace add cd2tec/super", text, rel)
+            self.assertIn("codex plugin add cd2-super@super", text, rel)
 
     def test_cowork_owner_wording_agrees(self):
         for rel in self.DOCS:

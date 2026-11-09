@@ -10,7 +10,7 @@ from contextlib import redirect_stdout
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-SCRIPTS = ROOT / "plugins/claude/cd2-varejo/skills/relatorio-vendas/scripts"
+SCRIPTS = ROOT / "plugins/claude/cd2-super/skills/relatorio-vendas/scripts"
 
 
 def _carregar(nome, caminho):

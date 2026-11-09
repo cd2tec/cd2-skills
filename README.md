@@ -5,7 +5,7 @@
   <img src="docs/assets/cd2tech-horizontal.svg" alt="CD2 Tech" height="48">
 </picture>
 
-# CD2 Skills para o varejo
+# Super para o varejo
 
 **Skills de IA para o varejo alimentar, de graça para testar.**
 
@@ -16,16 +16,16 @@
 [![ChatGPT Work](https://img.shields.io/badge/ChatGPT%20Work-plugin-0000ff.svg)](#chatgpt-work)
 [![DeepSeek Harness](https://img.shields.io/badge/DeepSeek%20Harness-skills-0000ff.svg)](#deepseek-harness)
 [![GPT Store](https://img.shields.io/badge/GPT%20Store-em%20breve-0000ff.svg)](#gpt-store)
-[![Release](https://img.shields.io/github/v/release/cd2tec/cd2-skills?label=release&color=0000ff)](https://github.com/cd2tec/cd2-skills/releases/latest)
-[![Site](https://img.shields.io/badge/site-cd2tec.github.io-0000ff.svg)](https://cd2tec.github.io/cd2-skills/)
+[![Release](https://img.shields.io/github/v/release/cd2tec/super?label=release&color=0000ff)](https://github.com/cd2tec/super/releases/latest)
+[![Site](https://img.shields.io/badge/site-cd2tec.github.io-0000ff.svg)](https://cd2tec.github.io/super/)
 
-**[Conheça o site das skills](https://cd2tec.github.io/cd2-skills/)**
+**[Conheça o site das skills](https://cd2tec.github.io/super/)**
 
 </div>
 
 ---
 
-A CD2 Tech publica calculadoras gratuitas para o varejo alimentar. Este repositório leva a mesma conta para dentro do assistente de IA que você já usa: o plugin **`cd2-varejo`** tem uma skill para cada calculadora, e mais oito relatórios gerenciais, um painel de varejo e a ficha de ferramenta do Archeo MCP Creator da CD2. A skill entende quem é você, faz a conta com os números da sua loja e entrega o que fazer primeiro, com a marca CD2 Tech.
+A CD2 Tech publica calculadoras gratuitas para o varejo alimentar. Este repositório leva a mesma conta para dentro do assistente de IA que você já usa: o plugin **`cd2-super`** tem uma skill para cada calculadora, e mais oito relatórios gerenciais, um painel de varejo e a ficha de ferramenta do Archeo MCP Creator da CD2. A skill entende quem é você, faz a conta com os números da sua loja e entrega o que fazer primeiro, com a marca CD2 Tech.
 
 Os relatórios e o painel funcionam **com o banco do seu ERP conectado ou sem conexão nenhuma**, a partir de um arquivo que você exporta do sistema. Veja [Relatórios e painel](#relatórios-e-painel).
 
@@ -89,7 +89,7 @@ Sem conexão, a skill avisa, sugere conectar uma vez e segue. Cada relatório tr
 
 ### Por que conectar
 
-Conectar pelo [Archeo MCP Creator da CD2](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=cd2-varejo) melhora o resultado:
+Conectar pelo [Archeo MCP Creator da CD2](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=cd2-super) melhora o resultado:
 
 - **Resultado melhor.** A skill lê o banco inteiro, acha cancelados e campos vazios e confere cada total no próprio banco.
 - **Online.** Os dados vêm direto do sistema, sem exportar planilha toda vez.
@@ -132,7 +132,7 @@ flowchart LR
 ```
 
 1. **Entende quem é você.** Dono, gerente, RH, DP ou financeiro. Uma loja ou uma rede. E o formato do resultado: página visual, planilha, resumo para WhatsApp ou texto.
-2. **Oferece puxar os dados.** Se o seu sistema estiver conectado na sessão, usa e diz qual usou. Se não, mostra o [Archeo MCP Creator](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=cd2-varejo) e segue com os números digitados.
+2. **Oferece puxar os dados.** Se o seu sistema estiver conectado na sessão, usa e diz qual usou. Se não, mostra o [Archeo MCP Creator](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=cd2-super) e segue com os números digitados.
 3. **Pergunta sobre novidades.** Usa a regra conferida numa data que ela informa, ou pesquisa antes em fontes oficiais.
 4. **Pede só o que falta,** com exemplo, valor padrão e o porquê de cada dado.
 5. **Faz a conta no script,** a mesma da calculadora. Onde a plataforma não roda código, segue as fórmulas da metodologia e mostra a conta.
@@ -159,7 +159,7 @@ Skill: Sem acordo coletivo, você precisa de 3 a 4 pessoas a mais:
        O primeiro passo é procurar o sindicato antes de 16/12/2026.
 ```
 
-Loja de exemplo, com a conta feita em 07/11/2026: 7 dias abertos, 13h por dia, encargos de 70% (o padrão) e jornada atual de 44h em 6 dias. Caixa: 14 pessoas, R$ 1.900,00 de salário médio e 5 postos abertos ao mesmo tempo. Açougue: 6 pessoas, R$ 2.600,00. Padaria: 5 pessoas, R$ 2.200,00. Veja [como calculamos](core/cd2-varejo/skills/fim-escala-6x1/references/metodologia.md).
+Loja de exemplo, com a conta feita em 07/11/2026: 7 dias abertos, 13h por dia, encargos de 70% (o padrão) e jornada atual de 44h em 6 dias. Caixa: 14 pessoas, R$ 1.900,00 de salário médio e 5 postos abertos ao mesmo tempo. Açougue: 6 pessoas, R$ 2.600,00. Padaria: 5 pessoas, R$ 2.200,00. Veja [como calculamos](core/cd2-super/skills/fim-escala-6x1/references/metodologia.md).
 
 ### Quanto o VR/VA custa de verdade
 
@@ -177,13 +177,13 @@ Skill: Você paga R$ 1.576,67 por mês acima do permitido, ou R$ 18.920,00 por a
        A Alelo é a que mais pesa: comece por ela.
 ```
 
-Padaria de exemplo: Alelo, Pluxee, Ticket e VR, com o dinheiro a 2% ao mês. Veja [como calculamos](core/cd2-varejo/skills/custo-vrva/references/metodologia.md).
+Padaria de exemplo: Alelo, Pluxee, Ticket e VR, com o dinheiro a 2% ao mês. Veja [como calculamos](core/cd2-super/skills/custo-vrva/references/metodologia.md).
 
 Outros pedidos que a skill entende: *"monta a escala da loja com 2 folgas"*, *"calcula as 4 lojas da rede"*, *"a Ticket pode me cobrar 6%?"*, *"me dá um resumo para mandar no WhatsApp"*.
 
 ## Instalação
 
-O plugin `cd2-varejo` é o mesmo em todas as plataformas. Muda só a forma de instalar:
+O plugin `cd2-super` é o mesmo em todas as plataformas. Muda só a forma de instalar:
 
 | Plataforma | Como instala | Observação |
 |---|---|---|
@@ -196,56 +196,56 @@ O plugin `cd2-varejo` é o mesmo em todas as plataformas. Muda só a forma de in
 
 ### Downloads
 
-Cada versão gera uma [release](https://github.com/cd2tec/cd2-skills/releases/latest) com um ZIP por plataforma. Estes links sempre entregam a versão mais recente:
+Cada versão gera uma [release](https://github.com/cd2tec/super/releases/latest) com um ZIP por plataforma. Estes links sempre entregam a versão mais recente:
 
-- **[`cd2-varejo-claude.zip`](https://github.com/cd2tec/cd2-skills/releases/latest/download/cd2-varejo-claude.zip)**, para o Claude Cowork;
-- **[`cd2-varejo-codex.zip`](https://github.com/cd2tec/cd2-skills/releases/latest/download/cd2-varejo-codex.zip)**, para o Codex, quando não der para instalar direto do GitHub;
-- **[`cd2-varejo-dsh.zip`](https://github.com/cd2tec/cd2-skills/releases/latest/download/cd2-varejo-dsh.zip)**, para o DeepSeek Harness;
-- **[`cd2-varejo-gpts.zip`](https://github.com/cd2tec/cd2-skills/releases/latest/download/cd2-varejo-gpts.zip)**, com o conteúdo dos GPTs, para quem publica.
+- **[`cd2-super-claude.zip`](https://github.com/cd2tec/super/releases/latest/download/cd2-super-claude.zip)**, para o Claude Cowork;
+- **[`cd2-super-codex.zip`](https://github.com/cd2tec/super/releases/latest/download/cd2-super-codex.zip)**, para o Codex, quando não der para instalar direto do GitHub;
+- **[`cd2-super-dsh.zip`](https://github.com/cd2tec/super/releases/latest/download/cd2-super-dsh.zip)**, para o DeepSeek Harness;
+- **[`cd2-super-gpts.zip`](https://github.com/cd2tec/super/releases/latest/download/cd2-super-gpts.zip)**, com o conteúdo dos GPTs, para quem publica.
 
-Na página de cada release ficam também os mesmos arquivos com a versão no nome (por exemplo, `cd2-varejo-claude-0.1.0.zip`).
+Na página de cada release ficam também os mesmos arquivos com a versão no nome (por exemplo, `cd2-super-claude-0.1.0.zip`).
 
 ### Claude Code
 
 Dentro de uma sessão:
 
 ```
-/plugin marketplace add cd2tec/cd2-skills
-/plugin install cd2-varejo@cd2-skills
+/plugin marketplace add cd2tec/super
+/plugin install cd2-super@super
 ```
 
-**Atualizar:** `/plugin marketplace update cd2-skills`. Para receber as versões novas sem pedir, abra `/plugin`, vá em **Marketplaces**, escolha `cd2-skills` e ligue o **auto-update**.
+**Atualizar:** `/plugin marketplace update super`. Para receber as versões novas sem pedir, abra `/plugin`, vá em **Marketplaces**, escolha `super` e ligue o **auto-update**.
 
 ### Claude Cowork
 
 No app do Claude, a instalação é pelo ZIP.
 
-1. Baixe o [`cd2-varejo-claude.zip`](https://github.com/cd2tec/cd2-skills/releases/latest/download/cd2-varejo-claude.zip).
+1. Baixe o [`cd2-super-claude.zip`](https://github.com/cd2tec/super/releases/latest/download/cd2-super-claude.zip).
 2. Escolha onde instalar:
    - **Só para você:** em **Customize > Plugins**, faça o upload do ZIP.
    - **Para a organização** (Owner ou Primary Owner, planos Team e Enterprise): em **Organization settings > Plugins & skills**, clique em **Add > Upload a plugin** e suba o ZIP.
-3. Na organização, defina quem recebe o plugin na aba **Inventory**, no menu da linha do `cd2-varejo`.
+3. Na organização, defina quem recebe o plugin na aba **Inventory**, no menu da linha do `cd2-super`.
 
 **Atualizar:** baixe o ZIP novo e repita o upload no mesmo lugar.
 
 ### Codex
 
 ```
-codex plugin marketplace add cd2tec/cd2-skills
-codex plugin add cd2-varejo@cd2-skills
+codex plugin marketplace add cd2tec/super
+codex plugin add cd2-super@super
 ```
 
-No app do Codex, depois de adicionar o marketplace, você também pode instalar o `cd2-varejo` pelo diretório de plugins, no marketplace `cd2-skills`.
+No app do Codex, depois de adicionar o marketplace, você também pode instalar o `cd2-super` pelo diretório de plugins, no marketplace `super`.
 
-**Atualizar:** `codex plugin marketplace upgrade cd2-skills`.
+**Atualizar:** `codex plugin marketplace upgrade super`.
 
 ### ChatGPT Work
 
 O ChatGPT Work só existe nos planos de empresa do ChatGPT, e quem instala é o admin do workspace. Ele usa o mesmo pacote do Codex.
 
 1. Em **Workspace settings > Plugins**, clique em **Add** e depois em **Import marketplace**.
-2. Em **Source**, use `https://github.com/cd2tec/cd2-skills`. Deixe **Path** e **Branch** vazios para acompanhar as atualizações.
-3. Em **Import results**, confira se o `cd2-varejo` veio de `plugins/codex/cd2-varejo` e defina a política de instalação de cada papel.
+2. Em **Source**, use `https://github.com/cd2tec/super`. Deixe **Path** e **Branch** vazios para acompanhar as atualizações.
+3. Em **Import results**, confira se o `cd2-super` veio de `plugins/codex/cd2-super` e defina a política de instalação de cada papel.
 4. As pessoas do workspace instalam em **Plugins**, na barra lateral.
 
 No ChatGPT Plus pessoal ou no gratuito não há plugin. Os GPTs chegam em breve na [GPT Store](#gpt-store). Enquanto isso, quem tem o Plus já pode usar o plugin no [Codex](#codex).
@@ -254,10 +254,10 @@ No ChatGPT Plus pessoal ou no gratuito não há plugin. Os GPTs chegam em breve 
 
 O DeepSeek Harness está em **developer preview**, e a DeepSeek avisa que pode haver mudanças incompatíveis.
 
-1. Baixe o [`cd2-varejo-dsh.zip`](https://github.com/cd2tec/cd2-skills/releases/latest/download/cd2-varejo-dsh.zip) e descompacte.
+1. Baixe o [`cd2-super-dsh.zip`](https://github.com/cd2tec/super/releases/latest/download/cd2-super-dsh.zip) e descompacte.
 2. Na pasta descompactada, rode `python3 install.py`. Isso copia as skills para `~/.agents/skills/`. Só para o projeto atual: `python3 install.py --project`.
 
-**Atualizar:** baixe o ZIP novo e rode `python3 install.py` de novo. **Remover:** `python3 install.py --remove`. Os detalhes estão no [README do pacote](plugins/dsh/cd2-varejo/README.md).
+**Atualizar:** baixe o ZIP novo e rode `python3 install.py` de novo. **Remover:** `python3 install.py --remove`. Os detalhes estão no [README do pacote](plugins/dsh/cd2-super/README.md).
 
 ### GPT Store
 
@@ -276,7 +276,7 @@ O GPT não se conecta ao seu sistema. Para puxar os dados do ERP, use o plugin n
 
 ## Conecte seu sistema
 
-Em vez de digitar ou exportar planilha, a skill pode puxar os números direto do seu ERP, da folha ou do banco de dados. Com o [Archeo MCP Creator da CD2](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=cd2-varejo), cada consulta vira uma ferramenta que o assistente chama, só de leitura. Sem conexão, a skill segue com o arquivo que você exportar ou com os números que você digitar. Veja a diferença em [Relatórios e painel](#relatórios-e-painel).
+Em vez de digitar ou exportar planilha, a skill pode puxar os números direto do seu ERP, da folha ou do banco de dados. Com o [Archeo MCP Creator da CD2](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=cd2-super), cada consulta vira uma ferramenta que o assistente chama, só de leitura. Sem conexão, a skill segue com o arquivo que você exportar ou com os números que você digitar. Veja a diferença em [Relatórios e painel](#relatórios-e-painel).
 
 ## Licença em português simples
 
@@ -291,17 +291,17 @@ O texto completo está no [`LICENSE`](LICENSE) e as condições de teste e de us
 
 As contas e informações das skills são apenas gerenciais, uma referência. A CD2 Tech não tem responsabilidade sobre os resultados nem sobre decisões tomadas com base neles.
 
-**Quer usar para valer?** Fale com a gente pelo [WhatsApp](https://wa.me/5519982355172?text=Oi%2C%20vim%20pelo%20GitHub%20das%20skills%20da%20CD2%20e%20quero%20falar%20sobre%20uso%20na%20minha%20empresa.) ou em [cd2.com.br](https://cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=cd2-varejo).
+**Quer usar para valer?** Fale com a gente pelo [WhatsApp](https://wa.me/5519982355172?text=Oi%2C%20vim%20pelo%20GitHub%20das%20skills%20da%20CD2%20e%20quero%20falar%20sobre%20uso%20na%20minha%20empresa.) ou em [cd2.com.br](https://cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=cd2-super).
 
 ## Estrutura do repositório
 
 As skills são escritas **uma vez**, em `core/`, e copiadas para o pacote de cada plataforma por um script. Assim o conteúdo não diverge entre as plataformas.
 
 ```
-core/cd2-varejo/                  fonte única: skills/, shared/ (marca e logos), kits/ (o que cada tipo de skill soma), gpts/ e plugin.core.json
-plugins/claude/cd2-varejo/        pacote do Claude Code e do Cowork (.claude-plugin/plugin.json e cópias geradas)
-plugins/codex/cd2-varejo/         pacote do Codex e do ChatGPT Work (plugin.json e cópias geradas)
-plugins/dsh/cd2-varejo/           pacote do DeepSeek Harness (plugin.json, install.py e skills/ no layout plano)
+core/cd2-super/                  fonte única: skills/, shared/ (marca e logos), kits/ (o que cada tipo de skill soma), gpts/ e plugin.core.json
+plugins/claude/cd2-super/        pacote do Claude Code e do Cowork (.claude-plugin/plugin.json e cópias geradas)
+plugins/codex/cd2-super/         pacote do Codex e do ChatGPT Work (plugin.json e cópias geradas)
+plugins/dsh/cd2-super/           pacote do DeepSeek Harness (plugin.json, install.py e skills/ no layout plano)
 gpts/<skill>/                     GPT de cada calculadora: instructions.md, gpt.json e knowledge/ (gerados)
 .claude-plugin/marketplace.json   marketplace do Claude Code
 .agents/plugins/marketplace.json  marketplace do Codex
@@ -315,9 +315,9 @@ index.html                        redireciona para docs/ se o Pages publicar a p
 
 ```mermaid
 flowchart LR
-    C[core/cd2-varejo] -->|sync_plugins.py| CL[plugins/claude/cd2-varejo]
-    C -->|sync_plugins.py| CX[plugins/codex/cd2-varejo]
-    C -->|sync_plugins.py<br/>layout plano| DS[plugins/dsh/cd2-varejo]
+    C[core/cd2-super] -->|sync_plugins.py| CL[plugins/claude/cd2-super]
+    C -->|sync_plugins.py| CX[plugins/codex/cd2-super]
+    C -->|sync_plugins.py<br/>layout plano| DS[plugins/dsh/cd2-super]
     C -->|sync_plugins.py<br/>layout gpt| GP[gpts/]
     S[skills.json] -->|sync_plugins.py| R[README.md e docs/index.html]
     CL --> MC[.claude-plugin/marketplace.json]

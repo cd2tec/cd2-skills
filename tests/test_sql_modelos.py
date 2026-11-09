@@ -6,7 +6,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 FIXTURES = Path(__file__).resolve().parent / "fixtures"
-sys.path.insert(0, str(ROOT / "core/cd2-varejo/kits/dados/scripts"))
+sys.path.insert(0, str(ROOT / "core/cd2-super/kits/dados/scripts"))
 
 from dados_arquivo import carregar, consultar  # noqa: E402
 
@@ -32,7 +32,7 @@ FROM (SELECT x.codigo, x.descricao, x.qtd, x.valor,
 ORDER BY y.valor DESC, y.codigo
 """
 
-CORE = ROOT / "core/cd2-varejo"
+CORE = ROOT / "core/cd2-super"
 
 
 def secao(skill, titulo):

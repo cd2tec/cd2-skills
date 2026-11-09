@@ -4,7 +4,7 @@ As skills deste repositório são licenciadas em CC BY-NC-ND 4.0 (veja o arquivo
 
 ## Uso livre
 
-Você pode estudar, usar de forma pessoal e não comercial, e compartilhar o material sem alterações. Sempre com atribuição à CD2 Tech e link para https://github.com/cd2tec/cd2-skills.
+Você pode estudar, usar de forma pessoal e não comercial, e compartilhar o material sem alterações. Sempre com atribuição à CD2 Tech e link para https://github.com/cd2tec/super.
 
 ## Teste livre na sua empresa
 
@@ -31,4 +31,4 @@ Se a sua empresa é cliente da CD2, qualquer contrato ativo, como AMS, sustenta�
 ## Fale com a CD2
 
 - WhatsApp: https://wa.me/5519982355172
-- Site: https://cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=cd2-varejo
+- Site: https://cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=cd2-super

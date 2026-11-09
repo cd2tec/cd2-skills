@@ -20,7 +20,7 @@ ROOT = Path(__file__).resolve().parent.parent
 PERSON = codecs.decode("Tnoevry", "rot13")  # nome próprio que nenhum arquivo pode citar
 SYNC = ROOT / "scripts" / "sync_plugins.py"
 PACKAGE = ROOT / "scripts" / "package_plugins.py"
-PLUGIN = "cd2-varejo"
+PLUGIN = "cd2-super"
 SKILLS = ("fim-escala-6x1", "custo-vrva")
 PLACEHOLDER = "{{" + "UTM_SOURCE" + "}}"
 EM, EN = chr(0x2014), chr(0x2013)
@@ -245,11 +245,11 @@ class SyncTest(unittest.TestCase):
         for path in manifests:
             meta = json.loads(path.read_text(encoding="utf-8"))
             self.assertEqual(meta["name"], PLUGIN, path)
-            self.assertEqual(meta["version"], "0.2.1", path)
+            self.assertEqual(meta["version"], "0.3.0", path)
             self.assertEqual(meta["license"], "CC-BY-NC-ND-4.0", path)
             self.assertEqual(meta["author"], {"name": "CD2 Tech", "url": "https://cd2.com.br"}, path)
-            self.assertEqual(meta["homepage"], "https://cd2tec.github.io/cd2-skills/", path)
-            self.assertEqual(meta["repository"], "https://github.com/cd2tec/cd2-skills", path)
+            self.assertEqual(meta["homepage"], "https://cd2tec.github.io/super/", path)
+            self.assertEqual(meta["repository"], "https://github.com/cd2tec/super", path)
         # Manifestos e marketplace falam dos relatórios, do painel e da ficha, e não só das calculadoras.
         claude_entry = json.loads((ROOT / ".claude-plugin" / "marketplace.json").read_text(encoding="utf-8"))["plugins"][0]
         for meta in [json.loads(p.read_text(encoding="utf-8")) for p in manifests] + [claude_entry]:
@@ -259,19 +259,19 @@ class SyncTest(unittest.TestCase):
             self.assertIn("relatorio", meta["keywords"])
             self.assertIn("painel", meta["keywords"])
         codex = json.loads(manifests[1].read_text(encoding="utf-8"))["extensions"]["com.openai"]["interface"]
-        self.assertEqual(codex["displayName"], "CD2 Varejo")
+        self.assertEqual(codex["displayName"], "CD2 Super")
         self.assertEqual(codex["developerName"], "CD2 Tech")
         claude_mp = json.loads((ROOT / ".claude-plugin" / "marketplace.json").read_text(encoding="utf-8"))
         codex_mp = json.loads((ROOT / ".agents" / "plugins" / "marketplace.json").read_text(encoding="utf-8"))
-        self.assertEqual(claude_mp["name"], "cd2-skills")
-        self.assertEqual(codex_mp["name"], "cd2-skills")
-        self.assertEqual(codex_mp["interface"]["displayName"], "CD2 Skills (CD2 Tech)")
+        self.assertEqual(claude_mp["name"], "super")
+        self.assertEqual(codex_mp["name"], "super")
+        self.assertEqual(codex_mp["interface"]["displayName"], "Super (CD2 Tech)")
         entry = claude_mp["plugins"][0]
         self.assertEqual(entry["name"], PLUGIN)
         self.assertNotIn("version", entry)
         self.assertEqual(entry["license"], "CC-BY-NC-ND-4.0")
-        self.assertEqual(entry["source"], "./plugins/claude/cd2-varejo")
-        self.assertEqual(codex_mp["plugins"][0]["source"]["path"], "./plugins/codex/cd2-varejo")
+        self.assertEqual(entry["source"], "./plugins/claude/cd2-super")
+        self.assertEqual(codex_mp["plugins"][0]["source"]["path"], "./plugins/codex/cd2-super")
 
     def test_readme_and_site_blocks(self):
         for rel, utm in (("README.md", "utm_source=github&"), ("docs/index.html", "utm_source=site-skills&")):
@@ -437,7 +437,7 @@ class PackageTest(unittest.TestCase):
             )
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
             for harness in ("claude", "codex", "dsh", "gpts"):
-                for name in (f"{PLUGIN}-{harness}.zip", f"{PLUGIN}-{harness}-0.2.1.zip"):
+                for name in (f"{PLUGIN}-{harness}.zip", f"{PLUGIN}-{harness}-0.3.0.zip"):
                     path = out / name
                     self.assertTrue(path.is_file(), name)
                     with zipfile.ZipFile(path) as zf:
@@ -482,9 +482,9 @@ class DescriptionLimits(unittest.TestCase):
         tmp = tempfile.TemporaryDirectory()
         self.addCleanup(tmp.cleanup)
         path = Path(tmp.name) / "plugin.json"
-        path.write_text(json.dumps({"name": "cd2-varejo", "version": "1.0.0", "license": self.sync.LICENSE_ID,
+        path.write_text(json.dumps({"name": "cd2-super", "version": "1.0.0", "license": self.sync.LICENSE_ID,
                                     "description": "x" * tamanho}), encoding="utf-8")
-        return self.sync.check_manifest(path, {"name": "cd2-varejo", "version": "1.0.0"}, str)
+        return self.sync.check_manifest(path, {"name": "cd2-super", "version": "1.0.0"}, str)
 
     def test_manifesto_acima_do_limite_acusa(self):
         self.assertTrue(any("500" in p for p in self.manifesto(501)))
@@ -493,8 +493,8 @@ class DescriptionLimits(unittest.TestCase):
         self.assertEqual(self.manifesto(500), [])
 
     def test_manifestos_e_marketplace_reais_cabem(self):
-        for rel in ("plugins/claude/cd2-varejo/.claude-plugin/plugin.json", "plugins/codex/cd2-varejo/plugin.json",
-                    "plugins/dsh/cd2-varejo/plugin.json"):
+        for rel in ("plugins/claude/cd2-super/.claude-plugin/plugin.json", "plugins/codex/cd2-super/plugin.json",
+                    "plugins/dsh/cd2-super/plugin.json"):
             with self.subTest(rel):
                 self.assertLessEqual(len(json.loads((ROOT / rel).read_text(encoding="utf-8"))["description"]), 500)
         market = json.loads((ROOT / ".claude-plugin/marketplace.json").read_text(encoding="utf-8"))
@@ -502,7 +502,7 @@ class DescriptionLimits(unittest.TestCase):
             self.assertLessEqual(len(entry.get("description", "")), 500)
 
     def test_descricao_de_skill_cabe_em_1024(self):
-        for skill in (ROOT / "core/cd2-varejo/skills").glob("*/SKILL.md"):
+        for skill in (ROOT / "core/cd2-super/skills").glob("*/SKILL.md"):
             with self.subTest(skill.parent.name):
                 texto = skill.read_text(encoding="utf-8")
                 self.assertLessEqual(len(re.search(r"^description:\s*(.+)$", texto, re.M).group(1)), 1024)

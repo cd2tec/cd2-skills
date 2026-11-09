@@ -1,24 +1,24 @@
 {
   "plugins": {
-    "cd2-varejo": {
-      "core": "core/cd2-varejo",
+    "cd2-super": {
+      "core": "core/cd2-super",
       "synced_dirs": [
         "skills"
       ],
       "shared": "shared",
       "harnesses": {
         "claude": {
-          "path": "plugins/claude/cd2-varejo",
+          "path": "plugins/claude/cd2-super",
           "manifest": ".claude-plugin/plugin.json",
           "utm_source": "claude"
         },
         "codex": {
-          "path": "plugins/codex/cd2-varejo",
+          "path": "plugins/codex/cd2-super",
           "manifest": "plugin.json",
           "utm_source": "codex"
         },
         "dsh": {
-          "path": "plugins/dsh/cd2-varejo",
+          "path": "plugins/dsh/cd2-super",
           "manifest": "plugin.json",
           "layout": "flat-skills",
           "utm_source": "deepseek"

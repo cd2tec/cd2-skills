@@ -21,7 +21,7 @@ from datetime import date
 from pathlib import Path
 
 # brand.py fica ao lado deste arquivo no pacote final (o sync copia). No
-# repositorio (layout core) ele mora em cd2-varejo/shared/scripts.
+# repositorio (layout core) ele mora em cd2-super/shared/scripts.
 _HERE = Path(__file__).resolve().parent
 _PATHS = [_HERE]
 if len(_HERE.parents) > 2:

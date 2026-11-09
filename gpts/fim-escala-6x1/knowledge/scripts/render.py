@@ -22,7 +22,7 @@ from decimal import ROUND_HALF_UP, Decimal
 from pathlib import Path
 
 # brand.py e calc.py ficam ao lado deste arquivo no pacote final (o sync copia
-# brand.py). No repositório (layout core) brand.py mora em cd2-varejo/shared/scripts.
+# brand.py). No repositório (layout core) brand.py mora em cd2-super/shared/scripts.
 _HERE = Path(__file__).resolve().parent
 _PATHS = [_HERE]
 if len(_HERE.parents) > 2:
@@ -47,7 +47,7 @@ VRVA_URL = "https://calc-vrva.cd2.com.br/"
 CD2_URL = "https://cd2.com.br/"
 ARCHEO_URL = "https://archeo.cd2.com.br/"
 METODOLOGIA_URL = (
-    "https://github.com/cd2tec/cd2-skills/blob/main/core/cd2-varejo/skills/"
+    "https://github.com/cd2tec/super/blob/main/core/cd2-super/skills/"
     "fim-escala-6x1/references/metodologia.md"
 )
 

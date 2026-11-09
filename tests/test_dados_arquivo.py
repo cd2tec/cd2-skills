@@ -12,7 +12,7 @@ from pathlib import Path
 from unittest import mock
 
 ROOT = Path(__file__).resolve().parent.parent
-SCRIPTS = ROOT / "core/cd2-varejo/kits/dados/scripts"
+SCRIPTS = ROOT / "core/cd2-super/kits/dados/scripts"
 FIXTURES = Path(__file__).resolve().parent / "fixtures"
 sys.path.insert(0, str(SCRIPTS))
 

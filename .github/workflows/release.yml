@@ -1,7 +1,7 @@
 name: Publicar release do plugin
 
 # Roda quando a versão em core/*/plugin.core.json muda (ou manualmente).
-# Cria a release cd2-varejo-v<versão> com os ZIPs de cada plataforma. Se a
+# Cria a release cd2-super-v<versão> com os ZIPs de cada plataforma. Se a
 # release já existe, só envia os arquivos que faltarem.
 
 on:

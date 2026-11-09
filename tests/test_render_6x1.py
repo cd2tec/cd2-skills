@@ -12,8 +12,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 PERSON = codecs.decode("Tnoevry", "rot13")  # nome próprio que nenhum arquivo pode citar
-SKILL = ROOT / "core" / "cd2-varejo" / "skills" / "fim-escala-6x1"
-sys.path.insert(0, str(ROOT / "core" / "cd2-varejo" / "shared" / "scripts"))
+SKILL = ROOT / "core" / "cd2-super" / "skills" / "fim-escala-6x1"
+sys.path.insert(0, str(ROOT / "core" / "cd2-super" / "shared" / "scripts"))
 sys.path.insert(0, str(SKILL / "scripts"))
 
 import calc  # noqa: E402
@@ -422,8 +422,8 @@ class SkillDocTest(unittest.TestCase):
         for ref in ("references/fluxo-conversa.md", "references/marca.md", "references/metodologia.md",
                     "scripts/calc.py", "scripts/render.py"):
             self.assertIn(ref, text)
-        shared = ROOT / "core" / "cd2-varejo" / "shared"
-        kit = ROOT / "core" / "cd2-varejo" / "kits" / "calculadora"
+        shared = ROOT / "core" / "cd2-super" / "shared"
+        kit = ROOT / "core" / "cd2-super" / "kits" / "calculadora"
         for ref in re.findall(r"`((?:references|scripts|assets)/[^`]+)`", text):
             self.assertTrue((SKILL / ref).exists() or (shared / ref).exists() or (kit / ref).exists(), ref)
 

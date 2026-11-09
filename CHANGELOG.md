@@ -2,6 +2,14 @@
 
 As notas de cada versão entram na release do GitHub. Use um título `## <versão>` por versão, da mais recente para a mais antiga.
 
+## 0.3.0
+
+Troca de nome. O plugin `cd2-varejo` agora se chama `cd2-super`, e o repositório e o marketplace agora se chamam `super`. As skills e as contas não mudaram.
+
+- Instalação nova no Claude Code: `/plugin marketplace add cd2tec/super` e `/plugin install cd2-super@super`. No Codex: `codex plugin marketplace add cd2tec/super` e `codex plugin add cd2-super@super`.
+- Para quem já instalou: remova o plugin `cd2-varejo` e o marketplace `cd2-skills`, e instale de novo com os nomes acima.
+- Os ZIPs da release passam a se chamar `cd2-super-<pacote>.zip`, e o site agora fica em https://cd2tec.github.io/super/.
+
 ## 0.2.1
 
 Correção de instalação. A descrição do plugin passou de 500 caracteres, e o envio do ZIP no Claude recusava o pacote. A descrição ficou mais curta, e o `--check` agora confere esse limite. As skills não mudaram.
