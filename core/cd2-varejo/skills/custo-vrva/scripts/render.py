@@ -352,7 +352,7 @@ _LIMITS = (
 
 _COMMERCIAL_TITLE = "Quer ir além da estimativa?"
 _COMMERCIAL_TEXT = (
-    "Avaliar na sua operação é livre por até 90 dias. Para usar no dia a dia da empresa, "
+    "Testar na sua operação é livre. Para usar no dia a dia da empresa, "
     "com suporte e responsabilidade, fale com a CD2."
 )
 _ERP_TITLE = "Seu ERP concilia isso sozinho?"

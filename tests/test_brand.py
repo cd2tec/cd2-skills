@@ -15,6 +15,60 @@ DATA = "07/11/2026"
 
 
 class BrandTest(unittest.TestCase):
+    def test_footer_calculadora_nao_mudou(self):
+        # O rodapé das calculadoras fica byte a byte como antes dos relatórios.
+        html = brand.footer_html("X", "01/01/2026")
+        self.assertTrue(html.startswith('<footer class="cd2-assinatura"><div class="cd2-assinatura-logo"><svg '))
+        self.assertTrue(
+            html.endswith(
+                '</div><p class="cd2-assinatura-aviso">Estas contas e informações são apenas gerenciais, '
+                "uma referência. Elas usam os números informados e a nossa leitura da regra em 01/01/2026 (X), "
+                "que pode mudar. A CD2 Tech não tem nenhuma responsabilidade sobre estes resultados nem sobre "
+                "decisões tomadas com base neles. Confira com seu contador e seu advogado antes de agir."
+                "</p></footer>"
+            )
+        )
+        self.assertEqual(html.count("<svg"), 2)
+
+    def test_disclaimer_dados_texto_fixo(self):
+        base = (
+            "Estas contas e informações são apenas gerenciais, uma referência. Elas usam {} em 08/11/2026. "
+            "A CD2 Tech não tem nenhuma responsabilidade sobre estes resultados nem sobre decisões tomadas "
+            "com base neles. Confira com seu contador e seu advogado antes de agir."
+        )
+        for origem, fonte in (
+            ("banco", "os dados do banco conectado"),
+            ("outro-mcp", "os dados do banco conectado"),
+            ("arquivo", "o arquivo informado"),
+            ("digitado", "os dados informados"),
+        ):
+            self.assertEqual(brand.disclaimer_dados(origem, "08/11/2026"), base.format(fonte))
+        self.assertEqual(brand.ORIGENS, ("banco", "outro-mcp", "arquivo", "digitado"))
+
+    def test_footer_dados_html_e_text(self):
+        html = brand.footer_dados_html("arquivo", "08/11/2026")
+        self.assertIn("cd2-logo-claro", html)
+        self.assertIn("o arquivo informado", html)
+        self.assertTrue(brand.footer_dados_text("digitado", "08/11/2026").startswith("CD2 Tech\n"))
+        with self.assertRaises(ValueError):
+            brand.footer_dados_html("nada", "08/11/2026")
+
+    def test_formatos_de_relatorio(self):
+        self.assertEqual(brand.moeda(1.005), "R$ 1,01")
+        self.assertEqual(brand.moeda(-0.001), "R$ 0,00")
+        self.assertEqual(brand.numero(5130), "5.130")
+        self.assertEqual(brand.pct(79.75), "79,8%")
+        self.assertEqual(brand.moeda_compacta(1642310.4), "R$ 1,6 mi")
+        self.assertEqual(brand.data_br("2026-11-08T09:30:00"), "08/11/2026")
+        self.assertEqual(brand.formatar(None, "moeda"), brand.SEM_DADO)
+        self.assertFalse(brand.e_numero(True))
+
+    def test_tokens_ganharam_chaves_sem_mudar_valores(self):
+        for chave in ("blue-experience", "blue-qwerty", "frente-lilas"):
+            self.assertIn(chave, brand.TOKENS)
+        self.assertEqual(brand.TOKENS["blue-retail"], "#0000ff")
+        self.assertIn("--s2: #011e80", brand.tokens_css())
+
     def test_footer_html_has_logo_and_disclaimer(self):
         html = brand.footer_html(REGRA, DATA)
         self.assertIn("<svg", html)

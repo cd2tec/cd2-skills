@@ -65,7 +65,7 @@ class WorkflowTest(unittest.TestCase):
         script = (ROOT / "scripts" / "package_plugins.py").read_text(encoding="utf-8")
         self.assertIn('f"{plugin}-v{version}"', script)
         self.assertIn("cd2-varejo", (ROOT / "harnesses.json").read_text(encoding="utf-8"))
-        self.assertIn("cd2-varejo-v", "cd2-varejo-v0.1.0")
+        self.assertIn("cd2-varejo-v", "cd2-varejo-v0.2.0")
 
     def test_actions_are_pinned_and_text_is_clean(self):
         for path in WF.glob("*.yml"):

@@ -1,0 +1,8 @@
+Data;Codigo;Departamento;Quantidade;Valor Liquido;Custo Unitario;Situacao
+05/10/2026;M01;Mercearia;10;100,00;6,00;Normal
+06/10/2026;M02;Mercearia;20;200,00;7,00;Normal
+07/10/2026;B01;Bebidas;10;150,00;12,00;Normal
+08/10/2026;B02;Bebidas;5;50,00;;Normal
+09/10/2026;B03;Bebidas;4;40,00;0,00;Normal
+10/10/2026;M01;Mercearia;5;50,00;6,00;Cancelado
+05/09/2026;M01;Mercearia;10;100,00;6,00;Normal

@@ -7,7 +7,7 @@
 
 # CD2 Skills para o varejo
 
-**Skills de IA para o varejo alimentar, de graça para avaliar.**
+**Skills de IA para o varejo alimentar, de graça para testar.**
 
 [![Licença CC BY-NC-ND 4.0](https://img.shields.io/badge/licen%C3%A7a-CC%20BY--NC--ND%204.0-0000ff.svg)](#licença-em-português-simples)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-0000ff.svg)](#claude-code)
@@ -25,7 +25,9 @@
 
 ---
 
-A CD2 Tech publica calculadoras gratuitas para o varejo alimentar. Este repositório leva a mesma conta para dentro do assistente de IA que você já usa: o plugin **`cd2-varejo`** tem uma skill para cada calculadora. A skill entende quem é você, faz a conta com os números da sua loja e entrega o que fazer primeiro, com a marca CD2 Tech.
+A CD2 Tech publica calculadoras gratuitas para o varejo alimentar. Este repositório leva a mesma conta para dentro do assistente de IA que você já usa: o plugin **`cd2-varejo`** tem uma skill para cada calculadora, e mais oito relatórios gerenciais, um painel de varejo e a ficha de ferramenta do Archeo MCP Creator da CD2. A skill entende quem é você, faz a conta com os números da sua loja e entrega o que fazer primeiro, com a marca CD2 Tech.
+
+Os relatórios e o painel funcionam **com o banco do seu ERP conectado ou sem conexão nenhuma**, a partir de um arquivo que você exporta do sistema. Veja [Relatórios e painel](#relatórios-e-painel).
 
 Funciona no [Claude Code](#claude-code), no [Claude Cowork](#claude-cowork), no [Codex](#codex), no [ChatGPT Work](#chatgpt-work) e no [DeepSeek Harness](#deepseek-harness). A [GPT Store](#gpt-store) chega em breve.
 
@@ -41,21 +43,83 @@ Quem toca supermercado, padaria ou mercado de bairro não tem tempo para juridiq
 ## As skills
 
 <!-- skills:start -->
-| Skill | O que faz | Regra | Calculadora gratuita | Status |
+| Skill | O que faz | Regra | Site | Status |
 | --- | --- | --- | --- | --- |
 | **Fim da escala 6x1** (`fim-escala-6x1`) | Calcula o impacto do fim da escala 6x1 na folha e na operação da sua loja. | Emenda Constitucional 141/2026 | [calc-fim-escala6x1.cd2.com.br](https://calc-fim-escala6x1.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=fim-escala-6x1) | disponível |
 | **Quanto o VR/VA custa de verdade** (`custo-vrva`) | Mostra o custo real do vale-refeição e do vale-alimentação para a sua empresa. | Decreto 12.712/2025 | [calc-vrva.cd2.com.br](https://calc-vrva.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=custo-vrva) | disponível |
+| **Relatório de vendas** (`relatorio-vendas`) | Gera relatórios gerenciais de vendas, como a curva ABC, com a conta conferida. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=relatorio-vendas) | disponível |
+| **Relatório de estoque** (`relatorio-estoque`) | Gera relatórios gerenciais de estoque, como posição, Kardex e cobertura, com a conta conferida. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=relatorio-estoque) | disponível |
+| **Relatório de compras** (`relatorio-compras`) | Gera relatórios gerenciais de compras, como a curva ABC de abastecimento e os pedidos pendentes, com a conta conferida. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=relatorio-compras) | disponível |
+| **Relatório de preços** (`relatorio-precos`) | Gera relatórios gerenciais de preço, margem e promoção, com a conta conferida. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=relatorio-precos) | disponível |
+| **Relatório de perdas** (`relatorio-perdas`) | Gera relatórios gerenciais de perdas, como a quebra por motivo e o índice de perda, com a conta conferida. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=relatorio-perdas) | disponível |
+| **Relatório financeiro** (`relatorio-financeiro`) | Gera relatórios gerenciais financeiros, como o aging de contas a pagar e a receber e o fluxo de caixa. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=relatorio-financeiro) | disponível |
+| **Relatório fiscal** (`relatorio-fiscal`) | Confere documentos fiscais por CFOP, cabeçalho contra itens e numeração, como relatório gerencial e não documento oficial. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=relatorio-fiscal) | disponível |
+| **Relatório contábil** (`relatorio-contabil`) | Confere balancete, razão e lançamentos, como relatório gerencial e não escrituração oficial. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=relatorio-contabil) | disponível |
+| **Painel de varejo** (`painel-varejo`) | Monta um painel visual da operação do varejo, com totalizadores, linha do tempo, mapa de calor e leitura. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=painel-varejo) | disponível |
+| **Ficha de ferramenta do Archeo MCP Creator** (`ficha-archeo-mcp`) | Prepara a ficha de uma ferramenta para cadastrar no Archeo MCP Creator da CD2, com o SQL e os parâmetros. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=ficha-archeo-mcp) | disponível |
 <!-- skills:end -->
 
-A skill vai além do site:
+As calculadoras vão além do site:
 
 - **Mais personalizada.** Lê a convenção coletiva ou o extrato da operadora que você mandar e calcula várias lojas de uma rede.
 - **Mais atualizada.** Antes de calcular, pode pesquisar novidades em fontes oficiais e dizer de onde tirou cada informação.
 - **Mesma conta.** O script de cada skill porta a conta da calculadora e é conferido por testes com os exemplos da metodologia.
 
+## Relatórios e painel
+
+Dez skills do plugin trabalham com os dados do seu sistema, sem calculadora no site. **Relatório não é painel**, e as skills têm nomes diferentes de propósito:
+
+- **Oito relatórios gerenciais**, com linhas, classes e a prova da conta, para decidir: `relatorio-vendas`, `relatorio-estoque`, `relatorio-compras`, `relatorio-precos`, `relatorio-perdas`, `relatorio-financeiro`, `relatorio-fiscal` e `relatorio-contabil`. Os dois últimos conferem documentos e lançamentos como relatório gerencial, não como documento ou escrituração oficial.
+- **Um painel visual**, `painel-varejo`, para acompanhar a operação: totalizadores, linha do tempo, mapa de calor e leitura.
+- **Uma ficha**, `ficha-archeo-mcp`, que transforma uma consulta que vale a pena repetir em ferramenta do Archeo MCP Creator da CD2: nome, descrição, SQL e parâmetros, prontos para cadastrar.
+
+A conta é feita por consulta e conferida: a soma das partes tem de bater com o total. Se não bater, a página abre em vermelho.
+
+### Com conexão e sem conexão
+
+| | Com conexão | Sem conexão |
+|---|---|---|
+| De onde vêm os dados | Do banco do seu ERP, pelo Archeo MCP Creator da CD2 ou por outro MCP de dados da sessão | De um arquivo exportado do sistema (CSV ou Excel), dado colado ou números digitados |
+| Como a conta é feita | Consulta no banco, com a prova fechada no próprio banco | Consulta num banco temporário montado a partir do arquivo, que some no fim |
+| Selo da conferência | "Prova fechada", quando o total e as partes fecham | "Conferido só contra o arquivo", mesmo que o total do ERP seja igual |
+| `painel-varejo` | Foto do período, ao vivo ou agendado | Só a foto do período |
+| `ficha-archeo-mcp` | Explora e valida o SQL no banco | Rascunho marcado como não validado |
+
+Sem conexão, a skill avisa, sugere conectar uma vez e segue. Cada relatório traz a linha **Para exportar**: que relatório ou planilha pedir ao ERP, as colunas mínimas e o que deixa de sair sem cada coluna. Se um relatório não sai só com arquivo, a skill diz isso e explica o motivo. Quem responder "não" à sugestão de conectar não é incomodado de novo.
+
+### Por que conectar
+
+Conectar pelo [Archeo MCP Creator da CD2](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=cd2-varejo) melhora o resultado:
+
+- **Resultado melhor.** A skill lê o banco inteiro, acha cancelados e campos vazios e confere cada total no próprio banco.
+- **Online.** Os dados vêm direto do sistema, sem exportar planilha toda vez.
+- **Seguro.** A conexão só lê: cada consulta é um SELECT que o servidor valida antes de aceitar, e qualquer escrita é recusada.
+
+### Exemplo de conversa
+
+```
+Você:  faz a curva ABC de venda dos meus produtos
+
+Skill: Não encontrei conexão com o seu sistema, então sigo com o arquivo
+       que você me passar. Peça ao ERP o relatório de venda por item do
+       período, em CSV ou Excel, com código, descrição, quantidade e
+       valor líquido.
+
+       [você manda o arquivo; a skill carrega num banco temporário, mede
+        linhas, datas e campos vazios, marca as linhas de subtotal
+        para não contar em dobro e roda a consulta]
+
+Skill: Dois produtos fazem 80% da venda: R$ 8.000,00 de R$ 10.000,00.
+       A classe B tem mais dois, com 15%, e a C fica com os outros dois, 5%.
+       Selo: Conferido só contra o arquivo. Com a conexão, a conta seria
+       conferida no banco.
+```
+
+Mercearia de exemplo, com seis produtos que vendem R$ 5.000,00, R$ 3.000,00, R$ 1.000,00, R$ 500,00, R$ 300,00 e R$ 200,00 no período, e cortes de 80% para a classe A e 95% para a B.
+
 ## Como a skill conversa com você
 
-Toda skill segue os mesmos sete passos, uma pergunta por vez:
+As calculadoras seguem os mesmos sete passos, uma pergunta por vez. Os relatórios e o painel têm um roteiro próprio, descrito em [Relatórios e painel](#relatórios-e-painel).
 
 ```mermaid
 flowchart LR
@@ -197,12 +261,14 @@ O DeepSeek Harness está em **developer preview**, e a DeepSeek avisa que pode h
 
 ### GPT Store
 
-Em breve na GPT Store, um GPT para cada skill, para quem usa o ChatGPT Plus ou o gratuito:
+Em breve na GPT Store, um GPT para cada calculadora, para quem usa o ChatGPT Plus ou o gratuito:
 
 - **CD2 Escala 6x1**, para o fim da escala 6x1;
 - **CD2 VR/VA: quanto custa**, para o custo do vale.
 
 Enquanto isso, o Codex também funciona no ChatGPT Plus: veja a instalação no [Codex](#codex).
+
+Os GPTs valem só para as duas calculadoras. Relatórios, painel e ficha ainda não têm GPT.
 
 O GPT não se conecta ao seu sistema. Para puxar os dados do ERP, use o plugin no Claude ou no Codex, com o Archeo. Como os GPTs são montados e publicados: [`gpts/README.md`](gpts/README.md).
 
@@ -210,18 +276,18 @@ O GPT não se conecta ao seu sistema. Para puxar os dados do ERP, use o plugin n
 
 ## Conecte seu sistema
 
-Em vez de digitar, a skill pode puxar os números direto do seu ERP, da folha ou do banco de dados. Com o [Archeo MCP Creator](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=cd2-varejo) da CD2, cada consulta vira uma ferramenta que o assistente chama, só de leitura. Sem conexão, a skill segue com os números que você digitar.
+Em vez de digitar ou exportar planilha, a skill pode puxar os números direto do seu ERP, da folha ou do banco de dados. Com o [Archeo MCP Creator da CD2](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=cd2-varejo), cada consulta vira uma ferramenta que o assistente chama, só de leitura. Sem conexão, a skill segue com o arquivo que você exportar ou com os números que você digitar. Veja a diferença em [Relatórios e painel](#relatórios-e-painel).
 
 ## Licença em português simples
 
 O plugin é da **CD2 Tech** e está na licença **CC BY-NC-ND 4.0**. Na prática:
 
 - **Livre para estudar.** Você pode ver, baixar, estudar, usar sem fins comerciais e compartilhar sem alterações, sempre com o crédito à CD2 Tech.
-- **Avaliação grátis na sua empresa.** Sua empresa pode usar as skills na própria operação por até 90 dias, para avaliar. Nesse período não há suporte, garantia nem responsabilidade da CD2. Veja o [`COMMERCIAL.md`](COMMERCIAL.md).
+- **Teste grátis na sua empresa.** Sua empresa pode usar as skills na própria operação para testar, livremente e sem prazo. Nesse uso de teste não há suporte, garantia nem responsabilidade da CD2. Veja o [`COMMERCIAL.md`](COMMERCIAL.md).
 - **Uso contínuo na empresa é para clientes CD2.** Qualquer contrato ativo com a CD2, como AMS, sustentação ou projeto, já inclui a licença comercial, com suporte, manutenção e responsabilidade da CD2.
 - **Nunca é permitido:** vender as skills, cobrar acesso a elas, distribuir uma versão modificada ou remover o crédito à CD2 Tech.
 
-O texto completo está no [`LICENSE`](LICENSE) e as condições de avaliação e de uso na empresa, no [`COMMERCIAL.md`](COMMERCIAL.md). A fonte Manrope que vai junto nas skills e no site é da SIL Open Font License 1.1, não da CC. Os nomes CD2 e CD2 Tech e as logos são marcas da CD2 Tech e não são licenciados pela CC, como diz o [`NOTICE`](NOTICE).
+O texto completo está no [`LICENSE`](LICENSE) e as condições de teste e de uso na empresa, no [`COMMERCIAL.md`](COMMERCIAL.md). A fonte Manrope que vai junto nas skills e no site é da SIL Open Font License 1.1, não da CC. Os nomes CD2 e CD2 Tech e as logos são marcas da CD2 Tech e não são licenciados pela CC, como diz o [`NOTICE`](NOTICE).
 
 As contas e informações das skills são apenas gerenciais, uma referência. A CD2 Tech não tem responsabilidade sobre os resultados nem sobre decisões tomadas com base neles.
 
@@ -232,15 +298,15 @@ As contas e informações das skills são apenas gerenciais, uma referência. A 
 As skills são escritas **uma vez**, em `core/`, e copiadas para o pacote de cada plataforma por um script. Assim o conteúdo não diverge entre as plataformas.
 
 ```
-core/cd2-varejo/                  fonte única: skills/, shared/ (marca, roteiro, logos), gpts/ e plugin.core.json
+core/cd2-varejo/                  fonte única: skills/, shared/ (marca e logos), kits/ (o que cada tipo de skill soma), gpts/ e plugin.core.json
 plugins/claude/cd2-varejo/        pacote do Claude Code e do Cowork (.claude-plugin/plugin.json e cópias geradas)
 plugins/codex/cd2-varejo/         pacote do Codex e do ChatGPT Work (plugin.json e cópias geradas)
 plugins/dsh/cd2-varejo/           pacote do DeepSeek Harness (plugin.json, install.py e skills/ no layout plano)
-gpts/<skill>/                     GPT de cada skill: instructions.md, gpt.json e knowledge/ (gerados)
+gpts/<skill>/                     GPT de cada calculadora: instructions.md, gpt.json e knowledge/ (gerados)
 .claude-plugin/marketplace.json   marketplace do Claude Code
 .agents/plugins/marketplace.json  marketplace do Codex
-harnesses.json                    plataformas de cada plugin e o layout de cada uma
-skills.json                       lista das skills, que gera a tabela deste README e os cards do site
+harnesses.json                    plataformas de cada plugin, o layout de cada uma e os kits de cada tipo de skill
+skills.json                       lista das skills, com tipo e gpt, que gera a tabela deste README e os cards do site
 scripts/sync_plugins.py           copia core/ para as plataformas, gera os GPTs e confere a sincronia
 scripts/package_plugins.py        gera os ZIPs da release
 docs/                             site do GitHub Pages
@@ -265,6 +331,6 @@ flowchart LR
 3. Rode os testes: `python3 -m unittest discover -s tests -v`.
 4. Abra o pull request. O CI repete o `--check` e os testes.
 
-Para somar uma calculadora nova, lançar uma versão ou acompanhar uma mudança de regra nos sites, siga o [`AGENTS.md`](AGENTS.md).
+Para somar uma calculadora ou um relatório novo, lançar uma versão ou acompanhar uma mudança de regra nos sites, siga o [`AGENTS.md`](AGENTS.md).
 
 Achou uma conta diferente da calculadora, ou um caso que a skill não cobre? Abra uma issue com a entrada que você usou.

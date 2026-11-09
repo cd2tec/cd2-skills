@@ -316,12 +316,12 @@ class HtmlTest(unittest.TestCase):
         self.assertEqual(page.count('class="cd2-assinatura"'), 1)
         self.assertEqual(page.count('id="veredito"'), 1)
 
-    def test_commercial_text_states_90_day_evaluation(self):
+    def test_commercial_text_states_free_testing(self):
         for fmt in ("html", "markdown"):
             with self.subTest(fmt=fmt):
                 text = render.render(output(), fmt)
                 self.assertNotIn("quanto quiser", text)
-                self.assertIn("Avaliar na sua operação é livre por até 90 dias.", text)
+                self.assertIn("Testar na sua operação é livre.", text)
                 self.assertIn("com suporte e responsabilidade, fale com a CD2", text)
         for fmt in FORMATS:
             self.assertNotIn("quanto quiser", render.render(output(), fmt))
@@ -470,8 +470,9 @@ class SkillDocTest(unittest.TestCase):
                     "references/bandeiras.md", "references/legal-params.json", "scripts/calc.py", "scripts/render.py"):
             self.assertIn(ref, text)
         shared = ROOT / "core" / "cd2-varejo" / "shared"
+        kit = ROOT / "core" / "cd2-varejo" / "kits" / "calculadora"
         for ref in re.findall(r"`((?:references|scripts|assets)/[^`]+)`", text):
-            self.assertTrue((SKILL / ref).exists() or (shared / ref).exists(), ref)
+            self.assertTrue((SKILL / ref).exists() or (shared / ref).exists() or (kit / ref).exists(), ref)
 
     def test_skill_md_footer_matches_brand(self):
         block = re.search(r"```text\n(.*?)\n```", self.read("SKILL.md"), re.S).group(1)

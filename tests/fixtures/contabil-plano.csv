@@ -1,0 +1,6 @@
+Conta;Codigo;Descricao;Natureza
+1;1.1.01;Caixa;Devedora
+2;2.1.01;Fornecedores;Credora
+3;3.1.01;Receita de vendas;Credora
+4;4.1.01;Despesas;Devedora
+5;2.3.01;Capital social;Credora

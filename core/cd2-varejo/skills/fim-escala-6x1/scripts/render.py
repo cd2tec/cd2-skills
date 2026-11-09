@@ -465,7 +465,7 @@ def _how_items(ctx):
 
 _COMMERCIAL_TITLE = "Quer ir além da estimativa?"
 _COMMERCIAL_TEXT = (
-    "Avaliar na sua operação é livre por até 90 dias. Para usar no dia a dia da empresa, "
+    "Testar na sua operação é livre. Para usar no dia a dia da empresa, "
     "com suporte e responsabilidade, fale com a CD2."
 )
 _ARCHEO_TITLE = "Seus números estão no ERP ou na folha?"
