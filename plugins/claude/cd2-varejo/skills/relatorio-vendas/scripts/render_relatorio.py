@@ -917,7 +917,9 @@ def main(argv=None) -> int:
         return 0
     Path(args.output).write_text(saida, encoding="utf-8", newline="")
     fechou = all(r["fechou"] for r in avaliar_prova(rel["prova"]))
-    print(f"OK: {args.output} ({len(saida) // 1024} KB). Prova: {'fechou' if fechou else 'NÃO FECHOU'}.")
+    # Relatório de arquivo ou digitado nunca é descrito como provado, nem no texto que o CLI devolve.
+    rotulo = "Prova" if _com_banco(rel) else "Conferência"
+    print(f"OK: {args.output} ({len(saida) // 1024} KB). {rotulo}: {'fechou' if fechou else 'NÃO FECHOU'}.")
     return 0
 
 

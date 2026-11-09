@@ -53,7 +53,7 @@ O que cada kit traz:
 - `kits/dados/`: o roteiro de conversa e o método de análise (`fluxo-dados.md`, `metodo-analise.md`), os indicadores, o mapeamento de ERP, as regras de SQLite, o carregador de arquivo `scripts/dados_arquivo.py` e a fonte Manrope.
 - `kits/relatorio/`: `scripts/render_relatorio.py`, `references/formato-relatorio.md` e `assets/relatorio-template.html`.
 
-O campo `gpt` é booleano e **vale só para calculadoras**: só as skills com `gpt: true` viram pacote de GPT, e relatório, painel e ficha ficam em `false`. O sync continua acusando GPT faltando em calculadora.
+O campo `gpt` é booleano e **vale só para calculadoras**: só as skills com `gpt: true` viram pacote de GPT, e relatório, painel e ficha ficam em `false`. O sync acusa GPT faltando em skill com `gpt: true`.
 
 ## Layouts de plataforma
 

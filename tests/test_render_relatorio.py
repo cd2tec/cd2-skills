@@ -61,6 +61,21 @@ def rodar(rel, *args):
     return codigo, saida.getvalue()
 
 
+class SaidaDoCli(unittest.TestCase):
+    def test_cli_nao_diz_prova_para_arquivo_ou_digitado(self):
+        for origem in ("arquivo", "digitado"):
+            with tempfile.TemporaryDirectory() as tmp:
+                _, texto = rodar(novo(origem), "--format", "html", "--output", str(Path(tmp) / "r.html"))
+            self.assertIn("Conferência: fechou", texto, origem)
+            self.assertNotIn("Prova", texto, origem)
+
+    def test_cli_diz_prova_para_banco_e_outro_mcp(self):
+        for origem in ("banco", "outro-mcp"):
+            with tempfile.TemporaryDirectory() as tmp:
+                _, texto = rodar(novo(origem), "--format", "html", "--output", str(Path(tmp) / "r.html"))
+            self.assertIn("Prova: fechou", texto, origem)
+
+
 class Formatos(unittest.TestCase):
     def test_moeda_e_numero(self):
         self.assertEqual(brand.moeda(4812640), "R$ 4.812.640,00")

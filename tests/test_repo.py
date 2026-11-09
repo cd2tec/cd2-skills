@@ -14,6 +14,8 @@ LEAKS = tuple(codecs.decode(s, "rot13") for s in (
     "nanylmr-zpc", "ohvyq-zpc-qnfuobneq", "fcrp-zpc-gbby", "Ergnvy Grpu",
 )) + (
     "/private/tmp", "scratchpad", "claude.ai/artifact", "docs/superpowers")
+NOMES_ANTIGOS = tuple(codecs.decode(s, "rot13") for s in (
+    "nepurb-unearff", "nanylmr-zpc", "ohvyq-zpc-qnfuobneq", "fcrp-zpc-gbby", "Ergnvy Grpu"))
 PERSON = codecs.decode("Tnoevry", "rot13")
 INTERNAL_DIRS = ("interno/", ".superpowers/", "dist/")
 
@@ -90,6 +92,16 @@ class RepoTest(unittest.TestCase):
             if rel == "CHANGELOG.md":
                 continue  # histórico da 0.1.0 continua verdadeiro
             self.assertIsNone(LICENSE_90.search(text), rel)
+
+    def test_testes_tambem_sem_nomes_antigos(self):
+        # tracked_texts() pula tests/: este teste cobre os outros arquivos de teste. Só o test_repo.py
+        # os cita (em rot13).
+        for path in sorted((ROOT / "tests").glob("*.py")):
+            if path.name == "test_repo.py":
+                continue
+            lowered = path.read_text(encoding="utf-8").lower()
+            for needle in NOMES_ANTIGOS:
+                self.assertNotIn(needle.lower(), lowered, f"{path.name}: {needle}")
 
     def test_sem_apache(self):
         # A licença é só a CC BY-NC-ND 4.0. A Manrope (assets/fonts) segue na OFL e fica de fora.

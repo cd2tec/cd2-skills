@@ -1,4 +1,5 @@
 """Testes do painel de varejo e da ficha do Archeo MCP Creator, nas cópias geradas para o Claude."""
+import codecs
 import copy
 import json
 import re
@@ -9,6 +10,9 @@ import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+# Nomes do repositório e das skills antigas, em rot13 para este arquivo não carregar o que ele procura.
+NOMES_ANTIGOS = tuple(codecs.decode(s, "rot13") for s in (
+    "nepurb-unearff", "nanylmr-zpc", "ohvyq-zpc-qnfuobneq", "fcrp-zpc-gbby", "Ergnvy Grpu"))
 CORE = ROOT / "core/cd2-varejo/skills"
 PAINEL = ROOT / "plugins/claude/cd2-varejo/skills/painel-varejo"
 FICHA = ROOT / "plugins/claude/cd2-varejo/skills/ficha-archeo-mcp"
@@ -240,7 +244,7 @@ class Ficha(unittest.TestCase):
     def test_ficha_usa_o_nome_do_produto(self):
         self.assertIn("Archeo MCP Creator da CD2", self.skill)
         self.assertNotRegex(self.skill, r"conector Archeo\b")
-        self.assertNotIn("spec-mcp-tool", self.skill)
+        self.assertNotIn(NOMES_ANTIGOS[3], self.skill)
 
     def test_ficha_sem_referencia_para_fora(self):
         for md in (CORE / "ficha-archeo-mcp").rglob("*.md"):
@@ -253,7 +257,7 @@ class Ficha(unittest.TestCase):
 
 class Textos(unittest.TestCase):
     def test_sem_travessao_nem_nomes_antigos(self):
-        proibidos = ("—", "–", "archeo-harness", "analyze-mcp", "build-mcp-dashboard", "spec-mcp-tool", "Retail Tech")
+        proibidos = ("—", "–") + NOMES_ANTIGOS
         for skill in ("painel-varejo", "ficha-archeo-mcp"):
             for arq in (CORE / skill).rglob("*"):
                 if arq.is_file() and arq.suffix in (".md", ".py", ".html", ".json"):
