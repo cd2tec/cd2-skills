@@ -230,6 +230,8 @@ def validar(rel) -> list[str]:
     else:
         for chave in ("filtros", "qualidade", "indisponiveis"):
             _lista_de_textos(premissas.get(chave), f"premissas.{chave}", erros)
+    if "sugerir_conexao" in rel and not isinstance(rel["sugerir_conexao"], bool):
+        erros.append("'sugerir_conexao' precisa ser true ou false, sem aspas.")
     _lista_de_textos(rel.get("avisos"), "avisos", erros)
     if rel.get("proximos") is not None:
         _lista_de_dicts(rel.get("proximos"), "proximos", erros)
@@ -684,11 +686,16 @@ def _whatsapp(rel, plataforma):
     return brand.whatsapp_link(_titulo_skill(rel), plataforma)
 
 
+def _sugere_conexao(rel):
+    """Linha do Creator: só sem conexão, e nunca para quem já disse não à sugestão."""
+    return not _com_banco(rel) and rel.get("sugerir_conexao", True)
+
+
 def _html_comercial(rel, plataforma):
     botao = (f'<a class="botao" href="{esc(_whatsapp(rel, plataforma))}" target="_blank" rel="noopener">'
              'Falar com a CD2 no WhatsApp</a>')
     creator = ""
-    if not _com_banco(rel):
+    if _sugere_conexao(rel):
         creator = (f'<p class="body-sm">{esc(CREATOR)} '
                    f'<a href="{esc(_link(rel, ARCHEO_URL))}" target="_blank" rel="noopener">Conhecer o Archeo MCP Creator</a></p>')
     return ('<section class="bloco b-raised comercial" aria-labelledby="t-comercial">'
@@ -696,9 +703,9 @@ def _html_comercial(rel, plataforma):
 
 
 def _linhas_comercial(rel, plataforma):
-    """Convite e, sem conexão com o banco, a linha do Creator: para markdown e WhatsApp."""
+    """Convite e, quando couber a sugestão de conectar, a linha do Creator: para markdown e WhatsApp."""
     linhas = [f"{CONVITE} {_whatsapp(rel, plataforma)}"]
-    if not _com_banco(rel):
+    if _sugere_conexao(rel):
         linhas.append(f"{CREATOR} {_link(rel, ARCHEO_URL)}")
     return linhas
 

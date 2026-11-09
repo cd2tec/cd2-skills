@@ -270,6 +270,48 @@ class TiposErrados(unittest.TestCase):
                 self.assertTrue(json.loads(saida)["errors"], nome)
 
 
+class SugerirConexao(unittest.TestCase):
+    """Quem disse não à sugestão de conectar não recebe a linha do Archeo MCP Creator."""
+
+    def saida(self, rel, fmt):
+        codigo, texto = rodar(rel, "--format", fmt)
+        self.assertEqual(codigo, 0, texto)
+        return texto
+
+    def test_false_tira_a_linha_em_todo_formato(self):
+        for origem in ("arquivo", "digitado"):
+            for fmt in rr.SAIDAS:
+                rel = novo(origem)
+                rel["sugerir_conexao"] = False
+                saida = self.saida(rel, fmt)
+                self.assertNotIn("Archeo MCP Creator", saida, (origem, fmt))
+                self.assertNotIn("archeo.cd2.com.br", saida, (origem, fmt))
+
+    def test_padrao_e_true_mantem_a_linha(self):
+        for origem in ("arquivo", "digitado"):
+            for fmt in ("html", "markdown", "whatsapp"):
+                com_padrao, explicito = novo(origem), novo(origem)
+                explicito["sugerir_conexao"] = True
+                self.assertEqual(self.saida(com_padrao, fmt).count("Archeo MCP Creator da CD2"), 1, (origem, fmt))
+                self.assertEqual(self.saida(explicito, fmt).count("Archeo MCP Creator da CD2"), 1, (origem, fmt))
+
+    def test_false_nao_muda_o_selo_nem_o_convite(self):
+        rel = novo("arquivo")
+        rel["sugerir_conexao"] = False
+        saida = self.saida(rel, "markdown")
+        self.assertIn(rr.SELO_ARQUIVO, saida)
+        self.assertNotIn("Prova fechada", saida)
+        self.assertIn(rr.CONVITE, saida)
+
+    def test_nao_booleano_sai_com_codigo_2(self):
+        for valor in ("false", 0, 1, None, [], {}):
+            rel = novo("arquivo")
+            rel["sugerir_conexao"] = valor
+            codigo, texto = rodar(rel, "--format", "markdown")
+            self.assertEqual(codigo, 2, repr(valor))
+            self.assertIn("sugerir_conexao", json.loads(texto)["errors"][0], repr(valor))
+
+
 class Selo(unittest.TestCase):
     def test_selo_prova_exige_a_origem(self):
         with self.assertRaises(TypeError):

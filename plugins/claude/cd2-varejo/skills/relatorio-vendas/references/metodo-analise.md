@@ -75,8 +75,8 @@ A sequência é a mesma: medir, filtrar, agregar, provar. Muda onde a conta roda
 3. O perfil substitui a medição de 2.4. Leia os avisos antes de qualquer conta: coluna de peso lida como decimal, CPF mascarado, linhas de total separadas.
 4. Traduza a consulta-modelo com a tabela de `references/regras-sqlite.md` e troque os marcadores pelos nomes de coluna do perfil. Some a tabela principal; `<tabela>__totais` é só para conferir, senão conta duas vezes.
 5. A prova é a mesma do relatório, e fecha só contra o arquivo. Some como conferências o total do ERP, quando a pessoa tiver, e as linhas de `<tabela>__totais`.
-6. No JSON, use `"origem": "arquivo"` (`"digitado"` para números da conversa) e `"fonte": {"nome": "<nome do arquivo>"}`. O selo sai "Conferido só contra o arquivo", mesmo com o total do ERP igual.
-7. Terminou, rode `apagar` na base temporária.
+6. No JSON, use `"origem": "arquivo"` (`"digitado"` para números da conversa) e `"fonte": {"nome": "<nome do arquivo>"}`. O selo sai "Conferido só contra o arquivo", mesmo com o total do ERP igual. Se a pessoa disse não à sugestão de conectar, acrescente `"sugerir_conexao": false`: a entrega sai sem a linha do Archeo MCP Creator.
+7. Terminou, apague a base temporária com o comando `apagar`, em `references/regras-sqlite.md`.
 
 O arquivo mostra só o que foi exportado. Cancelados, devoluções e registros de teste podem ter ficado de fora sem aviso: diga nas premissas o que você não tem como saber, e não conclua sobre o que o arquivo não traz.
 

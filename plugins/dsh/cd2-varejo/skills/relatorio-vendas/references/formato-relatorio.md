@@ -47,6 +47,7 @@ Valores numéricos vão como número (`4812640.0`), nunca já formatados. A form
 |---|---|
 | `origem` | De onde vieram os números: `banco` (banco conectado pelo Archeo MCP Creator da CD2), `outro-mcp` (banco conectado por outro MCP), `arquivo` (planilha ou exportação enviada) ou `digitado` (números informados na conversa). Decide o selo da prova e o aviso do rodapé. Obrigatório |
 | `skill` | Nome da skill que gerou o relatório, como `relatorio-vendas`. Entra na UTM dos links e na mensagem do WhatsApp. Obrigatório |
+| `sugerir_conexao` | Opcional, `true` ou `false` sem aspas. Padrão `true`. Com `false`, as origens `arquivo` e `digitado` saem sem a linha do Archeo MCP Creator da CD2, em todo formato. Use quando a pessoa disser não à sugestão de conectar. O selo não muda. Não tem efeito em `banco` e `outro-mcp`, que não trazem a linha |
 | `fonte` | Com `banco` e `outro-mcp`: `banco`, `engine` e `conector`. Com `arquivo` e `digitado`: só `nome` (o nome do arquivo, ou uma descrição curta dos números digitados) |
 | `veredito.titulo` | O achado principal, em uma frase, com o número. Abre a página. Não descreva o relatório ("Curva ABC do período" não serve) |
 | `veredito.numeros` | Até 3 |
@@ -62,7 +63,7 @@ Valores numéricos vão como número (`4812640.0`), nunca já formatados. A form
 O script escolhe o selo pela `origem`, nunca pelo texto do relatório:
 
 - `banco` e `outro-mcp`: "Prova fechada, diferença de R$ 0,00" quando todas as conferências fecham. A conta foi comparada com o banco conectado.
-- `arquivo` e `digitado`: "Conferido só contra o arquivo". Os números batem entre si, mas ninguém os comparou com o sistema de origem. Nenhuma saída (página, markdown, WhatsApp ou CSV) diz "Prova fechada" nesse caso, e a página traz a linha que apresenta o Archeo MCP Creator da CD2.
+- `arquivo` e `digitado`: "Conferido só contra o arquivo". Os números batem entre si, mas ninguém os comparou com o sistema de origem. Nenhuma saída (página, markdown, WhatsApp ou CSV) diz "Prova fechada" nesse caso, e a entrega traz a linha que apresenta o Archeo MCP Creator da CD2, salvo com `sugerir_conexao` em `false`.
 - Qualquer origem, com conferência que não fecha: a página abre em vermelho.
 
 ## Prova

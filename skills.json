@@ -22,7 +22,7 @@
   {
     "name": "relatorio-vendas",
     "title": "Relatório de vendas",
-    "summary": "Gera relatórios gerenciais de vendas, como a curva ABC, com a prova de que a conta fecha.",
+    "summary": "Gera relatórios gerenciais de vendas, como a curva ABC, com a conta conferida.",
     "site_url": "https://archeo.cd2.com.br/",
     "rule": "",
     "status": "disponível",

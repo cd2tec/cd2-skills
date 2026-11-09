@@ -129,7 +129,7 @@ Atenção: ficha com vários níveis (componente que também é composto) exige 
 
 **Para exportar:** são dois arquivos na mesma base. O de venda por item do período (código do produto, quantidade, valor líquido) e o da ficha técnica ou composição (produto final, componente, quantidade por unidade, custo do componente).
 
-- Não dá para fazer só com arquivo porque a venda não traz a composição, quando o ERP não exporta a ficha técnica. Nesse caso, diga isso e ofereça a ABC do produto final.
+- Sem o arquivo da ficha técnica, não dá para fazer só com arquivo, porque a venda não traz a composição. Nesse caso, diga isso e ofereça a ABC do produto final.
 - Sem quantidade real baixada: sai o custo previsto, mas não o rendimento obtido.
 - Sem custo do componente: sai a quantidade prevista, mas não o custo nem a margem.
 - Desmontagem: peça também o peso de entrada e o peso de cada corte. Sem eles, não sai a perda.
@@ -144,10 +144,11 @@ Atenção: ficha com vários níveis (componente que também é composto) exige 
 
 **Prova:** total = mesmas lojas + novas + encerradas, nos dois períodos.
 
-**Para exportar:** peça o relatório de venda dos dois períodos, em um arquivo com a data em cada linha ou em dois arquivos, um por período. Colunas mínimas: data, loja, valor líquido, e a dimensão que será comparada (departamento ou segmento, se não for por loja).
+**Para exportar:** peça o relatório de venda dos dois períodos, em um arquivo com a data em cada linha ou em dois arquivos, um por período. Colunas mínimas: data e valor líquido. Recomendadas: loja e a dimensão que será comparada (departamento ou segmento).
 
 - Sem data em cada linha e com um arquivo só: não dá para separar os períodos.
 - Sem loja: não dá para isolar mesmas lojas. Sai a comparação do total, a prova vira soma das linhas = total, e isso fica dito na entrega.
+- Sem departamento ou segmento: a comparação sai só por loja ou no total.
 - Sem documento (cupom ou nota): sem a decomposição em fluxo e ticket e sem a regra de base comparável. Avise que a comparação pode estar sobre base pequena.
 
 ### 3.5 Devoluções e cancelamentos

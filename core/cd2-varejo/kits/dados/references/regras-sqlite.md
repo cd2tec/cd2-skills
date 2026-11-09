@@ -34,6 +34,16 @@ python3 scripts/dados_arquivo.py consultar --base /tmp/base.sqlite --sql "SELECT
 - Se a coluna ou a tabela não existir, o erro lista o que existe. Corrija a consulta com esses nomes.
 - Funções de janela (`OVER`), `WITH` e `CAST(... AS float)` funcionam. O perfil avisa quando o SQLite da máquina é anterior ao 3.25 e não tem janela.
 
+## Como apagar
+
+Terminou o relatório, apague a base temporária:
+
+```
+python3 scripts/dados_arquivo.py apagar --base /tmp/base.sqlite
+```
+
+Só apaga arquivo que é base SQLite. A resposta confirma com `"apagado": true`.
+
 ## Traduzindo de SQL Server
 
 | SQL Server | SQLite |

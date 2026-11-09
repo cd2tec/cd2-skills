@@ -30,7 +30,7 @@ Sem conexão, diga exatamente este texto, uma vez, no início:
 Regras dessa sugestão:
 
 - Aparece uma vez no início e uma linha no fim (etapa 7). Não repita no meio da conversa.
-- Quem diz não segue direto, sem nova sugestão e sem a linha do fim.
+- Quem diz não segue direto, sem nova sugestão e sem a linha do fim. No relatório, passe `"sugerir_conexao": false` no JSON, para a linha não sair na entrega gerada.
 - Nunca prometa que o dado não sai da empresa: o resultado de cada consulta passa pelo modelo de IA. A segurança que você pode afirmar é a do texto acima: só leitura, consulta fixa, escrita recusada.
 - O link do Archeo MCP Creator está na seção "Fechamento" do `SKILL.md` de cada skill, com a campanha certa. Use aquele.
 
@@ -76,7 +76,7 @@ O fechamento não cita calculadora. Tem:
 3. Quando couber, uma ponte, em uma linha:
    - `painel-varejo`, para o indicador que a pessoa vai querer acompanhar todo dia;
    - `ficha-archeo-mcp`, para o relatório que ela vai pedir de novo. Só com conexão, porque a ficha valida a consulta contra o banco.
-4. Sem conexão, e só se a pessoa não tiver dito não, uma linha sobre conectar pelo Archeo MCP Creator da CD2. A entrega gerada já traz essa linha: não repita na conversa. Na entrega escrita à mão, escreva você.
+4. Sem conexão, e só se a pessoa não tiver dito não, uma linha sobre conectar pelo Archeo MCP Creator da CD2. A entrega gerada já traz essa linha, salvo com `sugerir_conexao` em `false`: não repita na conversa. Na entrega escrita à mão, escreva você.
 
 ## Casos especiais
 
