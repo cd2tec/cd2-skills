@@ -25,9 +25,13 @@ Layouts (campo "layout" em harnesses.json, padrão "plugin"):
 
 Kits: shared/ vai para todas as skills (a marca). Os kits em kits/<kit>/ vão só
 para as skills do tipo que os usa. O campo "tipo" de cada item do skills.json
-(calculadora, relatorio, painel, ficha) escolhe os kits pela tabela "kits" do
-plugin em harnesses.json. Toda skill de core/ precisa estar no skills.json com
-"tipo" e "gpt". Só as skills com "gpt": true viram pacote de GPT.
+(calculadora, relatorio, painel, ficha, rotina) escolhe os kits pela tabela
+"kits" do plugin em harnesses.json. Toda skill de core/ precisa estar no
+skills.json com "tipo" e "gpt". Só as skills com "gpt": true viram pacote de GPT.
+
+Reaproveitar: uma rotina lista em "reaproveita" os relatorio-* de que depende. O
+sync gera nela references/relatorios-<assunto>.md e references/guia-<assunto>.md,
+para a skill seguir autocontida com uma fonte só para cada consulta e regra.
 
 Em todo arquivo de texto copiado (.md, .py, .html, .json), o placeholder de UTM
 vira o utm_source da plataforma. O script também gera a tabela de skills do
@@ -77,7 +81,8 @@ YAML_INDICATORS = "!&*[]{}#|>%@`,'\""
 # Caminho relativo entre crases apontando para um arquivo da skill.
 REF_PATTERN = re.compile(r"`((?:\.\./|references/|assets/|scripts/)[^`\s]+\.(?:md|py|html|json))`")
 LAYOUTS = ("plugin", "flat-skills", "gpt")
-TIPOS = ("calculadora", "relatorio", "painel", "ficha")
+TIPOS = ("calculadora", "relatorio", "painel", "ficha", "rotina")
+SECOES_FORA_DO_GUIA = ("Entrega", "Fechamento")
 MARK_START, MARK_END = "<!-- skills:start -->", "<!-- skills:end -->"
 
 
@@ -174,12 +179,51 @@ def fontes_ou_problema(core: Path, spec: dict, skills: list[dict], nome: str, pr
         return None
 
 
+def guia_do_relatorio(texto: str, assunto: str) -> str:
+    """SKILL.md de um relatório sem o frontmatter, a entrega e o fechamento, que são da rotina."""
+    corpo = re.sub(r"\A---\n.*?\n---\n", "", texto, count=1, flags=re.S)
+    linhas: list[str] = []
+    cortando = False
+    for linha in corpo.splitlines(keepends=True):
+        if linha.startswith("## "):
+            cortando = linha[3:].strip() in SECOES_FORA_DO_GUIA
+        if not cortando:
+            linhas.append(linha)
+    abertura = (
+        f"Regras do relatório {assunto}, reaproveitadas aqui: valem para conta, recorte e prova. "
+        "Entrega e fechamento são os desta skill.\n\n"
+    )
+    return abertura + "".join(linhas).replace("references/relatorios.md", f"references/relatorios-{assunto}.md")
+
+
+def gerar_reaproveitados(core: Path, item: dict, dest: Path) -> list[str]:
+    """Gera em `dest` as consultas e as regras dos relatórios que a rotina lista em "reaproveita"."""
+    problems: list[str] = []
+    for nome in item.get("reaproveita") or []:
+        fonte = core / "skills" / nome
+        skill_md, relatorios = fonte / "SKILL.md", fonte / "references" / "relatorios.md"
+        if not (skill_md.is_file() and relatorios.is_file()):
+            problems.append(f"skills/{item['name']}: 'reaproveita' cita {nome}, sem SKILL.md e references/relatorios.md em core")
+            continue
+        assunto = nome.removeprefix("relatorio-")
+        refs = dest / "references"
+        refs.mkdir(parents=True, exist_ok=True)
+        consultas = relatorios.read_text(encoding="utf-8").replace("SKILL.md", f"guia-{assunto}.md")
+        (refs / f"relatorios-{assunto}.md").write_text(consultas, encoding="utf-8")
+        guia = guia_do_relatorio(skill_md.read_text(encoding="utf-8"), assunto)
+        (refs / f"guia-{assunto}.md").write_text(guia, encoding="utf-8")
+    return problems
+
+
 def build_skills(core: Path, spec: dict, skills: list[dict], work: Path) -> list[str]:
     problems: list[str] = []
+    itens = {s.get("name"): s for s in skills}
     for skill in skill_dirs(core):
         fontes = fontes_ou_problema(core, spec, skills, skill.name, problems)
         if fontes is not None:
-            problems += assemble_skill(skill, fontes, work / "skills" / skill.name)
+            dest = work / "skills" / skill.name
+            problems += assemble_skill(skill, fontes, dest)
+            problems += gerar_reaproveitados(core, itens[skill.name], dest)
     return problems
 
 
@@ -281,9 +325,24 @@ def yaml_scalar_problem(value: str) -> str | None:
     return None
 
 
+def problemas_de_reaproveita(item: dict, tipos: dict) -> list[str]:
+    nome, lista = item.get("name"), item["reaproveita"]
+    if item.get("tipo") != "rotina":
+        return [f"skills.json: '{nome}' tem 'reaproveita', que é só do tipo rotina"]
+    if not isinstance(lista, list) or not all(isinstance(r, str) for r in lista):
+        return [f"skills.json: '{nome}' precisa de 'reaproveita' como lista de nomes"]
+    return [
+        f"skills.json: '{nome}' tem 'reaproveita' com '{r}', que não é skill do tipo relatorio"
+        for r in lista if tipos.get(r) != "relatorio"
+    ]
+
+
 def check_skills_json(skills: list[dict]) -> list[str]:
     problems: list[str] = []
+    tipos = {s.get("name"): s.get("tipo") for s in skills}
     for s in skills:
+        if "reaproveita" in s:
+            problems += problemas_de_reaproveita(s, tipos)
         if s.get("tipo") not in TIPOS:
             problems.append(f"skills.json: '{s.get('name')}' com tipo '{s.get('tipo')}' (use um de: {', '.join(TIPOS)})")
         if not isinstance(s.get("gpt"), bool):

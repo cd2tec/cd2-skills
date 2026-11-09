@@ -1,0 +1,1 @@
+# Regras das rotinas
