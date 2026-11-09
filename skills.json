@@ -144,5 +144,29 @@
       "relatorio-perdas",
       "relatorio-financeiro"
     ]
+  },
+  {
+    "name": "preparo-de-negociacao",
+    "title": "Preparo de negociação",
+    "summary": "Prepara a visita de um fornecedor, com compra, custo, serviço, ruptura e o que pedir.",
+    "site_url": "https://archeo.cd2.com.br/",
+    "rule": "",
+    "status": "disponível",
+    "tipo": "rotina",
+    "gpt": false,
+    "reaproveita": [
+      "relatorio-compras",
+      "relatorio-estoque"
+    ]
+  },
+  {
+    "name": "ata-de-negociacao",
+    "title": "Ata de negociação",
+    "summary": "Fecha a visita do fornecedor com acordos, pendências, mensagem de confirmação e o que atualizar no ERP.",
+    "site_url": "https://archeo.cd2.com.br/",
+    "rule": "",
+    "status": "disponível",
+    "tipo": "rotina",
+    "gpt": false
   }
 ]

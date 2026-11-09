@@ -67,7 +67,7 @@ class KitRotina(unittest.TestCase):
         self.assertIn("não grava nada", texto_kit("perfil-da-operacao.md"))
 
 
-ROTINAS = {"perfil-da-operacao", "briefing-do-dia"}
+ROTINAS = {"perfil-da-operacao", "briefing-do-dia", "preparo-de-negociacao", "ata-de-negociacao"}
 
 
 def skill_md(nome):
@@ -120,6 +120,35 @@ class SeuDia(unittest.TestCase):
         self.assertIn("sem número de negócio", texto)
         self.assertIn("`references/perfil-da-operacao.md`", texto)
         self.assertNotIn("reaproveita", item("perfil-da-operacao"))
+
+
+class Fornecedores(unittest.TestCase):
+    def test_preparo_reaproveita_compras_e_estoque(self):
+        self.assertEqual(set(item("preparo-de-negociacao")["reaproveita"]), {"relatorio-compras", "relatorio-estoque"})
+
+    def test_preparo_cita_secoes(self):
+        texto = skill_md("preparo-de-negociacao")
+        for trecho in ("`references/relatorios-compras.md`", "3.4", "3.5", "3.7", "relatorio-compras"):
+            self.assertIn(trecho, texto)
+
+    def test_preparo_verba_de_arquivo(self):
+        self.assertIn("verba vem de arquivo ou texto colado", skill_md("preparo-de-negociacao"))
+
+    def test_ata_exige_trecho(self):
+        texto = skill_md("ata-de-negociacao")
+        self.assertIn("`trecho`", texto)
+        self.assertIn("`acordos`", texto)
+
+    def test_ata_checklist_erp(self):
+        self.assertIn("o que atualizar no ERP", skill_md("ata-de-negociacao"))
+
+    def test_ata_mostra_antes(self):
+        texto = skill_md("ata-de-negociacao")
+        self.assertIn("`references/acoes.md`", texto)
+        self.assertIn("mostre antes", texto)
+
+    def test_ata_sem_reaproveita(self):
+        self.assertNotIn("reaproveita", item("ata-de-negociacao"))
 
 
 if __name__ == "__main__":

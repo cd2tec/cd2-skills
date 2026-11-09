@@ -59,6 +59,8 @@ Quem toca supermercado, padaria ou mercado de bairro não tem tempo para juridiq
 | **Ficha de ferramenta do Archeo MCP Creator** (`ficha-archeo-mcp`) | Prepara a ficha de uma ferramenta para cadastrar no Archeo MCP Creator da CD2, com o SQL e os parâmetros. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=ficha-archeo-mcp) | disponível |
 | **Perfil da operação** (`perfil-da-operacao`) | Mostra o que está conectado, infere lojas e departamentos e gera o bloco de perfil para as outras rotinas. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=perfil-da-operacao) | disponível |
 | **Briefing do dia** (`briefing-do-dia`) | Monta o briefing da manhã, com venda contra a meta, ruptura, validade, contas, agenda e três ações. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=briefing-do-dia) | disponível |
+| **Preparo de negociação** (`preparo-de-negociacao`) | Prepara a visita de um fornecedor, com compra, custo, serviço, ruptura e o que pedir. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=preparo-de-negociacao) | disponível |
+| **Ata de negociação** (`ata-de-negociacao`) | Fecha a visita do fornecedor com acordos, pendências, mensagem de confirmação e o que atualizar no ERP. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=ata-de-negociacao) | disponível |
 <!-- skills:end -->
 
 As calculadoras vão além do site:
