@@ -1,0 +1,9 @@
+Data;Codigo;Departamento;Motivo;Loja;Quantidade;Custo
+03/10/2026;Q01;Padaria;Vencimento;1;10;2,00
+04/10/2026;Q02;Padaria;Vencimento;1;5;4,00
+05/10/2026;Q03;Padaria;Avaria;1;2;5,00
+06/10/2026;Q04;Açougue;Vencimento;1;4;12,50
+07/10/2026;Q05;Açougue;Outros;1;1;30,00
+08/10/2026;Q06;Açougue;Outros;2;3;10,00
+15/09/2026;Q01;Padaria;Vencimento;1;100;2,00
+09/10/2026;Q07;Padaria;;1;1;10,00

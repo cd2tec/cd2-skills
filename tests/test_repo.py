@@ -93,7 +93,13 @@ class RepoTest(unittest.TestCase):
         skills = json.loads(read("skills.json"))
         harnesses = json.loads(read("harnesses.json"))
         self.assertEqual(core["version"], "0.1.0")
-        self.assertEqual({s["name"] for s in skills}, {"fim-escala-6x1", "custo-vrva", "relatorio-vendas"})
+        self.assertEqual(
+            {s["name"] for s in skills},
+            {
+                "fim-escala-6x1", "custo-vrva", "relatorio-vendas", "relatorio-estoque",
+                "relatorio-compras", "relatorio-precos", "relatorio-perdas",
+            },
+        )
         self.assertEqual(set(harnesses["plugins"]["cd2-varejo"]["harnesses"]), {"claude", "codex", "dsh", "gpt"})
 
 

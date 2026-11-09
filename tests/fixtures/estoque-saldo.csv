@@ -1,0 +1,8 @@
+Codigo;Descricao;Departamento;Loja;Saldo;Custo;Preco
+P001;Arroz tipo 1 5 kg;Mercearia;1;10;5,00;8,00
+P002;Feijão carioca 1 kg;Mercearia;1;20;4,00;6,00
+P003;Leite integral 1 L;Laticínios;1;30;3,00;4,50
+P004;Queijo mussarela kg;Laticínios;1;-4;20,00;30,00
+P005;Sal refinado 1 kg;Mercearia;1;0;1,00;2,00
+P006;Vela comum;Bazar;1;5;;3,00
+P007;Café torrado 500 g;Mercearia;2;7;10,00;15,00

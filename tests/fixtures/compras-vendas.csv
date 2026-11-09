@@ -1,0 +1,8 @@
+Data;Codigo;Descricao;Quantidade;Custo;Situacao
+05/09/2026;C001;Arroz tipo 1 5 kg;100;4,00;Normal
+10/10/2026;C001;Arroz tipo 1 5 kg;25;4,00;Normal
+12/09/2026;C002;Feijão carioca 1 kg;100;3,00;Normal
+15/09/2026;C003;Óleo de soja 900 ml;30;5,00;Normal
+20/09/2026;C004;Sal refinado 1 kg;100;0,50;Normal
+21/09/2026;C004;Sal refinado 1 kg;10;0,50;Cancelado
+05/07/2026;C005;Vela comum;10;1,00;Normal

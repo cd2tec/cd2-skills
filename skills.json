@@ -28,5 +28,45 @@
     "status": "disponível",
     "tipo": "relatorio",
     "gpt": false
+  },
+  {
+    "name": "relatorio-estoque",
+    "title": "Relatório de estoque",
+    "summary": "Gera relatórios gerenciais de estoque, como posição, Kardex e cobertura, com a conta conferida.",
+    "site_url": "https://archeo.cd2.com.br/",
+    "rule": "",
+    "status": "disponível",
+    "tipo": "relatorio",
+    "gpt": false
+  },
+  {
+    "name": "relatorio-compras",
+    "title": "Relatório de compras",
+    "summary": "Gera relatórios gerenciais de compras, como a curva ABC de abastecimento e os pedidos pendentes, com a conta conferida.",
+    "site_url": "https://archeo.cd2.com.br/",
+    "rule": "",
+    "status": "disponível",
+    "tipo": "relatorio",
+    "gpt": false
+  },
+  {
+    "name": "relatorio-precos",
+    "title": "Relatório de preços",
+    "summary": "Gera relatórios gerenciais de preço, margem e promoção, com a conta conferida.",
+    "site_url": "https://archeo.cd2.com.br/",
+    "rule": "",
+    "status": "disponível",
+    "tipo": "relatorio",
+    "gpt": false
+  },
+  {
+    "name": "relatorio-perdas",
+    "title": "Relatório de perdas",
+    "summary": "Gera relatórios gerenciais de perdas, como a quebra por motivo e o índice de perda, com a conta conferida.",
+    "site_url": "https://archeo.cd2.com.br/",
+    "rule": "",
+    "status": "disponível",
+    "tipo": "relatorio",
+    "gpt": false
   }
 ]
