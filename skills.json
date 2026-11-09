@@ -98,5 +98,25 @@
     "status": "disponível",
     "tipo": "relatorio",
     "gpt": false
+  },
+  {
+    "name": "painel-varejo",
+    "title": "Painel de varejo",
+    "summary": "Monta um painel visual da operação do varejo, com totalizadores, linha do tempo, mapa de calor e leitura.",
+    "site_url": "https://archeo.cd2.com.br/",
+    "rule": "",
+    "status": "disponível",
+    "tipo": "painel",
+    "gpt": false
+  },
+  {
+    "name": "ficha-archeo-mcp",
+    "title": "Ficha de ferramenta do Archeo MCP Creator",
+    "summary": "Prepara a ficha de uma ferramenta para cadastrar no Archeo MCP Creator da CD2, com o SQL e os parâmetros.",
+    "site_url": "https://archeo.cd2.com.br/",
+    "rule": "",
+    "status": "disponível",
+    "tipo": "ficha",
+    "gpt": false
   }
 ]
