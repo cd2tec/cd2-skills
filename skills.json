@@ -68,5 +68,35 @@
     "status": "disponível",
     "tipo": "relatorio",
     "gpt": false
+  },
+  {
+    "name": "relatorio-financeiro",
+    "title": "Relatório financeiro",
+    "summary": "Gera relatórios gerenciais financeiros, como o aging de contas a pagar e a receber e o fluxo de caixa.",
+    "site_url": "https://archeo.cd2.com.br/",
+    "rule": "",
+    "status": "disponível",
+    "tipo": "relatorio",
+    "gpt": false
+  },
+  {
+    "name": "relatorio-fiscal",
+    "title": "Relatório fiscal",
+    "summary": "Confere documentos fiscais por CFOP, cabeçalho contra itens e numeração, como relatório gerencial e não documento oficial.",
+    "site_url": "https://archeo.cd2.com.br/",
+    "rule": "",
+    "status": "disponível",
+    "tipo": "relatorio",
+    "gpt": false
+  },
+  {
+    "name": "relatorio-contabil",
+    "title": "Relatório contábil",
+    "summary": "Confere balancete, razão e lançamentos, como relatório gerencial e não escrituração oficial.",
+    "site_url": "https://archeo.cd2.com.br/",
+    "rule": "",
+    "status": "disponível",
+    "tipo": "relatorio",
+    "gpt": false
   }
 ]

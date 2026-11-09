@@ -1,0 +1,13 @@
+Lancamento;Data;Conta;DC;Valor;Situacao
+L1;01/09/2026;1;D;1000;Efetivado
+L1;01/09/2026;5;C;1000;Efetivado
+L2;05/10/2026;1;D;500;Efetivado
+L2;05/10/2026;3;C;500;Efetivado
+L3;10/10/2026;4;D;200;Efetivado
+L3;10/10/2026;1;C;200;Efetivado
+L4;15/10/2026;4;D;100;Efetivado
+L4;15/10/2026;2;C;100;Efetivado
+L5;20/10/2026;1;D;999;Rascunho
+L5;20/10/2026;3;C;999;Rascunho
+L6;25/10/2026;2;D;40;Efetivado
+L6;25/10/2026;1;C;40;Efetivado

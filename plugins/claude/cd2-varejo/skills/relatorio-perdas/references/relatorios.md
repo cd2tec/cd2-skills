@@ -90,7 +90,7 @@ Cuidados:
 ### 3.3 Validade
 
 **Vencidos em estoque:** produto, lote, validade, saldo do lote, valor a custo, dias vencido.
-**A vencer:** faixas de 7, 15 e 30 dias, mais "vence depois de 30 dias" para o saldo restante, com saldo, venda média diária e a quantidade que não deve vender até o vencimento (saldo - venda média x dias restantes, se positiva): essa é a lista de ação (remarcar, transferir, doar).
+**A vencer:** faixas exclusivas, que cobrem todo o saldo (até 7 dias, de 8 a 15, de 16 a 30 e "vence depois de 30 dias" para o saldo restante), com saldo, venda média diária e a quantidade que não deve vender até o vencimento (saldo - venda média x dias restantes, se positiva): essa é a lista de ação (remarcar, transferir, doar).
 Só é possível com saldo por lote. Com validade apenas na nota de entrada, entregue uma estimativa por entrada mais recente e marque como estimativa; sem validade em lugar nenhum, diga que o ERP não controla.
 **Prova:** saldo vencido + saldo de cada faixa a vencer (até 7, 15 e 30 dias) + saldo que vence depois de 30 dias = saldo dos lotes na fonte de saldo, somado direto. Lote sem validade informada vai à parte e entra na soma.
 

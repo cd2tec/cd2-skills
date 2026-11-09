@@ -79,6 +79,29 @@ class TestSkillsRelatorio(unittest.TestCase):
             texto = (skill / "SKILL.md").read_text(encoding="utf-8")
             self.assertRegex(texto, r"\*\*Esta skill ou o painel\?\*\*[^\n]*`painel-varejo`[^\n]*relatório", skill.name)
 
+    def test_fiscal_e_contabil_perguntam_novidades(self):
+        pergunta = "uso o que sei ou pesquiso novidades?"
+        for nome in ("relatorio-fiscal", "relatorio-contabil"):
+            texto = (CORE / "skills" / nome / "SKILL.md").read_text(encoding="utf-8")
+            self.assertIn(pergunta, texto, nome)
+            self.assertIn("fontes oficiais", texto, nome)
+        # Só as duas têm a pergunta: nas demais o dado vem do arquivo ou do banco, não de regra que muda.
+        for skill in SKILLS:
+            if skill.name not in ("relatorio-fiscal", "relatorio-contabil"):
+                self.assertNotIn(pergunta, (skill / "SKILL.md").read_text(encoding="utf-8"), skill.name)
+
+    def test_fiscal_e_contabil_marcam_conferencia(self):
+        avisos = {
+            "relatorio-fiscal": "Conferência gerencial. Não substitui a escrituração fiscal oficial.",
+            "relatorio-contabil": "Conferência gerencial. Não substitui a escrituração contábil oficial.",
+        }
+        for nome, aviso in avisos.items():
+            texto = (CORE / "skills" / nome / "SKILL.md").read_text(encoding="utf-8")
+            self.assertIn(aviso, texto, nome)
+            self.assertIn('"conferencia": true', texto, nome)
+            self.assertIn("conferência", descricao(CORE / "skills" / nome), nome)
+            self.assertRegex(texto, r"(?i)não é documento (fiscal|contábil|oficial)|não gera", nome)
+
 
 if __name__ == "__main__":
     unittest.main()

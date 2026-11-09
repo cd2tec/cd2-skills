@@ -146,6 +146,67 @@ FROM (SELECT e.produto, e.fornecedor,
 ORDER BY ABS(100.0 * t.custo_ultima / NULLIF(t.custo_penultima, 0) - 100.0) DESC
 """
 
+# Seção 3.1 de relatorio-financeiro, em SQLite: DATEDIFF vira diferença de julianday, referência
+# fixa em 31/10/2026, sem filtro de empresa e sem OFFSET.
+SQL_FINANCEIRO_AGING = """
+SELECT x.faixa, COUNT(*) titulos, CAST(SUM(x.saldo) AS float) valor,
+       CAST(100.0 * SUM(x.saldo) / NULLIF(SUM(SUM(x.saldo)) OVER (), 0) AS float) part_pct
+FROM (SELECT d.saldo,
+             CASE WHEN d.dias < -90 THEN '1 vencido > 90'
+                  WHEN d.dias < -60 THEN '2 vencido 61-90'
+                  WHEN d.dias < -30 THEN '3 vencido 31-60'
+                  WHEN d.dias <   0 THEN '4 vencido 1-30'
+                  WHEN d.dias <=  7 THEN '5 a vencer 0-7'
+                  WHEN d.dias <= 15 THEN '6 a vencer 8-15'
+                  WHEN d.dias <= 30 THEN '7 a vencer 16-30'
+                  WHEN d.dias <= 60 THEN '8 a vencer 31-60'
+                  ELSE '9 a vencer > 60' END faixa
+      FROM (SELECT t.saldo,
+                   CAST(julianday(t.vencimento) - julianday('2026-10-31') AS integer) dias
+            FROM financeiro_pagar t
+            WHERE t.situacao = 'Aberto' AND t.saldo > 0) d) x
+GROUP BY x.faixa
+ORDER BY x.faixa
+"""
+
+# Seção 3.1 de relatorio-fiscal, em SQLite: loja 1 e outubro de 2026 fixos, situação "Autorizada"
+# e a junção por loja, nota, série e modelo.
+SQL_FISCAL_CFOP = """
+SELECT x.cfop, x.itens, CAST(x.valor AS float) valor,
+       CAST(x.icms AS float) icms, CAST(x.icms_st AS float) icms_st,
+       CAST(100.0 * x.valor / NULLIF(SUM(x.valor) OVER (), 0) AS float) part_pct
+FROM (SELECT i.cfop cfop, COUNT(*) itens,
+             SUM(COALESCE(i.valor, 0)) valor,
+             SUM(COALESCE(i.icms, 0)) icms,
+             SUM(COALESCE(i.icms_st, 0)) icms_st
+      FROM fiscal_itens i
+      JOIN fiscal_notas h ON h.loja = i.loja AND h.nota = i.nota
+                         AND h.serie = i.serie AND h.modelo = i.modelo
+      WHERE h.situacao = 'Autorizada' AND h.loja = 1
+        AND h.data >= '2026-10-01' AND h.data < '2026-11-01'
+      GROUP BY i.cfop) x
+ORDER BY x.valor DESC, x.cfop
+"""
+
+# Seção 3.1 de relatorio-contabil, em SQLite: <deb> e <cre> expandidos para o formato "uma linha
+# por conta, com D ou C", competência de outubro de 2026 e exercício desde 01/01/2026.
+SQL_CONTABIL_BALANCETE = """
+SELECT pc.codigo, pc.descricao, pc.natureza,
+       CAST(SUM(CASE WHEN l.data <  '2026-10-01' THEN CASE WHEN l.dc = 'D' THEN l.valor ELSE 0 END
+                                                      - CASE WHEN l.dc = 'C' THEN l.valor ELSE 0 END
+                     ELSE 0 END) AS float) saldo_anterior,
+       CAST(SUM(CASE WHEN l.data >= '2026-10-01' THEN CASE WHEN l.dc = 'D' THEN l.valor ELSE 0 END ELSE 0 END) AS float) debitos,
+       CAST(SUM(CASE WHEN l.data >= '2026-10-01' THEN CASE WHEN l.dc = 'C' THEN l.valor ELSE 0 END ELSE 0 END) AS float) creditos,
+       CAST(SUM(CASE WHEN l.dc = 'D' THEN l.valor ELSE 0 END - CASE WHEN l.dc = 'C' THEN l.valor ELSE 0 END) AS float) saldo_atual
+FROM contabil_lancamentos l
+JOIN contabil_plano pc ON pc.conta = l.conta
+WHERE l.situacao = 'Efetivado'
+  AND l.data >= '2026-01-01' AND l.data < '2026-11-01'
+GROUP BY pc.codigo, pc.descricao, pc.natureza
+HAVING SUM(CASE WHEN l.dc = 'D' THEN l.valor ELSE 0 END) <> 0 OR SUM(CASE WHEN l.dc = 'C' THEN l.valor ELSE 0 END) <> 0
+ORDER BY pc.codigo
+"""
+
 
 class Base(unittest.TestCase):
     def setUp(self):
@@ -393,6 +454,120 @@ class TestModelos(Base):
         )
         self.assertAlmostEqual(sum(l["valor_comprado"] for l in linhas), direto[0]["total"])
         self.assertAlmostEqual(direto[0]["total"], 1800.0)
+
+    def test_financeiro_aging(self):
+        self.assertIn("### 3.1 Contas a pagar por vencimento", secao("relatorio-financeiro", "3.1"))
+        # Em financeiro-pagar.csv, referência 31/10/2026, só situação Aberto com saldo > 0
+        # (T11 liquidado, T12 cancelado e T13 aberto de saldo zero ficam fora). Dias até o vencimento:
+        #   T01 -103: 1 vencido > 90                  1.000
+        #   T02  -82: 2 vencido 61-90                 T02   500
+        #   T03  -46: 3 vencido 31-60                 T03   300
+        #   T04  -11: 4 vencido 1-30                  T04   200
+        #   T05    0 e T06 7: 5 a vencer 0-7          100 + 50 = 150 (7 ainda é desta faixa)
+        #   T07    8: 6 a vencer 8-15                 400
+        #   T08   30: 7 a vencer 16-30                250
+        #   T10   60: 8 a vencer 31-60                150
+        #   T09   61: 9 a vencer > 60                 600
+        # Total em aberto: 3.550.
+        self.carregar("financeiro-pagar.csv")
+
+        linhas = self.linhas(SQL_FINANCEIRO_AGING)
+
+        self.assertEqual([l["faixa"][0] for l in linhas], list("123456789"))
+        self.assertEqual([l["titulos"] for l in linhas], [1, 1, 1, 1, 2, 1, 1, 1, 1])
+        valores = [1000.0, 500.0, 300.0, 200.0, 150.0, 400.0, 250.0, 150.0, 600.0]
+        for linha, valor in zip(linhas, valores):
+            self.assertAlmostEqual(linha["valor"], valor)
+            self.assertAlmostEqual(linha["part_pct"], valor / 35.5)
+
+        # Prova da seção 3.1: faixas exclusivas somam o total em aberto, e esse total vem de outra conta:
+        # original - baixado, título a título, sem passar pela coluna de saldo nem pelas faixas.
+        independente = self.linhas(
+            "SELECT SUM(original - baixado) total, COUNT(*) n FROM financeiro_pagar "
+            "WHERE situacao = 'Aberto' AND original - baixado > 0"
+        )
+        self.assertAlmostEqual(sum(l["valor"] for l in linhas), independente[0]["total"])
+        self.assertAlmostEqual(independente[0]["total"], 3550.0)
+        self.assertEqual(sum(l["titulos"] for l in linhas), independente[0]["n"])
+        # Amostra: em nenhum título aberto o saldo exportado difere de original - baixado.
+        divergentes = self.linhas(
+            "SELECT COUNT(*) n FROM financeiro_pagar WHERE situacao = 'Aberto' AND original - baixado <> saldo"
+        )
+        self.assertEqual(divergentes[0]["n"], 0)
+
+    def test_fiscal_cfop(self):
+        self.assertIn("### 3.1 Documentos fiscais: sintético", secao("relatorio-fiscal", "3.1"))
+        # Em fiscal-notas.csv e fiscal-itens.csv, loja 1, outubro de 2026, só Autorizada:
+        # entram as notas 100/série 1, 100/série 2, 101 e 105 (a 102 está cancelada, a 103 é de
+        # setembro e a 104 é da loja 2). Valor de produtos dos cabeçalhos: 1.000 + 300 + 500 + 800 = 2.600.
+        #   5102: itens 600 (100/1) + 300 (100/2) + 500 (101) = 1.400, ICMS 72 + 36 + 60 = 168, 3 itens
+        #   1102: item 800 (105), ICMS 96, 1 item
+        #   5405: item 400 (100/1), ICMS-ST 40, 1 item
+        # Participação sobre 2.600: 1.400 = 53,8462%, 800 = 30,7692%, 400 = 15,3846%.
+        self.carregar("fiscal-notas.csv", "fiscal-itens.csv")
+
+        linhas = self.linhas(SQL_FISCAL_CFOP)
+
+        self.assertEqual([l["cfop"] for l in linhas], [5102, 1102, 5405])
+        self.assertEqual([l["itens"] for l in linhas], [3, 1, 1])
+        self.assertEqual([l["valor"] for l in linhas], [1400.0, 800.0, 400.0])
+        self.assertEqual([l["icms"] for l in linhas], [168.0, 96.0, 0.0])
+        self.assertEqual([l["icms_st"] for l in linhas], [0.0, 0.0, 40.0])
+        for linha, valor in zip(linhas, [1400.0, 800.0, 400.0]):
+            self.assertAlmostEqual(linha["part_pct"], valor / 26.0)
+
+        # Prova da seção 3.1: soma por CFOP = valor de produtos dos cabeçalhos autorizados do período,
+        # total que vem da tabela de notas e não passa pela junção com os itens.
+        cabecalho = self.linhas(
+            "SELECT SUM(valor_produtos) total, COUNT(*) notas FROM fiscal_notas "
+            "WHERE situacao = 'Autorizada' AND loja = 1 AND data >= '2026-10-01' AND data < '2026-11-01'"
+        )
+        self.assertAlmostEqual(sum(l["valor"] for l in linhas), cabecalho[0]["total"])
+        self.assertAlmostEqual(cabecalho[0]["total"], 2600.0)
+        self.assertEqual(cabecalho[0]["notas"], 4)
+
+        # Por que a chave leva a série: juntando só por loja e número, a nota 100 casa com duas
+        # séries e o sintético passa de 2.600.
+        sem_serie = self.linhas(
+            "SELECT SUM(i.valor) total FROM fiscal_itens i JOIN fiscal_notas h ON h.loja = i.loja AND h.nota = i.nota "
+            "WHERE h.situacao = 'Autorizada' AND h.loja = 1 AND h.data >= '2026-10-01' AND h.data < '2026-11-01'"
+        )
+        self.assertGreater(sem_serie[0]["total"], 2600.0)
+
+    def test_contabil_balancete(self):
+        self.assertIn("### 3.1 Balancete de verificação", secao("relatorio-contabil", "3.1"))
+        # Em contabil-lancamentos.csv, só Efetivado (o rascunho L5 de 999 fica fora), exercício
+        # desde 01/01/2026 e período de outubro. Saldo com sinal: débito positivo, crédito negativo.
+        #   1.1.01.001 Caixa:         anterior +1.000, débitos 500, créditos 200 + 40 = 240, atual +1.260
+        #   2.1.01.001 Fornecedores:  anterior 0, débitos 40, créditos 100, atual -60
+        #   2.3.01.001 Capital:       anterior -1.000, sem movimento no mês, atual -1.000
+        #   3.1.01.001 Receita:       anterior 0, créditos 500, atual -500
+        #   4.1.01.001 Despesas:      anterior 0, débitos 200 + 100 = 300, atual +300
+        # Débitos do mês 500 + 40 + 300 = 840 e créditos 240 + 100 + 500 = 840.
+        self.carregar("contabil-plano.csv", "contabil-lancamentos.csv")
+
+        linhas = self.linhas(SQL_CONTABIL_BALANCETE)
+
+        self.assertEqual([l["codigo"] for l in linhas], ["1.1.01.001", "2.1.01.001", "2.3.01.001", "3.1.01.001", "4.1.01.001"])
+        self.assertEqual([l["saldo_anterior"] for l in linhas], [1000.0, 0.0, -1000.0, 0.0, 0.0])
+        self.assertEqual([l["debitos"] for l in linhas], [500.0, 40.0, 0.0, 0.0, 300.0])
+        self.assertEqual([l["creditos"] for l in linhas], [240.0, 100.0, 0.0, 500.0, 0.0])
+        self.assertEqual([l["saldo_atual"] for l in linhas], [1260.0, -60.0, -1000.0, -500.0, 300.0])
+
+        # Prova da seção 3.1: débitos = créditos no período, calculados no lançamento por D e C
+        # (não pelas colunas do balancete), e a soma dos saldos com sinal é zero.
+        direto = self.linhas(
+            "SELECT SUM(CASE WHEN dc = 'D' THEN valor ELSE 0 END) deb, SUM(CASE WHEN dc = 'C' THEN valor ELSE 0 END) cre "
+            "FROM contabil_lancamentos WHERE situacao = 'Efetivado' AND data >= '2026-10-01' AND data < '2026-11-01'"
+        )
+        self.assertAlmostEqual(direto[0]["deb"], direto[0]["cre"])
+        self.assertAlmostEqual(sum(l["debitos"] for l in linhas), direto[0]["deb"])
+        self.assertAlmostEqual(sum(l["creditos"] for l in linhas), direto[0]["cre"])
+        self.assertAlmostEqual(direto[0]["deb"], 840.0)
+        self.assertAlmostEqual(sum(l["saldo_atual"] for l in linhas), 0.0)
+        self.assertAlmostEqual(sum(l["saldo_anterior"] for l in linhas), 0.0)
+        # Equação patrimonial: ativo 1.260 = passivo 60 + patrimônio líquido 1.000 + resultado (500 - 300).
+        self.assertAlmostEqual(1260.0, 60.0 + 1000.0 + (500.0 - 300.0))
 
 
 if __name__ == "__main__":

@@ -50,6 +50,9 @@ Quem toca supermercado, padaria ou mercado de bairro não tem tempo para juridiq
 | **Relatório de compras** (`relatorio-compras`) | Gera relatórios gerenciais de compras, como a curva ABC de abastecimento e os pedidos pendentes, com a conta conferida. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=relatorio-compras) | disponível |
 | **Relatório de preços** (`relatorio-precos`) | Gera relatórios gerenciais de preço, margem e promoção, com a conta conferida. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=relatorio-precos) | disponível |
 | **Relatório de perdas** (`relatorio-perdas`) | Gera relatórios gerenciais de perdas, como a quebra por motivo e o índice de perda, com a conta conferida. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=relatorio-perdas) | disponível |
+| **Relatório financeiro** (`relatorio-financeiro`) | Gera relatórios gerenciais financeiros, como o aging de contas a pagar e a receber e o fluxo de caixa. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=relatorio-financeiro) | disponível |
+| **Relatório fiscal** (`relatorio-fiscal`) | Confere documentos fiscais por CFOP, cabeçalho contra itens e numeração, como relatório gerencial e não documento oficial. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=relatorio-fiscal) | disponível |
+| **Relatório contábil** (`relatorio-contabil`) | Confere balancete, razão e lançamentos, como relatório gerencial e não escrituração oficial. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=relatorio-contabil) | disponível |
 <!-- skills:end -->
 
 A skill vai além do site:

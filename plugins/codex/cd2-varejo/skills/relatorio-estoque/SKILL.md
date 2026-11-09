@@ -52,6 +52,8 @@ Pedido genérico ("me mostra o estoque") recebe o **estoque geral sintético por
 | Kardex | Saldo inicial + entradas - saídas = saldo final; saldo final = saldo atual quando o período vai até a última data |
 | Lote de inventário | Itens do lote = contados + não contados; divergência em valor = soma das divergências por item |
 | Cobertura e ruptura | Venda usada no cálculo = venda do período pela fonte de vendas |
+| Inconsistências de saldo | Itens de cada exceção, contados direto na fonte, = listados + omitidos além dos 20 maiores; a soma do valor bate com a soma direta. Amostra de 5 itens conferida na origem, dita como amostra |
+| Giro e estoque médio | Custo da mercadoria vendida usado = total a custo da venda do período, somado direto na fonte de vendas |
 | Posição retroativa | Recompor até hoje devolve o saldo atual |
 
 Sem ela, o script recusa. Origem `arquivo` ou `digitado` nunca vira "Prova fechada": o selo é "Conferido só contra o arquivo", mesmo com o total do ERP igual. Quem decide se a prova fechou é o script: não ajuste número para fechar.

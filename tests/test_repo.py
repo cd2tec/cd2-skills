@@ -97,7 +97,8 @@ class RepoTest(unittest.TestCase):
             {s["name"] for s in skills},
             {
                 "fim-escala-6x1", "custo-vrva", "relatorio-vendas", "relatorio-estoque",
-                "relatorio-compras", "relatorio-precos", "relatorio-perdas",
+                "relatorio-compras", "relatorio-precos", "relatorio-perdas", "relatorio-financeiro",
+                "relatorio-fiscal", "relatorio-contabil",
             },
         )
         self.assertEqual(set(harnesses["plugins"]["cd2-varejo"]["harnesses"]), {"claude", "codex", "dsh", "gpt"})
