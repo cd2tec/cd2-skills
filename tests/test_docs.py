@@ -274,11 +274,11 @@ class SiteTest(unittest.TestCase):
                        "só lê", "SELECT", "Online", "Archeo MCP Creator da CD2"):
             self.assertIn(needle, section, needle)
         self.assertRegex(section, r'class="chat"')
-        # O hero e os fatos falam das doze skills, não de duas.
+        # O hero e os fatos falam das dezenove skills, não de duas.
         self.assertNotIn('<span class="stat">2</span>', html)
-        self.assertIn('<span class="stat">12</span>', html)
+        self.assertIn('<span class="stat">19</span>', html)
         self.assertNotRegex(html, r"(?i)dados? (nunca )?sa[ei]m? da (sua )?empresa|nada sai da")
-        # Os cards gerados mostram as doze e não fingem calculadora nos relatórios.
+        # Os cards gerados mostram todas e não fingem calculadora nos relatórios.
         block = html.split("<!-- skills:start -->")[1].split("<!-- skills:end -->")[0]
         self.assertEqual(block.count('class="skill-card"'), len(json.loads(read("skills.json"))))
         self.assertEqual(block.count("Abrir a calculadora gratuita"), 2)

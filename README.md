@@ -72,6 +72,22 @@ As calculadoras vão além do site:
 - **Mais atualizada.** Antes de calcular, pode pesquisar novidades em fontes oficiais e dizer de onde tirou cada informação.
 - **Mesma conta.** O script de cada skill porta a conta da calculadora e é conferido por testes com os exemplos da metodologia.
 
+## Rotinas do dia
+
+Sete skills organizam o plugin pelo dia de quem toca o supermercado. Elas usam as consultas e as provas dos relatórios, então o número é o mesmo nos dois lugares.
+
+| Grupo | Skill | Pergunta que responde |
+|---|---|---|
+| Seu dia | `perfil-da-operacao` | O que você consegue ver da minha operação e por onde começo? |
+| Seu dia | `briefing-do-dia` | Como está o dia? |
+| Seu dia | `sinais-da-operacao` | O que mudou e merece atenção? |
+| Fornecedores | `preparo-de-negociacao` | O fornecedor chega às 14h, me prepara. |
+| Fornecedores | `ata-de-negociacao` | Fecha a visita. |
+| Ofertas | `plano-de-ofertas` | Monta a semana de ofertas. |
+| Ofertas | `comunicacao-de-ofertas` | Escreve a comunicação dessa oferta. |
+
+As rotinas leem o ERP conectado ou um arquivo exportado, e a agenda e o e-mail quando estão conectados. Nada é escrito no ERP: o que precisa mudar vira uma lista para você fazer. E-mail sai como rascunho, WhatsApp sai como texto pronto para colar, e o que nasce de um e-mail ou de uma transcrição é mostrado antes de sair. As regras de oferta são apoio para conferência, não parecer jurídico.
+
 ## Relatórios e painel
 
 Dez skills do plugin trabalham com os dados do seu sistema, sem calculadora no site. **Relatório não é painel**, e as skills têm nomes diferentes de propósito:
@@ -187,6 +203,20 @@ Skill: Você paga R$ 1.576,67 por mês acima do permitido, ou R$ 18.920,00 por a
 Padaria de exemplo: Alelo, Pluxee, Ticket e VR, com o dinheiro a 2% ao mês. Veja [como calculamos](core/cd2-super/skills/custo-vrva/references/metodologia.md).
 
 Outros pedidos que a skill entende: *"monta a escala da loja com 2 folgas"*, *"calcula as 4 lojas da rede"*, *"a Ticket pode me cobrar 6%?"*, *"me dá um resumo para mandar no WhatsApp"*.
+
+### Briefing do dia
+
+```
+Você:  como está o dia?
+
+Skill: Ontem a Loja 1 vendeu R$ 12.400,00, 6% acima do mesmo dia da
+       semana anterior. No mês, está em 95% da meta até o dia 8.
+
+       Três coisas para hoje: 4 itens A sem saldo, R$ 18.200,00 a pagar
+       e a visita da distribuidora às 14h.
+
+       Não vi: contas a receber. Conferido só contra o arquivo.
+```
 
 ## Instalação
 

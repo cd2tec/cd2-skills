@@ -245,7 +245,7 @@ class SyncTest(unittest.TestCase):
         for path in manifests:
             meta = json.loads(path.read_text(encoding="utf-8"))
             self.assertEqual(meta["name"], PLUGIN, path)
-            self.assertEqual(meta["version"], "0.3.0", path)
+            self.assertEqual(meta["version"], "0.4.0", path)
             self.assertEqual(meta["license"], "CC-BY-NC-ND-4.0", path)
             self.assertEqual(meta["author"], {"name": "CD2 Tech", "url": "https://cd2.com.br"}, path)
             self.assertEqual(meta["homepage"], "https://cd2tec.github.io/super/", path)
@@ -492,7 +492,7 @@ class PackageTest(unittest.TestCase):
             )
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
             for harness in ("claude", "codex", "dsh", "gpts"):
-                for name in (f"{PLUGIN}-{harness}.zip", f"{PLUGIN}-{harness}-0.3.0.zip"):
+                for name in (f"{PLUGIN}-{harness}.zip", f"{PLUGIN}-{harness}-0.4.0.zip"):
                     path = out / name
                     self.assertTrue(path.is_file(), name)
                     with zipfile.ZipFile(path) as zf:
@@ -504,6 +504,7 @@ class PackageTest(unittest.TestCase):
             with zipfile.ZipFile(out / f"{PLUGIN}-claude.zip") as zf:
                 self.assertIn(".claude-plugin/plugin.json", zf.namelist())
                 self.assertIn(".claude-plugin/icon.png", zf.namelist())
+                self.assertIn(".mcp.json", zf.namelist())
             with zipfile.ZipFile(out / f"{PLUGIN}-gpts.zip") as zf:
                 self.assertIn("custo-vrva/knowledge/scripts/calc.py", zf.namelist())
 

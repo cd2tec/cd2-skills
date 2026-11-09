@@ -350,6 +350,7 @@
     </a>
     <nav aria-label="Principal">
       <a class="link" href="#skills">Skills</a>
+      <a class="link" href="#rotinas">Rotinas</a>
       <a class="link" href="#relatorios">Relatórios e painel</a>
       <a class="link" href="#como-funciona">Como funciona</a>
       <a class="link" href="#instalar">Instalar</a>
@@ -374,7 +375,7 @@
         <li>Claude Code</li><li>Claude Cowork</li><li>Codex</li><li>ChatGPT Work</li><li>DeepSeek Harness</li><li>GPT Store em breve</li>
       </ul>
       <ul class="facts">
-        <li class="block block--deep notch-tr"><span class="stat">12</span><span class="stat-line">skills prontas: duas calculadoras gratuitas da CD2, oito relatórios, um painel e uma ficha</span></li>
+        <li class="block block--deep notch-tr"><span class="stat">19</span><span class="stat-line">skills prontas: sete rotinas do dia, duas calculadoras gratuitas da CD2, oito relatórios, um painel e uma ficha</span></li>
         <li class="block block--deep"><span class="stat">5</span><span class="stat-line">plataformas a partir de uma fonte só, e a GPT Store em breve</span></li>
         <li class="block block--accent notch-bl"><span class="stat">Sem prazo</span><span class="stat-line">para testar na operação da sua empresa</span></li>
       </ul>
@@ -409,7 +410,7 @@
     <div class="wrap">
       <div class="section-head">
         <span class="eyebrow">As skills</span>
-        <h2 class="heading-md">Duas calculadoras, oito relatórios, um painel e uma ficha</h2>
+        <h2 class="heading-md">Sete rotinas, duas calculadoras, oito relatórios, um painel e uma ficha</h2>
         <p>As duas calculadoras têm a mesma conta do site gratuito da CD2, com os números da sua loja: leem a sua convenção coletiva ou o extrato da operadora, somam várias lojas e podem pesquisar novidades antes de calcular. Os relatórios, o painel e a ficha trabalham com os dados do seu sistema, como mostra a próxima seção.</p>
       </div>
 <!-- skills:start -->
@@ -554,6 +555,46 @@
               <p class="s"><b>Skill</b>Você paga R$ 1.576,67 por mês acima do permitido, ou R$ 18.920,00 por ano. São R$ 1.110,00 de taxa acima do teto e R$ 466,67 de custo do dinheiro parado. A Alelo é a que mais pesa: comece por ela.</p>
             </div>
             <p class="chat__foot">Padaria de exemplo: Alelo, Pluxee, Ticket e VR, dinheiro a 2% ao mês. <a href="https://github.com/cd2tec/super/blob/main/core/cd2-super/skills/custo-vrva/references/metodologia.md">Como calculamos</a></p>
+          </article>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="rotinas">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">Rotinas do dia</span>
+        <h2 class="heading-md">Organizadas pelo dia de quem toca o supermercado</h2>
+        <p>Sete skills usam as consultas e as provas dos relatórios, então o número é o mesmo nos dois lugares. Leem o ERP conectado ou um arquivo exportado. Nada é escrito no ERP, e e-mail sai como rascunho.</p>
+      </div>
+      <div class="grid g3 report-kinds">
+        <article class="block block--raised notch-tr">
+          <span class="eyebrow">Seu dia</span>
+          <h3>Como está o dia?</h3>
+          <p><code>perfil-da-operacao</code> mostra o que está ao alcance, <code>briefing-do-dia</code> traz venda contra a meta e as três ações, e <code>sinais-da-operacao</code> aponta o que mudou.</p>
+        </article>
+        <article class="block block--raised">
+          <span class="eyebrow">Fornecedores</span>
+          <h3>Do preparo à ata</h3>
+          <p><code>preparo-de-negociacao</code> junta compra, custo e serviço antes da visita. <code>ata-de-negociacao</code> fecha com acordos, pendências e o que atualizar no ERP.</p>
+        </article>
+        <article class="block block--raised notch-bl">
+          <span class="eyebrow">Ofertas</span>
+          <h3>Do plano ao texto</h3>
+          <p><code>plano-de-ofertas</code> monta a semana com preço e margem. <code>comunicacao-de-ofertas</code> escreve por canal. As regras de oferta são apoio para conferência, não parecer jurídico.</p>
+        </article>
+      </div>
+      <div class="examples">
+        <div class="grid g2">
+          <article class="chat" aria-label="Exemplo de conversa com a skill briefing-do-dia">
+            <div class="chat__bar">briefing-do-dia</div>
+            <div class="chat__body">
+              <p class="u"><b>Você</b>Como está o dia?</p>
+              <p class="s"><b>Skill</b>Ontem a Loja 1 vendeu R$ 12.400,00, 6% acima do mesmo dia da semana anterior. No mês, está em 95% da meta até o dia 8.</p>
+              <p class="s"><b>Skill</b>Três coisas para hoje: 4 itens A sem saldo, R$ 18.200,00 a pagar e a visita da distribuidora às 14h. Não vi: contas a receber. Conferido só contra o arquivo.</p>
+            </div>
+            <p class="chat__foot">Loja de exemplo, com um arquivo de venda e uma planilha de metas.</p>
           </article>
         </div>
       </div>

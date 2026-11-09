@@ -2,6 +2,17 @@
 
 As notas de cada versão entram na release do GitHub. Use um título `## <versão>` por versão, da mais recente para a mais antiga.
 
+## 0.4.0
+
+Rotinas do dia. Sete skills novas organizam o plugin pelo dia de quem toca o supermercado, usando as consultas e as provas dos relatórios.
+
+- **Seu dia:** `perfil-da-operacao`, `briefing-do-dia` e `sinais-da-operacao`. O briefing compara a venda do mês com a meta proporcional aos dias corridos e a venda de ontem com o mesmo dia da semana anterior.
+- **Fornecedores:** `preparo-de-negociacao` e `ata-de-negociacao`. Na ata, todo acordo traz o trecho de origem.
+- **Ofertas:** `plano-de-ofertas` e `comunicacao-de-ofertas`. As regras de oferta foram conferidas em 09/11/2026 e são apoio para conferência, não parecer jurídico.
+- As rotinas nunca escrevem no ERP. E-mail sai como rascunho, WhatsApp como texto pronto, e o que nasce de conteúdo externo é mostrado antes de sair.
+- No pacote do Claude, o Archeo MCP Creator da CD2 já vem configurado: é só fazer login. Sem conta, tudo segue com arquivo.
+- O relatório aceita os blocos `agenda`, `acordos` e `pendencias` e uma linha de origem em cada bloco. A conta das calculadoras e dos relatórios não mudou.
+
 ## 0.3.0
 
 Troca de nome. O plugin `cd2-varejo` agora se chama `cd2-super`, e o repositório e o marketplace agora se chamam `super`. As skills e as contas não mudaram.
