@@ -18,5 +18,15 @@
     "status": "disponível",
     "tipo": "calculadora",
     "gpt": true
+  },
+  {
+    "name": "relatorio-vendas",
+    "title": "Relatório de vendas",
+    "summary": "Gera relatórios gerenciais de vendas, como a curva ABC, com a prova de que a conta fecha.",
+    "site_url": "https://archeo.cd2.com.br/",
+    "rule": "",
+    "status": "disponível",
+    "tipo": "relatorio",
+    "gpt": false
   }
 ]
