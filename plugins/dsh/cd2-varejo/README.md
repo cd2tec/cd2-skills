@@ -59,4 +59,4 @@ Abra uma sessão nova no DSH e peça algo que uma skill cubra, por exemplo *"qua
 
 ## Licença
 
-CC BY-NC-ND 4.0, da CD2 Tech. Avaliar na sua operação é livre por até 90 dias. Para usar no dia a dia da empresa, com suporte e responsabilidade, fale com a CD2. Contato: [WhatsApp](https://wa.me/5519982355172) e [cd2.com.br](https://cd2.com.br/?utm_source=deepseek&utm_medium=skill&utm_campaign=cd2-varejo).
+CC BY-NC-ND 4.0, da CD2 Tech. Testar na sua operação é livre. Para usar no dia a dia da empresa, com suporte e responsabilidade, fale com a CD2. Contato: [WhatsApp](https://wa.me/5519982355172) e [cd2.com.br](https://cd2.com.br/?utm_source=deepseek&utm_medium=skill&utm_campaign=cd2-varejo).

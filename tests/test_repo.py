@@ -1,5 +1,6 @@
 import codecs
 import json
+import re
 import subprocess
 import unittest
 from pathlib import Path
@@ -37,6 +38,12 @@ def tracked_texts():
             continue
 
 
+LICENSE_90 = re.compile(
+    r"livre por até 90 dias|por até 90 dias, (só )?para avaliar|até 90 dias, para avaliar"
+    r"|avaliação grátis por 90|90 dias de avaliação|stat\">90 dias"
+)
+
+
 class RepoTest(unittest.TestCase):
     def test_license_is_official_cc_by_nc_nd(self):
         self.assertIn("Attribution-NonCommercial-NoDerivatives 4.0 International", read("LICENSE"))
@@ -60,7 +67,7 @@ class RepoTest(unittest.TestCase):
             self.assertFalse(rel.startswith(INTERNAL_DIRS + ("docs/superpowers/",)), rel)
 
     def test_no_deliverable_says_use_as_much_as_you_want(self):
-        # A avaliação gratuita tem prazo (90 dias, COMMERCIAL.md): nenhum texto pode dizer o contrário.
+        # O teste na empresa é livre e sem prazo (COMMERCIAL.md): nenhum texto pode dizer o contrário.
         for rel, text in tracked_texts():
             self.assertFalse("quanto quiser" in text, rel)
 
@@ -69,10 +76,17 @@ class RepoTest(unittest.TestCase):
         self.assertIn("SIL Open Font License 1.1", text)
         self.assertIn("não é coberta pela licença Creative Commons", text)
 
-    def test_commercial_has_evaluation_and_clients(self):
+    def test_commercial_testar_livre(self):
         text = read("COMMERCIAL.md")
-        for needle in ("avaliação", "cliente", "wa.me/5519982355172"):
+        self.assertIn("para testar, livremente e sem prazo", text)
+        for needle in ("cliente", "wa.me/5519982355172"):
             self.assertIn(needle, text)
+
+    def test_licenca_sem_prazo(self):
+        for rel, text in tracked_texts():
+            if rel == "CHANGELOG.md":
+                continue  # histórico da 0.1.0 continua verdadeiro
+            self.assertIsNone(LICENSE_90.search(text), rel)
 
     def test_json_files_parse(self):
         core = json.loads(read("core/cd2-varejo/plugin.core.json"))

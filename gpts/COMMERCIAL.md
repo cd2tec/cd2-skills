@@ -6,16 +6,16 @@ As skills deste repositório são licenciadas em CC BY-NC-ND 4.0 (veja o arquivo
 
 Você pode estudar, usar de forma pessoal e não comercial, e compartilhar o material sem alterações. Sempre com atribuição à CD2 Tech e link para https://github.com/cd2tec/cd2-skills.
 
-## Avaliação gratuita na sua empresa
+## Teste livre na sua empresa
 
-Nós damos uma permissão adicional: você pode usar as skills na sua própria operação por até 90 dias, só para avaliar.
+Nós damos uma permissão adicional: você pode usar as skills na sua própria operação para testar, livremente e sem prazo.
 
-Nesse período:
+Nesse uso de teste:
 - não há suporte;
 - não há garantia;
 - a CD2 Tech não tem responsabilidade sobre resultados ou decisões.
 
-A avaliação não inclui revender, embutir em produto ou distribuir.
+O teste não inclui revender, embutir em produto ou distribuir.
 
 ## Uso contínuo na empresa: para clientes CD2
 

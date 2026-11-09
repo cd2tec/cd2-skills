@@ -316,12 +316,12 @@ class HtmlTest(unittest.TestCase):
         self.assertEqual(page.count('class="cd2-assinatura"'), 1)
         self.assertEqual(page.count('id="veredito"'), 1)
 
-    def test_commercial_text_states_90_day_evaluation(self):
+    def test_commercial_text_states_free_testing(self):
         for fmt in ("html", "markdown"):
             with self.subTest(fmt=fmt):
                 text = render.render(output(), fmt)
                 self.assertNotIn("quanto quiser", text)
-                self.assertIn("Avaliar na sua operação é livre por até 90 dias.", text)
+                self.assertIn("Testar na sua operação é livre.", text)
                 self.assertIn("com suporte e responsabilidade, fale com a CD2", text)
         for fmt in FORMATS:
             self.assertNotIn("quanto quiser", render.render(output(), fmt))

@@ -67,4 +67,4 @@ Se o editor recusar algum arquivo:
 
 ## Licença
 
-CC BY-NC-ND 4.0, da CD2 Tech. Avaliar na sua operação é livre por até 90 dias. Para usar no dia a dia da empresa, com suporte e responsabilidade, fale com a CD2. Veja `LICENSE`, `NOTICE` e `COMMERCIAL.md`.
+CC BY-NC-ND 4.0, da CD2 Tech. Testar na sua operação é livre. Para usar no dia a dia da empresa, com suporte e responsabilidade, fale com a CD2. Veja `LICENSE`, `NOTICE` e `COMMERCIAL.md`.

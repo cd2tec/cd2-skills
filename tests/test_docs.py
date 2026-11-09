@@ -44,7 +44,7 @@ class ReadmeTest(unittest.TestCase):
             "DeepSeek Harness",
             "GPT Store",
             "CC BY-NC-ND 4.0",
-            "avaliação",
+            "Teste grátis na sua empresa",
             "/plugin marketplace add cd2tec/cd2-skills",
             "/plugin install cd2-varejo@cd2-skills",
             "codex plugin marketplace add cd2tec/cd2-skills",
@@ -55,7 +55,7 @@ class ReadmeTest(unittest.TestCase):
         text = read("README.md")
         for needle in (
             "COMMERCIAL.md",
-            "90 dias",
+            "sem prazo",
             "CD2 Escala 6x1",
             "CD2 VR/VA: quanto custa",
             "gpts/README.md",
@@ -178,13 +178,13 @@ class SiteTest(unittest.TestCase):
 
     def test_site_sections_and_themes(self):
         for needle in (
-            "Skills de IA para o varejo, de graça para avaliar",
+            "Skills de IA para o varejo, de graça para testar",
             "Como a skill conversa com você",
             "Conecte seu sistema",
             'role="tablist"',
             "CC BY-NC-ND 4.0",
             "COMMERCIAL.md",
-            "90 dias",
+            "Sem prazo",
             "CD2 Escala 6x1",
             "CD2 VR/VA: quanto custa",
             "/plugin marketplace add cd2tec/cd2-skills",

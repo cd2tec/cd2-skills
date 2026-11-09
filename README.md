@@ -7,7 +7,7 @@
 
 # CD2 Skills para o varejo
 
-**Skills de IA para o varejo alimentar, de graça para avaliar.**
+**Skills de IA para o varejo alimentar, de graça para testar.**
 
 [![Licença CC BY-NC-ND 4.0](https://img.shields.io/badge/licen%C3%A7a-CC%20BY--NC--ND%204.0-0000ff.svg)](#licença-em-português-simples)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-0000ff.svg)](#claude-code)
@@ -217,11 +217,11 @@ Em vez de digitar, a skill pode puxar os números direto do seu ERP, da folha ou
 O plugin é da **CD2 Tech** e está na licença **CC BY-NC-ND 4.0**. Na prática:
 
 - **Livre para estudar.** Você pode ver, baixar, estudar, usar sem fins comerciais e compartilhar sem alterações, sempre com o crédito à CD2 Tech.
-- **Avaliação grátis na sua empresa.** Sua empresa pode usar as skills na própria operação por até 90 dias, para avaliar. Nesse período não há suporte, garantia nem responsabilidade da CD2. Veja o [`COMMERCIAL.md`](COMMERCIAL.md).
+- **Teste grátis na sua empresa.** Sua empresa pode usar as skills na própria operação para testar, livremente e sem prazo. Nesse período não há suporte, garantia nem responsabilidade da CD2. Veja o [`COMMERCIAL.md`](COMMERCIAL.md).
 - **Uso contínuo na empresa é para clientes CD2.** Qualquer contrato ativo com a CD2, como AMS, sustentação ou projeto, já inclui a licença comercial, com suporte, manutenção e responsabilidade da CD2.
 - **Nunca é permitido:** vender as skills, cobrar acesso a elas, distribuir uma versão modificada ou remover o crédito à CD2 Tech.
 
-O texto completo está no [`LICENSE`](LICENSE) e as condições de avaliação e de uso na empresa, no [`COMMERCIAL.md`](COMMERCIAL.md). A fonte Manrope que vai junto nas skills e no site é da SIL Open Font License 1.1, não da CC. Os nomes CD2 e CD2 Tech e as logos são marcas da CD2 Tech e não são licenciados pela CC, como diz o [`NOTICE`](NOTICE).
+O texto completo está no [`LICENSE`](LICENSE) e as condições de teste e de uso na empresa, no [`COMMERCIAL.md`](COMMERCIAL.md). A fonte Manrope que vai junto nas skills e no site é da SIL Open Font License 1.1, não da CC. Os nomes CD2 e CD2 Tech e as logos são marcas da CD2 Tech e não são licenciados pela CC, como diz o [`NOTICE`](NOTICE).
 
 As contas e informações das skills são apenas gerenciais, uma referência. A CD2 Tech não tem responsabilidade sobre os resultados nem sobre decisões tomadas com base neles.
 
