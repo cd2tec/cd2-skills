@@ -76,7 +76,7 @@ Duas listas diferentes, que não devem ser misturadas:
 - **De cadastro:** itens ativos com preço vigente <= custo atual, vendidos ou não.
 
 Ordene pelo prejuízo em valor. Antes de alarmar, descarte os falsos positivos: custo com erro de embalagem (custo da caixa contra preço da unidade), item em promoção com verba do fornecedor, item de combo com preço rateado.
-**Prova:** cada item listado confere com o preço e o custo da fonte (cadastro, ou item vendido na lista praticada).
+**Prova:** prejuízo total da lista praticada = soma de (custo - venda) dos itens com venda abaixo do custo, somada direto na fonte, e a contagem de itens de cada lista = contagem direta na fonte. Dos itens mostrados, 5 conferidos na origem ("5 de 5 itens conferidos na origem"): conferência de amostra, não de total.
 
 **Para exportar:** para a lista praticada, o mesmo relatório do 3.1: venda por item com código, quantidade, valor líquido e custo unitário. Para a lista de cadastro, o cadastro de produtos ativos com preço vigente e custo atual.
 
@@ -90,7 +90,7 @@ Ordene pelo prejuízo em valor. Antes de alarmar, descarte os falsos positivos: 
 Itens com aumento de custo nas últimas entradas e preço de venda inalterado.
 **Colunas:** produto, custo anterior, custo atual, variação %, data da entrada, preço atual, data da última alteração de preço, margem anterior e atual, preço para recompor a margem anterior (custo atual / (1 - margem anterior)).
 Custos por entrada: `references/mapeamento-erp.md`, seção 3. O preço de recomposição é referência de cálculo, não recomendação: elasticidade e concorrência não estão no dado.
-**Prova:** cada item listado confere com o custo das duas últimas entradas e com o preço atual do cadastro.
+**Prova:** itens com aumento de custo e preço inalterado = contagem direta na fonte de entradas e preços com os mesmos critérios. Dos itens listados, 5 conferidos na origem contra as duas últimas entradas e o preço atual ("5 de 5 itens conferidos na origem"): conferência de amostra, não de total.
 
 **Para exportar:** peça duas coisas: as notas de entrada por item (produto, data de entrada, custo unitário, quantidade, tipo de operação), com pelo menos duas entradas por produto, e os preços de venda atuais (produto, preço).
 

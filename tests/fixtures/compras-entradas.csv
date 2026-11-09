@@ -1,0 +1,6 @@
+Data;Produto;Fornecedor;Chave;Custo;Quantidade;Operacao
+05/08/2026;E01;F1;1;10,00;100;Compra
+10/10/2026;E01;F1;2;12,00;50;Compra
+15/09/2026;E02;F1;3;8,00;25;Compra
+20/09/2026;E02;F1;4;0,00;10;Bonificação
+05/07/2026;E01;F1;5;9,00;10;Compra

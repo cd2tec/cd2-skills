@@ -75,6 +75,7 @@ Cuidados:
 - O período da perda não identificada é o intervalo **entre inventários**, não o mês do balanço. Um inventário anual concentra 12 meses de perda no mês em que ocorre: diga isso em vez de mostrar um pico falso.
 - Quebra lançada entre o congelamento e a contagem pode estar nos dois lados.
 - Liste os lotes considerados e os departamentos sem inventário.
+- **Contado zero x não contado:** se o sistema grava zero tanto para o item contado sem saldo quanto para o não contado, não dá para separar os dois, e o item não contado vira falta total. Isso infla a perda não identificada sem avisar: pergunte como o ERP grava, e diga na entrega que o número pode estar inflado.
 
 **Prova:** perda não identificada = divergência líquida dos lotes considerados, e a lista dos lotes e dos departamentos sem inventário vai na entrega.
 
@@ -89,9 +90,9 @@ Cuidados:
 ### 3.3 Validade
 
 **Vencidos em estoque:** produto, lote, validade, saldo do lote, valor a custo, dias vencido.
-**A vencer:** faixas de 7, 15 e 30 dias, com saldo, venda média diária e a quantidade que não deve vender até o vencimento (saldo - venda média x dias restantes, se positiva): essa é a lista de ação (remarcar, transferir, doar).
+**A vencer:** faixas de 7, 15 e 30 dias, mais "vence depois de 30 dias" para o saldo restante, com saldo, venda média diária e a quantidade que não deve vender até o vencimento (saldo - venda média x dias restantes, se positiva): essa é a lista de ação (remarcar, transferir, doar).
 Só é possível com saldo por lote. Com validade apenas na nota de entrada, entregue uma estimativa por entrada mais recente e marque como estimativa; sem validade em lugar nenhum, diga que o ERP não controla.
-**Prova:** saldo vencido mais saldo a vencer, por lote, = saldo desses lotes na fonte de saldo.
+**Prova:** saldo vencido + saldo de cada faixa a vencer (até 7, 15 e 30 dias) + saldo que vence depois de 30 dias = saldo dos lotes na fonte de saldo, somado direto. Lote sem validade informada vai à parte e entra na soma.
 
 **Para exportar:** peça o relatório de posição de estoque por lote, com validade. Colunas mínimas: produto, lote, validade, saldo. Recomendadas: custo e a venda por item dos últimos 30 dias (para a venda média diária).
 
@@ -134,6 +135,7 @@ ORDER BY valor_cancelado DESC OFFSET 0 ROWS
 
 - O piso de cupons (100 por default) evita taxa alta por base pequena.
 - Separe desconto de promoção e de fidelidade (regra do sistema) do desconto manual (decisão do operador ou supervisor). Sem essa distinção no dado, diga que o desconto mostrado inclui promoção.
+- Itens cancelados dependem de exportação no nível do item; com só o cupom, saem os cupons cancelados e os itens não.
 - Itens cancelados depois do subtotal e cancelamento do cupom inteiro logo após o pagamento em dinheiro são os padrões clássicos de auditoria; só aponte se o dado tiver hora e forma de pagamento.
 
 **Prova:** cancelado + válido = total registrado do período.

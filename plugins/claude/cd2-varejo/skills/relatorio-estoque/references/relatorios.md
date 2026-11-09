@@ -65,7 +65,7 @@ ORDER BY x.valor_custo DESC OFFSET 0 ROWS
 Com arquivo, o departamento costuma vir na mesma linha do saldo: agrupe por ele e tire o join com o cadastro.
 
 **Decisões a declarar:** saldo negativo fica fora do valor (somado à parte como inconsistência); qual custo foi usado; se saldo reservado ou em trânsito entrou.
-**Prova:** soma de `valor_custo` do relatório = `SUM(saldo * custo)` direto na tabela de saldo com os mesmos filtros, sem join.
+**Prova:** soma de `valor_custo` do relatório = `SUM(saldo * custo)` dos saldos positivos, direto na tabela de saldo com os mesmos filtros, sem join.
 **Leituras típicas:** concentração do valor em poucos departamentos, itens negativos (saldo sem confiança), valor parado em itens inativos ou fora de linha, itens sem custo.
 
 **Para exportar:** peça o relatório de posição de estoque (saldo por produto) na data de hoje, em CSV ou Excel, com uma linha por produto, ou por produto e loja. Colunas mínimas: código do produto, descrição, saldo.
@@ -236,7 +236,7 @@ Lista de exceções, cada uma com contagem e os 20 maiores casos:
 - saldo diferente do Kardex recomposto (amostra dos itens de maior valor, não a base inteira);
 - quantidade fracionada em item vendido por unidade.
 
-**Prova:** cada exceção listada confere com o saldo, o custo ou a situação do item na própria exportação ou tabela, e a contagem de cada lista = linhas listadas mais as omitidas além dos 20 maiores.
+**Prova:** para cada exceção, itens contados na fonte (com um `COUNT` direto, sem a lista) = itens listados + itens omitidos além dos 20 maiores, e a soma do valor por exceção bate com a soma direta na fonte. Dos 20 itens mostrados, confira 5 no detalhe da origem e diga "5 de 5 itens conferidos na origem": isso é conferência de amostra, não de total.
 
 **Para exportar:** peça a posição de estoque com o cadastro do produto. Colunas mínimas: código, saldo. Cada exceção depende de uma coluna.
 
@@ -254,7 +254,7 @@ Lista de exceções, cada uma com contagem e os 20 maiores casos:
 
 Apresente por departamento, com o total. Giro calculado com venda a preço de venda sobre estoque a custo é erro comum: os dois lados a custo.
 
-**Prova:** o custo da mercadoria vendida usado = quantidade vendida x custo da venda por item no período, igual à fonte de vendas.
+**Prova:** o custo da mercadoria vendida usado = total a custo da venda por item do período, somado direto na exportação ou tabela de vendas (`SUM(quantidade x custo)` com os mesmos filtros), e não a conta refeita a partir do mesmo cálculo.
 
 **Para exportar:** peça a venda por item do período com o custo da mercadoria vendida (código, quantidade, custo unitário ou total a custo) e duas posições de estoque a custo, uma no início e outra no fim do período.
 

@@ -128,6 +128,24 @@ GROUP BY q.departamento, COALESCE(q.motivo, '(sem motivo)')
 ORDER BY valor_custo DESC, q.departamento, motivo
 """
 
+# Seção 3.5 de relatorio-compras, em SQLite: só notas de compra, período fixo e colunas do arquivo.
+SQL_COMPRAS_VARIACAO = """
+SELECT t.produto, t.fornecedor, t.custo_ultima, t.custo_penultima,
+       CAST(100.0 * t.custo_ultima / NULLIF(t.custo_penultima, 0) - 100.0 AS float) variacao_pct,
+       t.valor_comprado
+FROM (SELECT e.produto, e.fornecedor,
+             CAST(MAX(CASE WHEN e.rn = 1 THEN e.custo END) AS float) custo_ultima,
+             CAST(MAX(CASE WHEN e.rn = 2 THEN e.custo END) AS float) custo_penultima,
+             CAST(SUM(e.qtd * e.custo) AS float) valor_comprado
+      FROM (SELECT ni.produto, ni.fornecedor, ni.custo custo, ni.quantidade qtd,
+                   ROW_NUMBER() OVER (PARTITION BY ni.produto, ni.fornecedor
+                                      ORDER BY ni.data DESC, ni.chave DESC) rn
+            FROM compras_entradas ni
+            WHERE ni.operacao = 'Compra' AND ni.data >= '2026-08-01' AND ni.data < '2026-11-01') e
+      GROUP BY e.produto, e.fornecedor) t
+ORDER BY ABS(100.0 * t.custo_ultima / NULLIF(t.custo_penultima, 0) - 100.0) DESC
+"""
+
 
 class Base(unittest.TestCase):
     def setUp(self):
@@ -347,6 +365,34 @@ class TestModelos(Base):
         self.assertAlmostEqual(sum(l["v"] for l in por_motivo), total)
         self.assertAlmostEqual(sum(l["v"] for l in por_departamento), total)
         self.assertAlmostEqual(total, 140.0)
+
+    def test_compras_variacao_custo(self):
+        self.assertIn("### 3.5 Variação de custo de compra", secao("relatorio-compras", "3.5"))
+        # Em compras-entradas.csv, só nota de compra entre agosto e outubro de 2026:
+        #   E01: 05/08 a 10,00 x 100 e 10/10 a 12,00 x 50; penúltima 10, última 12,
+        #        variação 12 / 10 - 1 = 20%, valor comprado 1.000 + 600 = 1.600
+        #   E02: uma entrada só, 15/09 a 8,00 x 25; sem penúltima, variação vazia, valor 200
+        # Fora: a bonificação do E02 (custo 0, não é compra) e o E01 de julho (9,00 x 10).
+        # Total das entradas de compra do período: 1.800. E01 vem primeiro por |variação| maior.
+        self.carregar("compras-entradas.csv")
+
+        linhas = self.linhas(SQL_COMPRAS_VARIACAO)
+
+        self.assertEqual([l["produto"] for l in linhas], ["E01", "E02"])
+        self.assertEqual([l["custo_ultima"] for l in linhas], [12.0, 8.0])
+        self.assertEqual(linhas[0]["custo_penultima"], 10.0)
+        self.assertIsNone(linhas[1]["custo_penultima"])
+        self.assertAlmostEqual(linhas[0]["variacao_pct"], 20.0)
+        self.assertIsNone(linhas[1]["variacao_pct"])
+        self.assertEqual([l["valor_comprado"] for l in linhas], [1600.0, 200.0])
+
+        # Prova da seção 3.5: soma do valor comprado = total das entradas de compra, direto na tabela.
+        direto = self.linhas(
+            "SELECT SUM(quantidade * custo) total FROM compras_entradas "
+            "WHERE operacao = 'Compra' AND data >= '2026-08-01' AND data < '2026-11-01'"
+        )
+        self.assertAlmostEqual(sum(l["valor_comprado"] for l in linhas), direto[0]["total"])
+        self.assertAlmostEqual(direto[0]["total"], 1800.0)
 
 
 if __name__ == "__main__":

@@ -60,8 +60,8 @@ Diga se venda e custo estão com ou sem impostos. Venda com imposto contra custo
 | Relatório | Prova |
 |---|---|
 | Margem | Venda do relatório + venda sem custo = venda total do período; custo total = soma dos itens |
-| Margem negativa | Cada item listado confere com preço e custo do cadastro ou do item vendido |
-| Custo sem repasse | Cada item listado confere com o custo das duas últimas entradas e com o preço atual |
+| Margem negativa | Contagem e prejuízo total das listas = soma direta na fonte; amostra de 5 itens conferida na origem |
+| Custo sem repasse | Contagem de itens = contagem direta na fonte; amostra de 5 itens conferida na origem |
 | Alterações de preço | Alterações listadas = linhas do histórico de preço do período |
 | Resultado de promoção | Venda dos itens promovidos no período = venda desses itens na fonte geral |
 | Cadastro x praticado | Amostra de 5 divergências conferida no detalhe do item vendido |

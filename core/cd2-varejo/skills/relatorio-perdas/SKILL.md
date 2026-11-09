@@ -54,7 +54,7 @@ Pedido genérico ("como estão as perdas") recebe a **perda total** (3.2) com a 
 |---|---|
 | Quebra por motivo | Soma por motivo = soma por departamento = total de quebras |
 | Perda total | Não identificada = divergência líquida dos lotes considerados (lista dos lotes na entrega) |
-| Validade | Saldo vencido + a vencer, por lote, = saldo dos lotes listados na fonte de saldo |
+| Validade | Vencido + faixas a vencer + vence depois de 30 dias = saldo dos lotes na fonte de saldo |
 | Ajustes manuais | Ajustes do relatório = movimentos dos tipos de ajuste no período |
 | Exceções de caixa | Cancelado + válido = total registrado |
 | Trocas e devoluções | Soma das devoluções por operador = total de devoluções do período |

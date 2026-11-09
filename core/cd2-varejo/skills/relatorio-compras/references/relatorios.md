@@ -167,9 +167,9 @@ Faça o arredondamento por embalagem e o corte em zero no resultado (ou com `CEI
 **Faixas de atraso:** no prazo, 1 a 7, 8 a 15, 16 a 30, acima de 30 dias. Pedido muito antigo em aberto geralmente é sujeira (saldo que deveria ter sido eliminado): destaque em vez de somar ao que "vai chegar".
 **Prova:** pedido = recebido + cancelado + pendente em cada item.
 
-**Para exportar:** peça o relatório de pedidos de compra em aberto, um item por linha. Colunas mínimas: número do pedido, fornecedor, produto, quantidade pedida, quantidade recebida, data de entrega prevista.
+**Para exportar:** peça o relatório de pedidos de compra em aberto, um item por linha. Colunas mínimas: número do pedido, fornecedor, produto, quantidade pedida, quantidade recebida, quantidade cancelada, data de entrega prevista.
 
-- Sem a quantidade cancelada: o pendente sai inflado (pedido - recebido) e a prova de pedido = recebido + cancelado + pendente não fecha. Avise e peça a coluna.
+- Sem a quantidade cancelada: o pendente sai inflado (pedido - recebido) e a prova de pedido = recebido + cancelado + pendente não fecha. Peça a coluna; se o ERP não tem, diga que o pendente é o máximo possível.
 - Sem a data de entrega prevista: não há atraso nem faixas, só o pendente.
 - Sem a data de emissão: não dá para destacar o pedido antigo que é sujeira.
 - Sem custo ou valor do item: sem valor pendente nem valor atrasado.
@@ -204,20 +204,21 @@ Sem data de entrega prevista, não há pontualidade nem OTIF: entregue atendimen
 Compare entradas de **compra** (sem bonificação, devolução ou transferência) do mesmo fornecedor e da mesma embalagem. Para pegar as duas últimas entradas por produto, numere as entradas com `ROW_NUMBER() OVER (PARTITION BY produto, fornecedor ORDER BY data DESC, chave DESC)` em tabela derivada. Numere todas as entradas do período, sem filtrar `rn <= 2`: a última (`rn = 1`) e a penúltima (`rn = 2`) dão o custo e a variação, e a soma de todas dá o valor comprado.
 
 ```sql
-SELECT e.<cod_produto>, e.<cod_fornecedor>,
-       CAST(MAX(CASE WHEN e.rn = 1 THEN e.custo END) AS float) custo_ultima,
-       CAST(MAX(CASE WHEN e.rn = 2 THEN e.custo END) AS float) custo_penultima,
-       CAST(100.0 * MAX(CASE WHEN e.rn = 1 THEN e.custo END)
-            / NULLIF(MAX(CASE WHEN e.rn = 2 THEN e.custo END), 0) - 100.0 AS float) variacao_pct,
-       CAST(SUM(e.qtd * e.custo) AS float) valor_comprado
+SELECT t.<cod_produto>, t.<cod_fornecedor>, t.custo_ultima, t.custo_penultima,
+       CAST(100.0 * t.custo_ultima / NULLIF(t.custo_penultima, 0) - 100.0 AS float) variacao_pct,
+       t.valor_comprado
+FROM (SELECT e.<cod_produto>, e.<cod_fornecedor>,
+             CAST(MAX(CASE WHEN e.rn = 1 THEN e.custo END) AS float) custo_ultima,
+             CAST(MAX(CASE WHEN e.rn = 2 THEN e.custo END) AS float) custo_penultima,
+             CAST(SUM(e.qtd * e.custo) AS float) valor_comprado
 FROM (SELECT ni.<cod_produto>, n.<cod_fornecedor>, ni.<custo_unitario> custo, ni.<quantidade> qtd,
              ROW_NUMBER() OVER (PARTITION BY ni.<cod_produto>, n.<cod_fornecedor>
                                 ORDER BY n.<data_entrada> DESC, n.<chave> DESC) rn
       FROM <nota_entrada> n
       JOIN <nota_entrada_item> ni ON ni.<chave> = n.<chave>
       WHERE <so_compra> AND n.<data_entrada> >= '2025-04-01' AND n.<data_entrada> < '2025-10-01') e
-GROUP BY e.<cod_produto>, e.<cod_fornecedor>
-ORDER BY ABS(variacao_pct) DESC OFFSET 0 ROWS
+GROUP BY e.<cod_produto>, e.<cod_fornecedor>) t
+ORDER BY ABS(100.0 * t.custo_ultima / NULLIF(t.custo_penultima, 0) - 100.0) DESC OFFSET 0 ROWS
 ```
 
 Produto com uma só entrada no período fica na lista com a variação vazia: ele não tem comparação, mas o valor comprado dele entra na prova.
