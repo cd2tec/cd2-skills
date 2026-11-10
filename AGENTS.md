@@ -25,7 +25,7 @@ O CI roda o `--check` e os testes. O `--check` falha se uma cópia divergir de `
 | `core/cd2-super/kits/<kit>/` | O que vai só para as skills dos tipos que usam o kit (veja a tabela de kits abaixo). Mesma estrutura de `shared/`: `scripts/`, `references/`, `assets/` | Sim |
 | `core/cd2-super/gpts/` | `_preamble.md` comum e, por skill, `instructions.md` e `gpt.json` do GPT | Sim |
 | `core/cd2-super/plugin.core.json` | Nome e versão de referência do plugin | Sim |
-| `skills.json` | Lista das skills: nome, título, resumo, site, regra, status, `tipo`, `gpt` e, nas rotinas, `reaproveita`. Gera a tabela do README e os cards do site | Sim |
+| `skills.json` | Lista das skills: nome, título, resumo, site, regra, status, `tipo`, `gpt`, `departamento` e, nas rotinas, `reaproveita`. Gera a tabela do README e os cards do site | Sim |
 | `harnesses.json` | Plataformas do plugin (caminho, manifesto, layout e `utm_source` de cada uma) e, em `kits`, quais kits cada `tipo` recebe | Sim |
 | `plugins/<plataforma>/cd2-super/` (manifesto, `README.md`, no Claude o ícone `.claude-plugin/icon.png` e o `.mcp.json` do Archeo e, no DSH, `install.py`) | Empacotamento próprio da plataforma. O ícone do Claude é cópia de `docs/assets/icon-512.png` | Sim |
 | `plugins/<plataforma>/cd2-super/skills/` e `gpts/<skill>/` | Cópias geradas | **Não** |
@@ -54,6 +54,8 @@ O que cada kit traz:
 - `kits/dados/`: o roteiro de conversa e o método de análise (`fluxo-dados.md`, `metodo-analise.md`), os indicadores, o mapeamento de ERP, as regras de SQLite, o carregador de arquivo `scripts/dados_arquivo.py` e a fonte Manrope.
 - `kits/relatorio/`: `scripts/render_relatorio.py`, `references/formato-relatorio.md` e `assets/relatorio-template.html`.
 - `kits/rotina/`: as regras comuns (`regras-rotina.md`), o roteiro (`fluxo-rotina.md`), os conectores, o formato do perfil, as ações e as regras de oferta.
+
+O campo `departamento` diz em que área da loja a skill aparece no README e no site, um dos nomes de `DEPARTAMENTOS` em `scripts/sync_plugins.py`, que também define a ordem das áreas. Dentro de cada área, vale a ordem do `skills.json`, da skill que mais chama a atenção para a que menos chama.
 
 O campo `gpt` é booleano e **vale só para calculadoras**: só as skills com `gpt: true` viram pacote de GPT, e relatório, painel e ficha ficam em `false`. O sync acusa GPT faltando em skill com `gpt: true`.
 
@@ -106,7 +108,7 @@ Skill nova do tipo `relatorio`:
 
 ## Somar uma rotina nova
 
-Rotina compõe o que os relatórios já calculam e organiza o plugin pelo dia da pessoa. Não tem calculadora, GPT nem site próprio.
+Rotina compõe o que os relatórios já calculam e atende o dia a dia de um departamento. Não tem calculadora, GPT nem site próprio.
 
 1. Crie `core/cd2-super/skills/<nome>/SKILL.md` com frontmatter `name` igual à pasta, `description` com "para X, use Y" onde houver risco de disparo errado, tabela de conectores com a coluna "Obrigatório?" e citação a `references/regras-rotina.md` e `references/fluxo-rotina.md`.
 2. Registre no `skills.json` com `"tipo": "rotina"`, `"gpt": false`, `site_url` do Archeo MCP Creator da CD2 e `rule` vazia. Em `reaproveita`, liste os `relatorio-*` de que ela depende: o sync gera na rotina os arquivos de consultas e de guia de cada um, com fonte única.

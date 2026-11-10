@@ -83,6 +83,8 @@ REF_PATTERN = re.compile(r"`((?:\.\./|references/|assets/|scripts/)[^`\s]+\.(?:m
 LAYOUTS = ("plugin", "flat-skills", "gpt")
 TIPOS = ("calculadora", "relatorio", "painel", "ficha", "rotina")
 SECOES_FORA_DO_GUIA = ("Entrega", "Fechamento")
+# Ordem em que os departamentos aparecem no README e no site.
+DEPARTAMENTOS = ("RH", "Financeiro", "Diretoria", "Comercial", "Compras", "Loja", "Fiscal", "Contábil", "Tecnologia")
 MARK_START, MARK_END = "<!-- skills:start -->", "<!-- skills:end -->"
 
 
@@ -343,6 +345,8 @@ def check_skills_json(skills: list[dict]) -> list[str]:
     for s in skills:
         if "reaproveita" in s:
             problems += problemas_de_reaproveita(s, tipos)
+        if s.get("departamento") not in DEPARTAMENTOS:
+            problems.append(f"skills.json: '{s.get('name')}' com departamento '{s.get('departamento')}' (use um de: {', '.join(DEPARTAMENTOS)})")
         if s.get("tipo") not in TIPOS:
             problems.append(f"skills.json: '{s.get('name')}' com tipo '{s.get('tipo')}' (use um de: {', '.join(TIPOS)})")
         if not isinstance(s.get("gpt"), bool):
@@ -465,36 +469,55 @@ def link_label(skill: dict) -> str:
     return "Abrir a calculadora gratuita" if skill["tipo"] == "calculadora" else "Conecte seu ERP"
 
 
+def por_departamento(skills: list[dict]) -> list[tuple[str, list[dict]]]:
+    """Skills agrupadas na ordem de DEPARTAMENTOS. Dentro de cada um, vale a ordem do skills.json."""
+    grupos = [(d, [s for s in skills if s.get("departamento") == d]) for d in DEPARTAMENTOS]
+    return [(d, itens) for d, itens in grupos if itens]
+
+
 def readme_block(skills: list[dict]) -> str:
-    lines = [
-        "| Skill | O que faz | Regra | Site | Status |",
-        "| --- | --- | --- | --- | --- |",
-    ]
-    for s in skills:
-        host = urlparse(s["site_url"]).netloc
-        url = utm_url(s["site_url"], "github", s["name"])
-        rule = s["rule"] or "Não se aplica"
-        lines.append(
-            f"| **{s['title']}** (`{s['name']}`) | {s['summary']} | {rule} | [{host}]({url}) | {s['status']} |"
-        )
-    return "\n".join(lines)
+    lines: list[str] = []
+    for departamento, itens in por_departamento(skills):
+        lines += [
+            f"### {departamento}",
+            "",
+            "| Skill | O que faz | Regra | Site | Status |",
+            "| --- | --- | --- | --- | --- |",
+        ]
+        for s in itens:
+            host = urlparse(s["site_url"]).netloc
+            url = utm_url(s["site_url"], "github", s["name"])
+            rule = s["rule"] or "Não se aplica"
+            lines.append(
+                f"| **{s['title']}** (`{s['name']}`) | {s['summary']} | {rule} | [{host}]({url}) | {s['status']} |"
+            )
+        lines.append("")
+    return "\n".join(lines).rstrip()
 
 
 def site_block(skills: list[dict]) -> str:
-    cards = []
-    for s in skills:
-        url = html.escape(utm_url(s["site_url"], "site-skills", s["name"]), quote=True)
-        rule = f'    <p class="skill-rule">Base: {html.escape(s["rule"])}</p>\n' if s["rule"] else ""
-        cards.append(
-            f'  <article class="skill-card" id="skill-{html.escape(s["name"])}">\n'
-            f'    <p class="skill-status">{html.escape(s["status"])}</p>\n'
-            f"    <h3>{html.escape(s['title'])}</h3>\n"
-            f"    <p>{html.escape(s['summary'])}</p>\n"
-            f"{rule}"
-            f'    <a class="skill-link" href="{url}">{link_label(s)}</a>\n'
-            "  </article>"
+    blocos = []
+    for departamento, itens in por_departamento(skills):
+        blocos.append(
+            f'<h3 class="skills-dept">{html.escape(departamento)}</h3>\n<div class="skills-grid">\n'
+            + "\n".join(cartao_do_site(s) for s in itens)
+            + "\n</div>"
         )
-    return '<div class="skills-grid">\n' + "\n".join(cards) + "\n</div>"
+    return "\n".join(blocos)
+
+
+def cartao_do_site(s: dict) -> str:
+    url = html.escape(utm_url(s["site_url"], "site-skills", s["name"]), quote=True)
+    rule = f'    <p class="skill-rule">Base: {html.escape(s["rule"])}</p>\n' if s["rule"] else ""
+    return (
+        f'  <article class="skill-card" id="skill-{html.escape(s["name"])}">\n'
+        f'    <p class="skill-status">{html.escape(s["status"])}</p>\n'
+        f"    <h4>{html.escape(s['title'])}</h4>\n"
+        f"    <p>{html.escape(s['summary'])}</p>\n"
+        f"{rule}"
+        f'    <a class="skill-link" href="{url}">{link_label(s)}</a>\n'
+        "  </article>"
+    )
 
 
 def fill_block(text: str, block: str) -> str | None:
