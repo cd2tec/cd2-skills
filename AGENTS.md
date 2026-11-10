@@ -1,6 +1,6 @@
 # Instruções para agentes neste repositório
 
-Este repositório publica o plugin `cd2-super`, da CD2 Tech, para mais de uma plataforma: Claude Code e Claude Cowork, Codex e ChatGPT Work, DeepSeek Harness e GPT Store. São dezenove skills de cinco tipos: duas calculadoras (cada uma leva para dentro do assistente a conta de uma calculadora gratuita da CD2), oito relatórios gerenciais `relatorio-*`, o painel `painel-varejo`, a ficha `ficha-archeo-mcp` e sete rotinas do dia. Relatório não é painel: só o `painel-varejo` entrega painel visual, e as outras palavras ficam separadas nos textos.
+Este repositório publica o plugin `cd2-super`, da CD2 Tech, para mais de uma plataforma: Claude Code e Claude Cowork, Codex e ChatGPT Work, DeepSeek Harness e GPT Store. São vinte e sete skills de cinco tipos: duas calculadoras (cada uma leva para dentro do assistente a conta de uma calculadora gratuita da CD2), oito relatórios gerenciais `relatorio-*`, o painel `painel-varejo`, a ficha `ficha-archeo-mcp` e quinze rotinas do dia. Relatório não é painel: só o `painel-varejo` entrega painel visual, e as outras palavras ficam separadas nos textos.
 
 Nomes fixos: repositório `cd2tec/super`, marketplace `super`, plugin `cd2-super`. A titular é só a CD2 Tech, em todos os arquivos.
 
@@ -45,7 +45,7 @@ Cada item do `skills.json` tem `tipo` e `gpt`. O `tipo` escolhe os kits que o sy
 | `relatorio` | os oito `relatorio-*` | `sql`, `dados`, `relatorio` | Relatório gerencial com a prova, em `render_relatorio.py` |
 | `painel` | `painel-varejo` | `sql`, `dados` | Painel visual, em `build_dashboard.py` |
 | `ficha` | `ficha-archeo-mcp` | `sql` | Ficha de ferramenta do Archeo MCP Creator da CD2 |
-| `rotina` | `perfil-da-operacao`, `briefing-do-dia`, `sinais-da-operacao`, `preparo-de-negociacao`, `ata-de-negociacao`, `plano-de-ofertas`, `comunicacao-de-ofertas` | `sql`, `dados`, `relatorio`, `rotina` | Leitura do dia, em `render_relatorio.py` ou em texto |
+| `rotina` | `perfil-da-operacao`, `briefing-do-dia`, `sinais-da-operacao`, `preparo-de-negociacao`, `ata-de-negociacao`, `plano-de-ofertas`, `comunicacao-de-ofertas`, `fechamento-do-dia`, `resumo-da-semana`, `ficha-do-fornecedor`, `cenario-de-custo`, `resultado-da-oferta`, `revisao-de-oferta`, `radar-de-concorrencia`, `visita-de-loja` | `sql`, `dados`, `relatorio`, `rotina` | Leitura do dia, em `render_relatorio.py` ou em texto. `briefing-do-dia`, `cenario-de-custo` e `radar-de-concorrencia` têm script próprio de conta |
 
 O que cada kit traz:
 
@@ -103,7 +103,7 @@ Skill nova do tipo `relatorio`:
 1. Crie `core/cd2-super/skills/relatorio-<assunto>/` com `SKILL.md` (frontmatter `name` igual à pasta e `description` que cita o arquivo exportado) e `references/relatorios.md`. Os scripts, o método, o roteiro e o template vêm dos kits `sql`, `dados` e `relatorio`; não copie nada deles para a skill e não use caminho `../`.
 2. Registre no `skills.json` com `"tipo": "relatorio"`, `"gpt": false`, `site_url` do Archeo MCP Creator da CD2 (`https://archeo.cd2.com.br/`) e `rule` vazia.
 3. No JSON da entrega, `origem` é obrigatória (`banco`, `outro-mcp`, `arquivo` ou `digitado`): é o `render_relatorio.py` que escolhe o selo. De `arquivo` e `digitado` sai "Conferido só contra o arquivo", nunca "Prova fechada".
-4. Fiscal e contábil são conferência, não documento oficial. Entre os relatórios, só eles perguntam "uso o que sei ou pesquiso novidades?". Nas rotinas, só `comunicacao-de-ofertas` pergunta.
+4. Fiscal e contábil são conferência, não documento oficial. Entre os relatórios, só eles perguntam "uso o que sei ou pesquiso novidades?". Nas rotinas, só `comunicacao-de-ofertas` e `revisao-de-oferta` perguntam.
 5. Some a skill ao conjunto esperado em `tests/test_repo.py`, atualize descrições e palavras-chave dos manifestos e marketplaces e dos READMEs dos pacotes, rode o sync, o `--check` e os testes, e suba a versão como em [Versão e release](#versão-e-release).
 
 ## Somar uma rotina nova

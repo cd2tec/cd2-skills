@@ -8,10 +8,10 @@ As rotinas falam em categoria, não em produto. Procure o que estiver na sessão
 | E-mail | Gmail, Microsoft 365 | Propostas e cobranças de fornecedor, rascunhos | Texto colado |
 | Agenda | Google Calendar, Outlook | Visitas de fornecedor, reuniões de resultado | Descrita na conversa |
 | Transcrição de reunião | TacTiq, Fireflies, Zoom, Otter | Ata da negociação, contexto da visita anterior | Anotação colada |
-| Arquivos | Google Drive, SharePoint, Notion | Encartes anteriores, planilha de metas, verbas | Upload |
+| Arquivos | Google Drive, SharePoint, Notion | Encartes anteriores, planilha de metas, verbas, coleta de preço | Upload |
 | Chat | Slack, Microsoft Teams | Publicar briefing, ata e resumo para o time | Texto pronto |
 | WhatsApp | Sem conector | Mensagem a fornecedor e equipe | Sempre texto pronto para colar |
-| Pesquisa na web | Busca da plataforma | Novidades em regras de oferta, calendário comercial | Use o que está nas referências e diga a data |
+| Pesquisa na web | Busca da plataforma | Novidades em regras de oferta, calendário comercial, encartes de concorrente | Use o que está nas referências e diga a data |
 
 O WhatsApp é o canal mais usado no varejo e não tem conector. Diga isso uma vez, no perfil, sem pedir desculpa: a mensagem sai como texto pronto para colar.
 

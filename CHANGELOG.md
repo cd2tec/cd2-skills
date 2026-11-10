@@ -2,6 +2,17 @@
 
 As notas de cada versão entram na release do GitHub. Use um título `## <versão>` por versão, da mais recente para a mais antiga.
 
+## 0.5.0
+
+Segunda onda de rotinas. Oito skills novas fecham o dia e a semana, aprofundam a relação com fornecedor e olham a oferta depois de pronta.
+
+- **Diretoria:** `resumo-da-semana`, com a pauta da reunião de resultados, e `fechamento-do-dia`, com decisões, pendências, mensagens e as três de amanhã.
+- **Compras:** `cenario-de-custo`, que simula um aumento com e sem repasse em script próprio, e `ficha-do-fornecedor`, a visão completa de um fornecedor.
+- **Comercial:** `resultado-da-oferta`, `revisao-de-oferta` e `radar-de-concorrencia`, que calcula o índice de preço em script próprio e usa só preço público.
+- **Loja:** `visita-de-loja`, com os números da loja, o que olhar no salão e as perguntas para o gerente.
+- `perfil-da-operacao` agora gera a voz da loja a partir do que ela já publicou, e `comunicacao-de-ofertas` passa a usá-la.
+- O aviso de autorização em `comunicacao-de-ofertas` vale só para sorteio, vale-brinde e concurso, como na lei. Brinde comum não precisa dele.
+
 ## 0.4.0
 
 Rotinas do dia. Sete skills novas organizam o plugin pelo dia de quem toca o supermercado, usando as consultas e as provas dos relatórios.

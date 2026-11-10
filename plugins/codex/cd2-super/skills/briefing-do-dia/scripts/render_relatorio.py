@@ -42,7 +42,7 @@ from brand import esc, formatar  # noqa: E402
 TEMPLATES = (_AQUI.parent / "assets" / "relatorio-template.html", _AQUI / "assets" / "relatorio-template.html",
              _AQUI / "relatorio-template.html")
 ARCHEO_URL = "https://archeo.cd2.com.br/"
-SKILL_PADRAO = re.compile(r"^(relatorio-[a-z]+|briefing-do-dia|sinais-da-operacao|preparo-de-negociacao|ata-de-negociacao|plano-de-ofertas)$")
+SKILL_PADRAO = re.compile(r"^(relatorio-[a-z]+|briefing-do-dia|sinais-da-operacao|preparo-de-negociacao|ata-de-negociacao|plano-de-ofertas|resumo-da-semana|ficha-do-fornecedor|cenario-de-custo|resultado-da-oferta|radar-de-concorrencia|visita-de-loja)$")
 TITULOS_SKILL = {
     "vendas": "Relatório de vendas", "estoque": "Relatório de estoque", "compras": "Relatório de compras",
     "precos": "Relatório de preços", "perdas": "Relatório de perdas", "financeiro": "Relatório financeiro",
@@ -50,6 +50,9 @@ TITULOS_SKILL = {
     "briefing-do-dia": "Briefing do dia", "sinais-da-operacao": "Sinais da operação",
     "preparo-de-negociacao": "Preparo de negociação", "ata-de-negociacao": "Ata de negociação",
     "plano-de-ofertas": "Plano de ofertas",
+    "resumo-da-semana": "Resumo da semana", "ficha-do-fornecedor": "Ficha do fornecedor",
+    "cenario-de-custo": "Cenário de custo", "resultado-da-oferta": "Resultado da oferta",
+    "radar-de-concorrencia": "Radar de concorrência", "visita-de-loja": "Visita de loja",
 }
 BANCO = ("banco", "outro-mcp")
 SKILLS_CONFERENCIA = ("relatorio-fiscal", "relatorio-contabil")

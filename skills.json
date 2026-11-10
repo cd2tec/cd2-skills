@@ -57,6 +57,34 @@
     "departamento": "Diretoria"
   },
   {
+    "name": "resumo-da-semana",
+    "title": "Resumo da semana",
+    "summary": "Fecha a semana com o que subiu e o que caiu e deixa a pauta da reunião de resultados com os números.",
+    "site_url": "https://archeo.cd2.com.br/",
+    "rule": "",
+    "status": "disponível",
+    "tipo": "rotina",
+    "gpt": false,
+    "reaproveita": [
+      "relatorio-vendas",
+      "relatorio-precos",
+      "relatorio-perdas",
+      "relatorio-estoque"
+    ],
+    "departamento": "Diretoria"
+  },
+  {
+    "name": "fechamento-do-dia",
+    "title": "Fechamento do dia",
+    "summary": "Fecha o dia com o que foi decidido, as pendências, as mensagens para a equipe e as três coisas de amanhã.",
+    "site_url": "https://archeo.cd2.com.br/",
+    "rule": "",
+    "status": "disponível",
+    "tipo": "rotina",
+    "gpt": false,
+    "departamento": "Diretoria"
+  },
+  {
     "name": "painel-varejo",
     "title": "Painel de varejo",
     "summary": "Monta um painel visual da operação do varejo, com totalizadores, linha do tempo, mapa de calor e leitura.",
@@ -83,6 +111,37 @@
     "departamento": "Comercial"
   },
   {
+    "name": "radar-de-concorrencia",
+    "title": "Radar de concorrência",
+    "summary": "Mostra onde o seu preço está acima ou abaixo do concorrente, por item, categoria e concorrente.",
+    "site_url": "https://archeo.cd2.com.br/",
+    "rule": "",
+    "status": "disponível",
+    "tipo": "rotina",
+    "gpt": false,
+    "reaproveita": [
+      "relatorio-precos",
+      "relatorio-vendas"
+    ],
+    "departamento": "Comercial"
+  },
+  {
+    "name": "resultado-da-oferta",
+    "title": "Resultado da oferta",
+    "summary": "Mostra se a oferta valeu: contribuição antes, durante e depois, canibalização, estoque que sobrou e verba.",
+    "site_url": "https://archeo.cd2.com.br/",
+    "rule": "",
+    "status": "disponível",
+    "tipo": "rotina",
+    "gpt": false,
+    "reaproveita": [
+      "relatorio-precos",
+      "relatorio-estoque",
+      "relatorio-vendas"
+    ],
+    "departamento": "Comercial"
+  },
+  {
     "name": "preparo-de-negociacao",
     "title": "Preparo de negociação",
     "summary": "Prepara a visita de um fornecedor, com compra, custo, serviço, ruptura e o que pedir.",
@@ -98,6 +157,38 @@
     "departamento": "Compras"
   },
   {
+    "name": "cenario-de-custo",
+    "title": "Cenário de custo",
+    "summary": "Simula um aumento de custo do fornecedor: margem e preço sem repasse, repassando o valor e mantendo a margem.",
+    "site_url": "https://archeo.cd2.com.br/",
+    "rule": "",
+    "status": "disponível",
+    "tipo": "rotina",
+    "gpt": false,
+    "reaproveita": [
+      "relatorio-compras",
+      "relatorio-precos"
+    ],
+    "departamento": "Compras"
+  },
+  {
+    "name": "ficha-do-fornecedor",
+    "title": "Ficha do fornecedor",
+    "summary": "Junta em uma página compra, serviço, custo, margem, títulos, verbas, e-mails e atas de um fornecedor.",
+    "site_url": "https://archeo.cd2.com.br/",
+    "rule": "",
+    "status": "disponível",
+    "tipo": "rotina",
+    "gpt": false,
+    "reaproveita": [
+      "relatorio-compras",
+      "relatorio-precos",
+      "relatorio-estoque",
+      "relatorio-financeiro"
+    ],
+    "departamento": "Compras"
+  },
+  {
     "name": "relatorio-vendas",
     "title": "Relatório de vendas",
     "summary": "Gera relatórios gerenciais de vendas, como a curva ABC, com a conta conferida.",
@@ -107,6 +198,23 @@
     "tipo": "relatorio",
     "gpt": false,
     "departamento": "Comercial"
+  },
+  {
+    "name": "visita-de-loja",
+    "title": "Visita de loja",
+    "summary": "Prepara a visita a uma loja, com os números dela, o que olhar no salão e as perguntas para o gerente.",
+    "site_url": "https://archeo.cd2.com.br/",
+    "rule": "",
+    "status": "disponível",
+    "tipo": "rotina",
+    "gpt": false,
+    "reaproveita": [
+      "relatorio-vendas",
+      "relatorio-perdas",
+      "relatorio-estoque",
+      "relatorio-precos"
+    ],
+    "departamento": "Loja"
   },
   {
     "name": "relatorio-perdas",
@@ -167,6 +275,17 @@
     "name": "comunicacao-de-ofertas",
     "title": "Comunicação de ofertas",
     "summary": "Escreve os textos da oferta por canal, no tom da loja, com período, condições e regras.",
+    "site_url": "https://archeo.cd2.com.br/",
+    "rule": "",
+    "status": "disponível",
+    "tipo": "rotina",
+    "gpt": false,
+    "departamento": "Comercial"
+  },
+  {
+    "name": "revisao-de-oferta",
+    "title": "Revisão de oferta",
+    "summary": "Confere encarte, post ou mensagem contra as regras de oferta, o plano e a voz da loja antes de publicar.",
     "site_url": "https://archeo.cd2.com.br/",
     "rule": "",
     "status": "disponível",

@@ -19,7 +19,7 @@ Siga o roteiro de conversa em `references/fluxo-dados.md` e o método em `refere
 | "o que vendo no prejuízo", "preço abaixo do custo" | Margem negativa | 3.2 |
 | "custo subiu e o preço não" | Custo sem repasse | 3.3 |
 | "o que mudou de preço", "histórico de preço" | Alterações de preço | 3.4 |
-| "a promoção funcionou?", "resultado da oferta" | Resultado de promoção | 3.5 |
+| "a promoção funcionou?", resultado por item | Resultado de promoção | 3.5 |
 | "preço do sistema bate com o caixa?" | Preço de cadastro x praticado | 3.6 |
 
 Pedido genérico ("análise de margem") recebe **margem por departamento** com os 20 itens de maior e de menor contribuição.
