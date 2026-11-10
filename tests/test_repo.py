@@ -127,6 +127,13 @@ class RepoTest(unittest.TestCase):
         self.assertEqual(set(harnesses["plugins"]["cd2-super"]["harnesses"]), {"claude", "codex", "dsh", "gpt"})
 
 
+class Departamentos(unittest.TestCase):
+    def test_departamentos_pedidos_tem_skill(self):
+        skills = json.loads((ROOT / "skills.json").read_text(encoding="utf-8"))
+        usados = {s["departamento"] for s in skills}
+        self.assertLessEqual({"Comercial", "Compras", "Financeiro", "RH", "Loja", "Fiscal", "Contábil"}, usados)
+
+
 class ArcheoPreConfigurado(unittest.TestCase):
     MCP = ROOT / "plugins/claude/cd2-super/.mcp.json"
 

@@ -343,6 +343,44 @@ SKILL_FONTE = (
 )
 
 
+def item_lista(nome, departamento):
+    return {"name": nome, "title": nome.title(), "summary": "s", "site_url": "https://archeo.cd2.com.br/", "rule": "",
+            "status": "disponível", "tipo": "relatorio", "gpt": False, "departamento": departamento}
+
+
+class DepartamentosTest(unittest.TestCase):
+    def setUp(self):
+        self.sync = load_sync()
+        self.itens = [item_lista("b", "Comercial"), item_lista("a", "RH"), item_lista("c", "Comercial")]
+
+    def test_departamento_invalido_acusa(self):
+        problems = self.sync.check_skills_json([item_lista("x", "Padaria")])
+        self.assertTrue(any("departamento" in p and "x" in p for p in problems), problems)
+
+    def test_sem_departamento_acusa(self):
+        item = item_lista("x", "RH")
+        del item["departamento"]
+        self.assertTrue(any("departamento" in p for p in self.sync.check_skills_json([item])))
+
+    def test_readme_agrupa_na_ordem_dos_departamentos(self):
+        bloco = self.sync.readme_block(self.itens)
+        self.assertLess(bloco.index("### RH"), bloco.index("### Comercial"))
+        self.assertEqual(bloco.count("### "), 2)
+        self.assertEqual(bloco.count("| Skill | O que faz |"), 2)
+
+    def test_dentro_do_departamento_mantem_a_ordem_do_skills_json(self):
+        bloco = self.sync.readme_block(self.itens)
+        self.assertLess(bloco.index("(`b`)"), bloco.index("(`c`)"))
+
+    def test_site_agrupa_com_titulo_e_grade(self):
+        bloco = self.sync.site_block(self.itens)
+        self.assertEqual(bloco.count('class="skills-dept"'), 2)
+        self.assertEqual(bloco.count('class="skills-grid"'), 2)
+        self.assertLess(bloco.index(">RH<"), bloco.index(">Comercial<"))
+        self.assertLess(bloco.index('id="skill-a"'), bloco.index('id="skill-b"'))
+        self.assertIn("<h4>", bloco)
+
+
 class ReaproveitaTest(unittest.TestCase):
     def setUp(self):
         self.sync = load_sync()
@@ -472,7 +510,7 @@ class KitsTest(unittest.TestCase):
 
     def test_cabecalho_e_rotulos_por_tipo(self):
         calc = {"name": "c", "title": "C", "summary": "s", "site_url": "https://calc.cd2.com.br/",
-                "rule": "Decreto 1", "status": "disponível", "tipo": "calculadora", "gpt": True}
+                "rule": "Decreto 1", "status": "disponível", "tipo": "calculadora", "gpt": True, "departamento": "RH"}
         rel = {**calc, "name": "r", "site_url": "https://archeo.cd2.com.br/", "rule": "", "tipo": "relatorio", "gpt": False}
         table = self.sync.readme_block([calc, rel])
         self.assertIn("| Skill | O que faz | Regra | Site | Status |", table)

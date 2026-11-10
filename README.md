@@ -43,27 +43,69 @@ Quem toca supermercado, padaria ou mercado de bairro não tem tempo para juridiq
 ## As skills
 
 <!-- skills:start -->
+### RH
+
 | Skill | O que faz | Regra | Site | Status |
 | --- | --- | --- | --- | --- |
 | **Fim da escala 6x1** (`fim-escala-6x1`) | Calcula o impacto do fim da escala 6x1 na folha e na operação da sua loja. | Emenda Constitucional 141/2026 | [calc-fim-escala6x1.cd2.com.br](https://calc-fim-escala6x1.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=fim-escala-6x1) | disponível |
+
+### Financeiro
+
+| Skill | O que faz | Regra | Site | Status |
+| --- | --- | --- | --- | --- |
 | **Quanto o VR/VA custa de verdade** (`custo-vrva`) | Mostra o custo real do vale-refeição e do vale-alimentação para a sua empresa. | Decreto 12.712/2025 | [calc-vrva.cd2.com.br](https://calc-vrva.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=custo-vrva) | disponível |
-| **Relatório de vendas** (`relatorio-vendas`) | Gera relatórios gerenciais de vendas, como a curva ABC, com a conta conferida. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=relatorio-vendas) | disponível |
-| **Relatório de estoque** (`relatorio-estoque`) | Gera relatórios gerenciais de estoque, como posição, Kardex e cobertura, com a conta conferida. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=relatorio-estoque) | disponível |
-| **Relatório de compras** (`relatorio-compras`) | Gera relatórios gerenciais de compras, como a curva ABC de abastecimento e os pedidos pendentes, com a conta conferida. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=relatorio-compras) | disponível |
-| **Relatório de preços** (`relatorio-precos`) | Gera relatórios gerenciais de preço, margem e promoção, com a conta conferida. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=relatorio-precos) | disponível |
-| **Relatório de perdas** (`relatorio-perdas`) | Gera relatórios gerenciais de perdas, como a quebra por motivo e o índice de perda, com a conta conferida. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=relatorio-perdas) | disponível |
 | **Relatório financeiro** (`relatorio-financeiro`) | Gera relatórios gerenciais financeiros, como o aging de contas a pagar e a receber e o fluxo de caixa. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=relatorio-financeiro) | disponível |
-| **Relatório fiscal** (`relatorio-fiscal`) | Confere documentos fiscais por CFOP, cabeçalho contra itens e numeração, como relatório gerencial e não documento oficial. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=relatorio-fiscal) | disponível |
-| **Relatório contábil** (`relatorio-contabil`) | Confere balancete, razão e lançamentos, como relatório gerencial e não escrituração oficial. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=relatorio-contabil) | disponível |
-| **Painel de varejo** (`painel-varejo`) | Monta um painel visual da operação do varejo, com totalizadores, linha do tempo, mapa de calor e leitura. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=painel-varejo) | disponível |
-| **Ficha de ferramenta do Archeo MCP Creator** (`ficha-archeo-mcp`) | Prepara a ficha de uma ferramenta para cadastrar no Archeo MCP Creator da CD2, com o SQL e os parâmetros. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=ficha-archeo-mcp) | disponível |
-| **Perfil da operação** (`perfil-da-operacao`) | Mostra o que está conectado, infere lojas e departamentos e gera o bloco de perfil para as outras rotinas. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=perfil-da-operacao) | disponível |
+
+### Diretoria
+
+| Skill | O que faz | Regra | Site | Status |
+| --- | --- | --- | --- | --- |
 | **Briefing do dia** (`briefing-do-dia`) | Monta o briefing da manhã, com venda contra a meta, ruptura, validade, contas, agenda e três ações. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=briefing-do-dia) | disponível |
 | **Sinais da operação** (`sinais-da-operacao`) | Aponta o que mudou e merece atenção, como fornecedor atrasando, custo sem repasse e margem negativa. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=sinais-da-operacao) | disponível |
-| **Preparo de negociação** (`preparo-de-negociacao`) | Prepara a visita de um fornecedor, com compra, custo, serviço, ruptura e o que pedir. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=preparo-de-negociacao) | disponível |
-| **Ata de negociação** (`ata-de-negociacao`) | Fecha a visita do fornecedor com acordos, pendências, mensagem de confirmação e o que atualizar no ERP. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=ata-de-negociacao) | disponível |
+| **Painel de varejo** (`painel-varejo`) | Monta um painel visual da operação do varejo, com totalizadores, linha do tempo, mapa de calor e leitura. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=painel-varejo) | disponível |
+| **Perfil da operação** (`perfil-da-operacao`) | Mostra o que está conectado, infere lojas e departamentos e gera o bloco de perfil para as outras rotinas. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=perfil-da-operacao) | disponível |
+
+### Comercial
+
+| Skill | O que faz | Regra | Site | Status |
+| --- | --- | --- | --- | --- |
 | **Plano de ofertas** (`plano-de-ofertas`) | Monta a semana de ofertas, com itens por papel, preço, margem, verba, canais e como medir. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=plano-de-ofertas) | disponível |
+| **Relatório de vendas** (`relatorio-vendas`) | Gera relatórios gerenciais de vendas, como a curva ABC, com a conta conferida. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=relatorio-vendas) | disponível |
+| **Relatório de preços** (`relatorio-precos`) | Gera relatórios gerenciais de preço, margem e promoção, com a conta conferida. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=relatorio-precos) | disponível |
 | **Comunicação de ofertas** (`comunicacao-de-ofertas`) | Escreve os textos da oferta por canal, no tom da loja, com período, condições e regras. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=comunicacao-de-ofertas) | disponível |
+
+### Compras
+
+| Skill | O que faz | Regra | Site | Status |
+| --- | --- | --- | --- | --- |
+| **Preparo de negociação** (`preparo-de-negociacao`) | Prepara a visita de um fornecedor, com compra, custo, serviço, ruptura e o que pedir. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=preparo-de-negociacao) | disponível |
+| **Relatório de compras** (`relatorio-compras`) | Gera relatórios gerenciais de compras, como a curva ABC de abastecimento e os pedidos pendentes, com a conta conferida. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=relatorio-compras) | disponível |
+| **Ata de negociação** (`ata-de-negociacao`) | Fecha a visita do fornecedor com acordos, pendências, mensagem de confirmação e o que atualizar no ERP. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=ata-de-negociacao) | disponível |
+
+### Loja
+
+| Skill | O que faz | Regra | Site | Status |
+| --- | --- | --- | --- | --- |
+| **Relatório de perdas** (`relatorio-perdas`) | Gera relatórios gerenciais de perdas, como a quebra por motivo e o índice de perda, com a conta conferida. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=relatorio-perdas) | disponível |
+| **Relatório de estoque** (`relatorio-estoque`) | Gera relatórios gerenciais de estoque, como posição, Kardex e cobertura, com a conta conferida. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=relatorio-estoque) | disponível |
+
+### Fiscal
+
+| Skill | O que faz | Regra | Site | Status |
+| --- | --- | --- | --- | --- |
+| **Relatório fiscal** (`relatorio-fiscal`) | Confere documentos fiscais por CFOP, cabeçalho contra itens e numeração, como relatório gerencial e não documento oficial. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=relatorio-fiscal) | disponível |
+
+### Contábil
+
+| Skill | O que faz | Regra | Site | Status |
+| --- | --- | --- | --- | --- |
+| **Relatório contábil** (`relatorio-contabil`) | Confere balancete, razão e lançamentos, como relatório gerencial e não escrituração oficial. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=relatorio-contabil) | disponível |
+
+### Tecnologia
+
+| Skill | O que faz | Regra | Site | Status |
+| --- | --- | --- | --- | --- |
+| **Ficha de ferramenta do Archeo MCP Creator** (`ficha-archeo-mcp`) | Prepara a ficha de uma ferramenta para cadastrar no Archeo MCP Creator da CD2, com o SQL e os parâmetros. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=ficha-archeo-mcp) | disponível |
 <!-- skills:end -->
 
 As calculadoras vão além do site:
@@ -74,17 +116,17 @@ As calculadoras vão além do site:
 
 ## Rotinas do dia
 
-Sete skills organizam o plugin pelo dia de quem toca o supermercado. Elas usam as consultas e as provas dos relatórios, então o número é o mesmo nos dois lugares.
+Sete skills atendem o dia a dia de cada departamento. Elas usam as consultas e as provas dos relatórios, então o número é o mesmo nos dois lugares.
 
-| Grupo | Skill | Pergunta que responde |
+| Departamento | Skill | Pergunta que responde |
 |---|---|---|
-| Seu dia | `perfil-da-operacao` | O que você consegue ver da minha operação e por onde começo? |
-| Seu dia | `briefing-do-dia` | Como está o dia? |
-| Seu dia | `sinais-da-operacao` | O que mudou e merece atenção? |
-| Fornecedores | `preparo-de-negociacao` | O fornecedor chega às 14h, me prepara. |
-| Fornecedores | `ata-de-negociacao` | Fecha a visita. |
-| Ofertas | `plano-de-ofertas` | Monta a semana de ofertas. |
-| Ofertas | `comunicacao-de-ofertas` | Escreve a comunicação dessa oferta. |
+| Diretoria | `perfil-da-operacao` | O que você consegue ver da minha operação e por onde começo? |
+| Diretoria | `briefing-do-dia` | Como está o dia? |
+| Diretoria | `sinais-da-operacao` | O que mudou e merece atenção? |
+| Compras | `preparo-de-negociacao` | O fornecedor chega às 14h, me prepara. |
+| Compras | `ata-de-negociacao` | Fecha a visita. |
+| Comercial | `plano-de-ofertas` | Monta a semana de ofertas. |
+| Comercial | `comunicacao-de-ofertas` | Escreve a comunicação dessa oferta. |
 
 As rotinas leem o ERP conectado ou um arquivo exportado, e a agenda e o e-mail quando estão conectados. Nada é escrito no ERP: o que precisa mudar vira uma lista para você fazer. E-mail sai como rascunho, WhatsApp sai como texto pronto para colar, e o que nasce de um e-mail ou de uma transcrição é mostrado antes de sair. As regras de oferta são apoio para conferência, não parecer jurídico.
 

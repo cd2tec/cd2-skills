@@ -7,7 +7,8 @@
     "rule": "Emenda Constitucional 141/2026",
     "status": "disponível",
     "tipo": "calculadora",
-    "gpt": true
+    "gpt": true,
+    "departamento": "RH"
   },
   {
     "name": "custo-vrva",
@@ -17,117 +18,8 @@
     "rule": "Decreto 12.712/2025",
     "status": "disponível",
     "tipo": "calculadora",
-    "gpt": true
-  },
-  {
-    "name": "relatorio-vendas",
-    "title": "Relatório de vendas",
-    "summary": "Gera relatórios gerenciais de vendas, como a curva ABC, com a conta conferida.",
-    "site_url": "https://archeo.cd2.com.br/",
-    "rule": "",
-    "status": "disponível",
-    "tipo": "relatorio",
-    "gpt": false
-  },
-  {
-    "name": "relatorio-estoque",
-    "title": "Relatório de estoque",
-    "summary": "Gera relatórios gerenciais de estoque, como posição, Kardex e cobertura, com a conta conferida.",
-    "site_url": "https://archeo.cd2.com.br/",
-    "rule": "",
-    "status": "disponível",
-    "tipo": "relatorio",
-    "gpt": false
-  },
-  {
-    "name": "relatorio-compras",
-    "title": "Relatório de compras",
-    "summary": "Gera relatórios gerenciais de compras, como a curva ABC de abastecimento e os pedidos pendentes, com a conta conferida.",
-    "site_url": "https://archeo.cd2.com.br/",
-    "rule": "",
-    "status": "disponível",
-    "tipo": "relatorio",
-    "gpt": false
-  },
-  {
-    "name": "relatorio-precos",
-    "title": "Relatório de preços",
-    "summary": "Gera relatórios gerenciais de preço, margem e promoção, com a conta conferida.",
-    "site_url": "https://archeo.cd2.com.br/",
-    "rule": "",
-    "status": "disponível",
-    "tipo": "relatorio",
-    "gpt": false
-  },
-  {
-    "name": "relatorio-perdas",
-    "title": "Relatório de perdas",
-    "summary": "Gera relatórios gerenciais de perdas, como a quebra por motivo e o índice de perda, com a conta conferida.",
-    "site_url": "https://archeo.cd2.com.br/",
-    "rule": "",
-    "status": "disponível",
-    "tipo": "relatorio",
-    "gpt": false
-  },
-  {
-    "name": "relatorio-financeiro",
-    "title": "Relatório financeiro",
-    "summary": "Gera relatórios gerenciais financeiros, como o aging de contas a pagar e a receber e o fluxo de caixa.",
-    "site_url": "https://archeo.cd2.com.br/",
-    "rule": "",
-    "status": "disponível",
-    "tipo": "relatorio",
-    "gpt": false
-  },
-  {
-    "name": "relatorio-fiscal",
-    "title": "Relatório fiscal",
-    "summary": "Confere documentos fiscais por CFOP, cabeçalho contra itens e numeração, como relatório gerencial e não documento oficial.",
-    "site_url": "https://archeo.cd2.com.br/",
-    "rule": "",
-    "status": "disponível",
-    "tipo": "relatorio",
-    "gpt": false
-  },
-  {
-    "name": "relatorio-contabil",
-    "title": "Relatório contábil",
-    "summary": "Confere balancete, razão e lançamentos, como relatório gerencial e não escrituração oficial.",
-    "site_url": "https://archeo.cd2.com.br/",
-    "rule": "",
-    "status": "disponível",
-    "tipo": "relatorio",
-    "gpt": false
-  },
-  {
-    "name": "painel-varejo",
-    "title": "Painel de varejo",
-    "summary": "Monta um painel visual da operação do varejo, com totalizadores, linha do tempo, mapa de calor e leitura.",
-    "site_url": "https://archeo.cd2.com.br/",
-    "rule": "",
-    "status": "disponível",
-    "tipo": "painel",
-    "gpt": false
-  },
-  {
-    "name": "ficha-archeo-mcp",
-    "title": "Ficha de ferramenta do Archeo MCP Creator",
-    "summary": "Prepara a ficha de uma ferramenta para cadastrar no Archeo MCP Creator da CD2, com o SQL e os parâmetros.",
-    "site_url": "https://archeo.cd2.com.br/",
-    "rule": "",
-    "status": "disponível",
-    "tipo": "ficha",
-    "gpt": false
-  },
-  {
-    "name": "perfil-da-operacao",
-    "title": "Perfil da operação",
-    "summary": "Mostra o que está conectado, infere lojas e departamentos e gera o bloco de perfil para as outras rotinas.",
-    "site_url": "https://archeo.cd2.com.br/",
-    "rule": "",
-    "status": "disponível",
-    "tipo": "rotina",
-    "gpt": false
+    "gpt": true,
+    "departamento": "Financeiro"
   },
   {
     "name": "briefing-do-dia",
@@ -143,7 +35,8 @@
       "relatorio-estoque",
       "relatorio-perdas",
       "relatorio-financeiro"
-    ]
+    ],
+    "departamento": "Diretoria"
   },
   {
     "name": "sinais-da-operacao",
@@ -160,31 +53,19 @@
       "relatorio-estoque",
       "relatorio-vendas",
       "relatorio-perdas"
-    ]
+    ],
+    "departamento": "Diretoria"
   },
   {
-    "name": "preparo-de-negociacao",
-    "title": "Preparo de negociação",
-    "summary": "Prepara a visita de um fornecedor, com compra, custo, serviço, ruptura e o que pedir.",
+    "name": "painel-varejo",
+    "title": "Painel de varejo",
+    "summary": "Monta um painel visual da operação do varejo, com totalizadores, linha do tempo, mapa de calor e leitura.",
     "site_url": "https://archeo.cd2.com.br/",
     "rule": "",
     "status": "disponível",
-    "tipo": "rotina",
+    "tipo": "painel",
     "gpt": false,
-    "reaproveita": [
-      "relatorio-compras",
-      "relatorio-estoque"
-    ]
-  },
-  {
-    "name": "ata-de-negociacao",
-    "title": "Ata de negociação",
-    "summary": "Fecha a visita do fornecedor com acordos, pendências, mensagem de confirmação e o que atualizar no ERP.",
-    "site_url": "https://archeo.cd2.com.br/",
-    "rule": "",
-    "status": "disponível",
-    "tipo": "rotina",
-    "gpt": false
+    "departamento": "Diretoria"
   },
   {
     "name": "plano-de-ofertas",
@@ -198,7 +79,89 @@
     "reaproveita": [
       "relatorio-precos",
       "relatorio-vendas"
-    ]
+    ],
+    "departamento": "Comercial"
+  },
+  {
+    "name": "preparo-de-negociacao",
+    "title": "Preparo de negociação",
+    "summary": "Prepara a visita de um fornecedor, com compra, custo, serviço, ruptura e o que pedir.",
+    "site_url": "https://archeo.cd2.com.br/",
+    "rule": "",
+    "status": "disponível",
+    "tipo": "rotina",
+    "gpt": false,
+    "reaproveita": [
+      "relatorio-compras",
+      "relatorio-estoque"
+    ],
+    "departamento": "Compras"
+  },
+  {
+    "name": "relatorio-vendas",
+    "title": "Relatório de vendas",
+    "summary": "Gera relatórios gerenciais de vendas, como a curva ABC, com a conta conferida.",
+    "site_url": "https://archeo.cd2.com.br/",
+    "rule": "",
+    "status": "disponível",
+    "tipo": "relatorio",
+    "gpt": false,
+    "departamento": "Comercial"
+  },
+  {
+    "name": "relatorio-perdas",
+    "title": "Relatório de perdas",
+    "summary": "Gera relatórios gerenciais de perdas, como a quebra por motivo e o índice de perda, com a conta conferida.",
+    "site_url": "https://archeo.cd2.com.br/",
+    "rule": "",
+    "status": "disponível",
+    "tipo": "relatorio",
+    "gpt": false,
+    "departamento": "Loja"
+  },
+  {
+    "name": "relatorio-precos",
+    "title": "Relatório de preços",
+    "summary": "Gera relatórios gerenciais de preço, margem e promoção, com a conta conferida.",
+    "site_url": "https://archeo.cd2.com.br/",
+    "rule": "",
+    "status": "disponível",
+    "tipo": "relatorio",
+    "gpt": false,
+    "departamento": "Comercial"
+  },
+  {
+    "name": "relatorio-estoque",
+    "title": "Relatório de estoque",
+    "summary": "Gera relatórios gerenciais de estoque, como posição, Kardex e cobertura, com a conta conferida.",
+    "site_url": "https://archeo.cd2.com.br/",
+    "rule": "",
+    "status": "disponível",
+    "tipo": "relatorio",
+    "gpt": false,
+    "departamento": "Loja"
+  },
+  {
+    "name": "relatorio-compras",
+    "title": "Relatório de compras",
+    "summary": "Gera relatórios gerenciais de compras, como a curva ABC de abastecimento e os pedidos pendentes, com a conta conferida.",
+    "site_url": "https://archeo.cd2.com.br/",
+    "rule": "",
+    "status": "disponível",
+    "tipo": "relatorio",
+    "gpt": false,
+    "departamento": "Compras"
+  },
+  {
+    "name": "relatorio-financeiro",
+    "title": "Relatório financeiro",
+    "summary": "Gera relatórios gerenciais financeiros, como o aging de contas a pagar e a receber e o fluxo de caixa.",
+    "site_url": "https://archeo.cd2.com.br/",
+    "rule": "",
+    "status": "disponível",
+    "tipo": "relatorio",
+    "gpt": false,
+    "departamento": "Financeiro"
   },
   {
     "name": "comunicacao-de-ofertas",
@@ -208,6 +171,62 @@
     "rule": "",
     "status": "disponível",
     "tipo": "rotina",
-    "gpt": false
+    "gpt": false,
+    "departamento": "Comercial"
+  },
+  {
+    "name": "ata-de-negociacao",
+    "title": "Ata de negociação",
+    "summary": "Fecha a visita do fornecedor com acordos, pendências, mensagem de confirmação e o que atualizar no ERP.",
+    "site_url": "https://archeo.cd2.com.br/",
+    "rule": "",
+    "status": "disponível",
+    "tipo": "rotina",
+    "gpt": false,
+    "departamento": "Compras"
+  },
+  {
+    "name": "perfil-da-operacao",
+    "title": "Perfil da operação",
+    "summary": "Mostra o que está conectado, infere lojas e departamentos e gera o bloco de perfil para as outras rotinas.",
+    "site_url": "https://archeo.cd2.com.br/",
+    "rule": "",
+    "status": "disponível",
+    "tipo": "rotina",
+    "gpt": false,
+    "departamento": "Diretoria"
+  },
+  {
+    "name": "relatorio-fiscal",
+    "title": "Relatório fiscal",
+    "summary": "Confere documentos fiscais por CFOP, cabeçalho contra itens e numeração, como relatório gerencial e não documento oficial.",
+    "site_url": "https://archeo.cd2.com.br/",
+    "rule": "",
+    "status": "disponível",
+    "tipo": "relatorio",
+    "gpt": false,
+    "departamento": "Fiscal"
+  },
+  {
+    "name": "relatorio-contabil",
+    "title": "Relatório contábil",
+    "summary": "Confere balancete, razão e lançamentos, como relatório gerencial e não escrituração oficial.",
+    "site_url": "https://archeo.cd2.com.br/",
+    "rule": "",
+    "status": "disponível",
+    "tipo": "relatorio",
+    "gpt": false,
+    "departamento": "Contábil"
+  },
+  {
+    "name": "ficha-archeo-mcp",
+    "title": "Ficha de ferramenta do Archeo MCP Creator",
+    "summary": "Prepara a ficha de uma ferramenta para cadastrar no Archeo MCP Creator da CD2, com o SQL e os parâmetros.",
+    "site_url": "https://archeo.cd2.com.br/",
+    "rule": "",
+    "status": "disponível",
+    "tipo": "ficha",
+    "gpt": false,
+    "departamento": "Tecnologia"
   }
 ]
