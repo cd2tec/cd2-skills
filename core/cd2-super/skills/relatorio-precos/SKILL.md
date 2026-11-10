@@ -1,6 +1,6 @@
 ---
 name: relatorio-precos
-description: Gera relatórios gerenciais de preço, margem e promoção de um varejo ou distribuidora, com a conta conferida. Funciona com o banco do ERP conectado, com outro MCP de dados ou com um arquivo exportado do sistema (CSV ou planilha), e também com números digitados. Cobre margem por produto e departamento, itens com margem negativa ou preço abaixo do custo, custo que subiu sem repasse ao preço, histórico de alteração de preço, resultado de promoção (antes, durante e depois) e divergência entre o preço de cadastro e o praticado no caixa. Use quando a pessoa pedir análise de margem, markup, rentabilidade por produto ou categoria, itens vendidos abaixo do custo, alterações de preço, resultado ou efetividade de promoção, ou conferência de preço, mesmo sem citar o nome da skill.
+description: Gera relatórios gerenciais de preço, margem e promoção de um varejo ou distribuidora, com a conta conferida. Funciona com o banco do ERP conectado, com outro MCP de dados ou com um arquivo exportado do sistema (CSV ou planilha), e também com números digitados. Cobre margem por produto e departamento, itens com margem negativa ou preço abaixo do custo, custo que subiu sem repasse ao preço, histórico de alteração de preço, resultado de promoção (antes, durante e depois) e divergência entre o preço de cadastro e o praticado no caixa. Use quando a pessoa pedir análise de margem, markup, rentabilidade por produto ou categoria, itens vendidos abaixo do custo, alterações de preço, resultado ou efetividade de promoção, ou conferência de preço, mesmo sem citar o nome da skill. Para fechar uma campanha inteira, com verba, estoque e plano, use resultado-da-oferta.
 ---
 
 # Relatório de preços
@@ -21,7 +21,7 @@ Siga o roteiro de conversa em `references/fluxo-dados.md` e o método em `refere
 | "o que vendo no prejuízo", "preço abaixo do custo" | Margem negativa | 3.2 |
 | "custo subiu e o preço não" | Custo sem repasse | 3.3 |
 | "o que mudou de preço", "histórico de preço" | Alterações de preço | 3.4 |
-| "a promoção funcionou?", "resultado da oferta" | Resultado de promoção | 3.5 |
+| "a promoção funcionou?", resultado por item | Resultado de promoção | 3.5 |
 | "preço do sistema bate com o caixa?" | Preço de cadastro x praticado | 3.6 |
 
 Pedido genérico ("análise de margem") recebe **margem por departamento** com os 20 itens de maior e de menor contribuição.

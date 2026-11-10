@@ -62,6 +62,8 @@ Quem toca supermercado, padaria ou mercado de bairro não tem tempo para juridiq
 | --- | --- | --- | --- | --- |
 | **Briefing do dia** (`briefing-do-dia`) | Monta o briefing da manhã, com venda contra a meta, ruptura, validade, contas, agenda e três ações. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=briefing-do-dia) | disponível |
 | **Sinais da operação** (`sinais-da-operacao`) | Aponta o que mudou e merece atenção, como fornecedor atrasando, custo sem repasse e margem negativa. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=sinais-da-operacao) | disponível |
+| **Resumo da semana** (`resumo-da-semana`) | Fecha a semana com o que subiu e o que caiu e deixa a pauta da reunião de resultados com os números. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=resumo-da-semana) | disponível |
+| **Fechamento do dia** (`fechamento-do-dia`) | Fecha o dia com o que foi decidido, as pendências, as mensagens para a equipe e as três coisas de amanhã. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=fechamento-do-dia) | disponível |
 | **Painel de varejo** (`painel-varejo`) | Monta um painel visual da operação do varejo, com totalizadores, linha do tempo, mapa de calor e leitura. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=painel-varejo) | disponível |
 | **Perfil da operação** (`perfil-da-operacao`) | Mostra o que está conectado, infere lojas e departamentos e gera o bloco de perfil para as outras rotinas. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=perfil-da-operacao) | disponível |
 
@@ -70,15 +72,20 @@ Quem toca supermercado, padaria ou mercado de bairro não tem tempo para juridiq
 | Skill | O que faz | Regra | Site | Status |
 | --- | --- | --- | --- | --- |
 | **Plano de ofertas** (`plano-de-ofertas`) | Monta a semana de ofertas, com itens por papel, preço, margem, verba, canais e como medir. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=plano-de-ofertas) | disponível |
+| **Radar de concorrência** (`radar-de-concorrencia`) | Mostra onde o seu preço está acima ou abaixo do concorrente, por item, categoria e concorrente. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=radar-de-concorrencia) | disponível |
+| **Resultado da oferta** (`resultado-da-oferta`) | Mostra se a oferta valeu: contribuição antes, durante e depois, canibalização, estoque que sobrou e verba. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=resultado-da-oferta) | disponível |
 | **Relatório de vendas** (`relatorio-vendas`) | Gera relatórios gerenciais de vendas, como a curva ABC, com a conta conferida. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=relatorio-vendas) | disponível |
 | **Relatório de preços** (`relatorio-precos`) | Gera relatórios gerenciais de preço, margem e promoção, com a conta conferida. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=relatorio-precos) | disponível |
 | **Comunicação de ofertas** (`comunicacao-de-ofertas`) | Escreve os textos da oferta por canal, no tom da loja, com período, condições e regras. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=comunicacao-de-ofertas) | disponível |
+| **Revisão de oferta** (`revisao-de-oferta`) | Confere encarte, post ou mensagem contra as regras de oferta, o plano e a voz da loja antes de publicar. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=revisao-de-oferta) | disponível |
 
 ### Compras
 
 | Skill | O que faz | Regra | Site | Status |
 | --- | --- | --- | --- | --- |
 | **Preparo de negociação** (`preparo-de-negociacao`) | Prepara a visita de um fornecedor, com compra, custo, serviço, ruptura e o que pedir. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=preparo-de-negociacao) | disponível |
+| **Cenário de custo** (`cenario-de-custo`) | Simula um aumento de custo do fornecedor: margem e preço sem repasse, repassando o valor e mantendo a margem. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=cenario-de-custo) | disponível |
+| **Ficha do fornecedor** (`ficha-do-fornecedor`) | Junta em uma página compra, serviço, custo, margem, títulos, verbas, e-mails e atas de um fornecedor. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=ficha-do-fornecedor) | disponível |
 | **Relatório de compras** (`relatorio-compras`) | Gera relatórios gerenciais de compras, como a curva ABC de abastecimento e os pedidos pendentes, com a conta conferida. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=relatorio-compras) | disponível |
 | **Ata de negociação** (`ata-de-negociacao`) | Fecha a visita do fornecedor com acordos, pendências, mensagem de confirmação e o que atualizar no ERP. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=ata-de-negociacao) | disponível |
 
@@ -86,6 +93,7 @@ Quem toca supermercado, padaria ou mercado de bairro não tem tempo para juridiq
 
 | Skill | O que faz | Regra | Site | Status |
 | --- | --- | --- | --- | --- |
+| **Visita de loja** (`visita-de-loja`) | Prepara a visita a uma loja, com os números dela, o que olhar no salão e as perguntas para o gerente. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=visita-de-loja) | disponível |
 | **Relatório de perdas** (`relatorio-perdas`) | Gera relatórios gerenciais de perdas, como a quebra por motivo e o índice de perda, com a conta conferida. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=relatorio-perdas) | disponível |
 | **Relatório de estoque** (`relatorio-estoque`) | Gera relatórios gerenciais de estoque, como posição, Kardex e cobertura, com a conta conferida. | Não se aplica | [archeo.cd2.com.br](https://archeo.cd2.com.br/?utm_source=github&utm_medium=skill&utm_campaign=relatorio-estoque) | disponível |
 
@@ -116,17 +124,25 @@ As calculadoras vão além do site:
 
 ## Rotinas do dia
 
-Sete skills atendem o dia a dia de cada departamento. Elas usam as consultas e as provas dos relatórios, então o número é o mesmo nos dois lugares.
+Quinze skills atendem o dia a dia de cada departamento. Elas usam as consultas e as provas dos relatórios, então o número é o mesmo nos dois lugares.
 
 | Departamento | Skill | Pergunta que responde |
 |---|---|---|
 | Diretoria | `perfil-da-operacao` | O que você consegue ver da minha operação e por onde começo? |
 | Diretoria | `briefing-do-dia` | Como está o dia? |
 | Diretoria | `sinais-da-operacao` | O que mudou e merece atenção? |
+| Diretoria | `resumo-da-semana` | Como foi a semana e o que levo para a reunião? |
+| Diretoria | `fechamento-do-dia` | Fecha o dia e me diz o que fazer amanhã. |
 | Compras | `preparo-de-negociacao` | O fornecedor chega às 14h, me prepara. |
 | Compras | `ata-de-negociacao` | Fecha a visita. |
+| Compras | `cenario-de-custo` | E se o custo desse fornecedor subir 8%? |
+| Compras | `ficha-do-fornecedor` | Como está esse fornecedor? |
 | Comercial | `plano-de-ofertas` | Monta a semana de ofertas. |
 | Comercial | `comunicacao-de-ofertas` | Escreve a comunicação dessa oferta. |
+| Comercial | `revisao-de-oferta` | Confere esse encarte antes de eu publicar? |
+| Comercial | `resultado-da-oferta` | A oferta deu certo? |
+| Comercial | `radar-de-concorrencia` | Como estou frente ao concorrente? |
+| Loja | `visita-de-loja` | Vou visitar a Loja 3, o que olho? |
 
 As rotinas leem o ERP conectado ou um arquivo exportado, e a agenda e o e-mail quando estão conectados. Nada é escrito no ERP: o que precisa mudar vira uma lista para você fazer. E-mail sai como rascunho, WhatsApp sai como texto pronto para colar, e o que nasce de um e-mail ou de uma transcrição é mostrado antes de sair. As regras de oferta são apoio para conferência, não parecer jurídico.
 

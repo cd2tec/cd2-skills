@@ -11,7 +11,7 @@
     {
       "name": "cd2-super",
       "source": "./plugins/claude/cd2-super",
-      "description": "Skills da CD2 Tech para o varejo alimentar: rotinas do dia (briefing-do-dia, sinais, negociação com fornecedor e ofertas); calculadoras fim-escala-6x1 e custo-vrva; oito relatórios gerenciais relatorio-*; painel-varejo; e ficha-archeo-mcp para o Archeo MCP Creator da CD2. Rotinas, relatórios e painel funcionam conectados ao ERP ou com arquivo exportado.",
+      "description": "Skills da CD2 Tech para o varejo alimentar: rotinas do dia (briefing-do-dia, sinais, semana, negociação com fornecedor, ofertas e visita de loja); calculadoras fim-escala-6x1 e custo-vrva; oito relatórios gerenciais relatorio-*; painel-varejo; e ficha-archeo-mcp para o Archeo MCP Creator da CD2. Rotinas, relatórios e painel funcionam conectados ao ERP ou com arquivo exportado.",
       "license": "CC-BY-NC-ND-4.0",
       "keywords": [
         "cd2",

@@ -114,7 +114,7 @@ class RepoTest(unittest.TestCase):
         core = json.loads(read("core/cd2-super/plugin.core.json"))
         skills = json.loads(read("skills.json"))
         harnesses = json.loads(read("harnesses.json"))
-        self.assertEqual(core["version"], "0.4.0")
+        self.assertEqual(core["version"], "0.5.0")
         self.assertEqual(
             {s["name"] for s in skills},
             {
@@ -122,6 +122,8 @@ class RepoTest(unittest.TestCase):
                 "relatorio-compras", "relatorio-precos", "relatorio-perdas", "relatorio-financeiro",
                 "relatorio-fiscal", "relatorio-contabil", "painel-varejo", "ficha-archeo-mcp",
                 "perfil-da-operacao", "briefing-do-dia", "sinais-da-operacao", "preparo-de-negociacao", "ata-de-negociacao", "plano-de-ofertas", "comunicacao-de-ofertas",
+                "fechamento-do-dia", "resumo-da-semana", "ficha-do-fornecedor", "cenario-de-custo",
+                "resultado-da-oferta", "revisao-de-oferta", "radar-de-concorrencia", "visita-de-loja",
             },
         )
         self.assertEqual(set(harnesses["plugins"]["cd2-super"]["harnesses"]), {"claude", "codex", "dsh", "gpt"})

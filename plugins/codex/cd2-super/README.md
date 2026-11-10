@@ -40,6 +40,14 @@ No ChatGPT Work (planos de empresa), quem administra o workspace importa o repos
 | [`ata-de-negociacao`](skills/ata-de-negociacao/SKILL.md) | Ata da visita, com acordos, pendências, mensagem de confirmação e o que atualizar no ERP |
 | [`plano-de-ofertas`](skills/plano-de-ofertas/SKILL.md) | Plano da semana de ofertas, com itens por papel, preço, margem, verba, canais e como medir |
 | [`comunicacao-de-ofertas`](skills/comunicacao-de-ofertas/SKILL.md) | Textos da oferta por canal, no tom da loja, com período, condições e regras |
+| [`resumo-da-semana`](skills/resumo-da-semana/SKILL.md) | Fecha a semana com o que subiu e o que caiu e a pauta da reunião de resultados |
+| [`fechamento-do-dia`](skills/fechamento-do-dia/SKILL.md) | Fecha o dia com decisões, pendências, mensagens para a equipe e as três de amanhã |
+| [`cenario-de-custo`](skills/cenario-de-custo/SKILL.md) | Simula um aumento de custo: margem e preço com e sem repasse |
+| [`ficha-do-fornecedor`](skills/ficha-do-fornecedor/SKILL.md) | Compra, serviço, custo, margem, títulos, verbas, e-mails e atas de um fornecedor |
+| [`radar-de-concorrencia`](skills/radar-de-concorrencia/SKILL.md) | Índice de preço frente aos concorrentes, por item, categoria e concorrente |
+| [`resultado-da-oferta`](skills/resultado-da-oferta/SKILL.md) | Contribuição antes, durante e depois, canibalização, estoque que sobrou e verba |
+| [`revisao-de-oferta`](skills/revisao-de-oferta/SKILL.md) | Confere a peça contra as regras de oferta, o plano e a voz da loja |
+| [`visita-de-loja`](skills/visita-de-loja/SKILL.md) | Números da loja, o que olhar no salão e perguntas para o gerente |
 
 A entrega visual sai como arquivo HTML autocontido, salvo na pasta de trabalho.
 

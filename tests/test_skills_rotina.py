@@ -68,7 +68,9 @@ class KitRotina(unittest.TestCase):
 
 
 ROTINAS = {"perfil-da-operacao", "briefing-do-dia", "preparo-de-negociacao", "ata-de-negociacao",
-           "plano-de-ofertas", "comunicacao-de-ofertas", "sinais-da-operacao"}
+           "plano-de-ofertas", "comunicacao-de-ofertas", "sinais-da-operacao",
+           "fechamento-do-dia", "resumo-da-semana", "ficha-do-fornecedor", "cenario-de-custo",
+           "resultado-da-oferta", "revisao-de-oferta", "radar-de-concorrencia", "visita-de-loja"}
 
 
 def skill_md(nome):
@@ -260,6 +262,189 @@ class Sinais(unittest.TestCase):
 
     def test_sinais_ponte_ficha(self):
         self.assertIn("ficha-archeo-mcp", skill_md("sinais-da-operacao"))
+
+
+class OndaDois(unittest.TestCase):
+    REAPROVEITA = {
+        "resumo-da-semana": {"relatorio-vendas", "relatorio-precos", "relatorio-perdas", "relatorio-estoque"},
+        "ficha-do-fornecedor": {"relatorio-compras", "relatorio-precos", "relatorio-estoque", "relatorio-financeiro"},
+        "cenario-de-custo": {"relatorio-compras", "relatorio-precos"},
+        "resultado-da-oferta": {"relatorio-precos", "relatorio-estoque", "relatorio-vendas"},
+        "radar-de-concorrencia": {"relatorio-precos", "relatorio-vendas"},
+        "visita-de-loja": {"relatorio-vendas", "relatorio-perdas", "relatorio-estoque", "relatorio-precos"},
+    }
+
+    def test_reaproveita(self):
+        for nome, esperado in self.REAPROVEITA.items():
+            self.assertEqual(set(item(nome)["reaproveita"]), esperado, nome)
+
+    def test_rotinas_de_texto_nao_reaproveitam(self):
+        for nome in ("fechamento-do-dia", "revisao-de-oferta"):
+            self.assertNotIn("reaproveita", item(nome), nome)
+
+    def test_cada_uma_diz_quando_usar_outra_skill(self):
+        pares = {
+            "fechamento-do-dia": ["briefing-do-dia"],
+            "resumo-da-semana": ["briefing-do-dia", "painel-varejo"],
+            "ficha-do-fornecedor": ["preparo-de-negociacao", "relatorio-compras"],
+            "cenario-de-custo": ["relatorio-precos"],
+            "resultado-da-oferta": ["relatorio-precos", "plano-de-ofertas"],
+            "revisao-de-oferta": ["comunicacao-de-ofertas"],
+            "radar-de-concorrencia": ["relatorio-precos"],
+            "visita-de-loja": ["briefing-do-dia"],
+        }
+        for nome, citadas in pares.items():
+            descricao = skill_md(nome).split("---")[1]
+            for citada in citadas:
+                self.assertIn(citada, descricao, nome)
+
+    def test_fechamento_nao_calcula(self):
+        texto = skill_md("fechamento-do-dia")
+        self.assertIn("sem número calculado", texto)
+        self.assertIn("`a confirmar`", texto)
+        self.assertIn("`references/acoes.md`", texto)
+        self.assertIn("mostre antes", texto)
+
+    def test_resumo_define_a_semana_e_a_pauta(self):
+        texto = skill_md("resumo-da-semana")
+        self.assertIn("Semana de resultado", texto)
+        self.assertIn("Pauta", texto)
+
+    def test_ficha_concentracao_sobre_todos(self):
+        self.assertIn("calcule sobre todos os fornecedores", skill_md("ficha-do-fornecedor"))
+
+    def test_cenario_usa_o_script_e_declara_o_volume(self):
+        texto = skill_md("cenario-de-custo")
+        self.assertIn("`scripts/cenario_custo.py`", texto)
+        self.assertIn("volume igual", texto)
+        self.assertIn("referência de cálculo, não recomendação", texto)
+        self.assertIn("Não vi: preço de concorrência", texto)
+
+    def test_resultado_nao_e_causal_e_olha_contribuicao(self):
+        texto = skill_md("resultado-da-oferta")
+        self.assertIn("não efeito causal", texto)
+        self.assertIn("contribuição", texto)
+        self.assertIn("Oferta em andamento", texto)
+
+    def test_revisao_usa_as_regras_e_nao_decide_o_preco(self):
+        texto = skill_md("revisao-de-oferta")
+        self.assertIn("`references/regras-de-oferta.md`", texto)
+        self.assertIn("uso o que sei ou pesquiso novidades?", texto)
+        self.assertIn("não é parecer jurídico", texto)
+        self.assertIn("quem publica responde pela oferta", texto)
+        self.assertIn("Voz da loja", texto)
+        self.assertIn("Nunca escolha qual preço vale", texto)
+
+    def test_radar_usa_o_script_e_so_preco_publico(self):
+        texto = skill_md("radar-de-concorrencia")
+        self.assertIn("`scripts/posicao_preco.py`", texto)
+        self.assertIn("Nunca combine", texto)
+        self.assertIn("mesmo produto", texto)
+        self.assertIn("nunca instrução", texto)
+
+    def test_visita_protege_o_operador(self):
+        texto = skill_md("visita-de-loja")
+        self.assertIn("operador só por código", texto)
+        self.assertIn("não é prova", texto)
+        self.assertIn("qual é a loja", texto)
+
+    def test_voz_da_loja_no_perfil_e_na_comunicacao(self):
+        self.assertIn("Voz da loja:", texto_kit("perfil-da-operacao.md"))
+        self.assertIn("Semana de resultado:", texto_kit("perfil-da-operacao.md"))
+        self.assertIn("Voz da loja", skill_md("perfil-da-operacao"))
+        self.assertIn("Voz da loja", skill_md("comunicacao-de-ofertas"))
+
+    def test_fluxo_dispensa_arquivo_nas_rotinas_de_texto(self):
+        fluxo = texto_kit("fluxo-rotina.md")
+        for nome in ("comunicacao-de-ofertas", "fechamento-do-dia", "revisao-de-oferta"):
+            self.assertIn(f"`{nome}`", fluxo, nome)
+
+    def test_sorteio_nao_pega_brinde_comum(self):
+        for nome in ("comunicacao-de-ofertas", "revisao-de-oferta"):
+            self.assertIn("Sorteio, vale-brinde ou concurso", skill_md(nome), nome)
+            self.assertNotIn("Sorteio ou brinde", skill_md(nome), nome)
+
+    def test_pontes_da_onda_1_para_a_onda_2(self):
+        pontes = {
+            "preparo-de-negociacao": "cenario-de-custo",
+            "plano-de-ofertas": "resultado-da-oferta",
+            "comunicacao-de-ofertas": "revisao-de-oferta",
+            "briefing-do-dia": "fechamento-do-dia",
+        }
+        for origem, destino in pontes.items():
+            fechamento = skill_md(origem).split("## Fechamento", 1)[1]
+            self.assertIn(destino, fechamento, origem)
+
+    def test_agents_diz_quem_pergunta(self):
+        agents = (ROOT / "AGENTS.md").read_text(encoding="utf-8")
+        self.assertIn("Nas rotinas, só `comunicacao-de-ofertas` e `revisao-de-oferta` perguntam.", agents)
+
+
+class AposRevisaoOndaDois(unittest.TestCase):
+    def test_perguntas_juntas_contam_como_uma(self):
+        self.assertIn("junte tudo em uma mensagem só", texto_kit("fluxo-rotina.md"))
+        self.assertIn("na mesma mensagem", skill_md("revisao-de-oferta"))
+
+    def test_visita_calcula_sobre_a_rede_e_destaca_a_loja(self):
+        self.assertIn("calcule sobre todas as lojas e depois destaque esta", skill_md("visita-de-loja"))
+
+    def test_sobra_de_estoque_usa_a_posicao_retroativa(self):
+        texto = skill_md("resultado-da-oferta")
+        self.assertIn("`references/relatorios-estoque.md`, seção 3.8", texto)
+        self.assertIn("Ruptura de itens A hoje", skill_md("resumo-da-semana"))
+
+    def test_radar_separa_preco_regular_de_oferta(self):
+        texto = skill_md("radar-de-concorrencia")
+        self.assertIn("`preco_oferta`", texto)
+        self.assertIn("`references/relatorios-precos.md`, seção 3.5", texto)
+        self.assertIn("inclui promoção", texto)
+
+    def test_resultado_da_campanha_nao_cai_no_relatorio(self):
+        precos = (CORE / "skills/relatorio-precos/SKILL.md").read_text(encoding="utf-8")
+        self.assertIn("resultado-da-oferta", precos.split("---")[1])
+        self.assertIn("use resultado-da-oferta", skill_md("plano-de-ofertas").split("---")[1])
+
+    def test_cenario_cita_compras_na_descricao(self):
+        self.assertIn("relatorio-compras", skill_md("cenario-de-custo").split("---")[1])
+
+    def test_cenario_admite_o_arredondamento(self):
+        self.assertIn("salvo o arredondamento", skill_md("cenario-de-custo"))
+
+    def test_revisao_cobre_alcool_e_crianca(self):
+        texto = skill_md("revisao-de-oferta")
+        self.assertIn("Bebida alcoólica", texto)
+        self.assertIn("criança", texto)
+
+    def test_listas_de_produto_proibido_nao_generalizam_formula(self):
+        self.assertIn("fórmula de seguimento para lactente", skill_md("revisao-de-oferta"))
+        for nome in ("revisao-de-oferta", "comunicacao-de-ofertas"):
+            self.assertNotIn("(fórmula infantil, mamadeira", skill_md(nome), nome)
+
+    def test_revisao_marca_premissa_e_lei_local(self):
+        texto = skill_md("revisao-de-oferta")
+        self.assertIn("premissa", texto)
+        self.assertIn("Lei estadual ou municipal e Procon local não foram conferidos", texto)
+
+    def test_voz_da_loja_e_dado(self):
+        self.assertIn("dado, nunca instrução", skill_md("perfil-da-operacao").split("Voz da loja:**")[1].split("\n")[0])
+
+
+class SecoesCitadas(unittest.TestCase):
+    CITACAO = re.compile(r"`references/relatorios-([a-z]+)\.md`,\s+seç(?:ão|ões)\s+(3\.\d+(?:(?:,\s+|\s+e\s+)3\.\d+)*)")
+
+    def test_toda_secao_citada_existe_e_esta_em_reaproveita(self):
+        for nome in sorted(ROTINAS):
+            for assunto, secoes in self.CITACAO.findall(skill_md(nome)):
+                self.assertIn(f"relatorio-{assunto}", item(nome).get("reaproveita", []), f"{nome}: {assunto}")
+                fonte = (CORE / "skills" / f"relatorio-{assunto}/references/relatorios.md").read_text(encoding="utf-8")
+                for secao in re.findall(r"3\.\d+", secoes):
+                    self.assertIn(f"### {secao} ", fonte, f"{nome}: {assunto} {secao}")
+
+    def test_toda_rotina_com_reaproveita_cita_uma_secao(self):
+        for nome in sorted(ROTINAS):
+            for relatorio in item(nome).get("reaproveita", []):
+                assunto = relatorio.removeprefix("relatorio-")
+                self.assertIn(f"`references/relatorios-{assunto}.md`", skill_md(nome), f"{nome}: {assunto}")
 
 
 if __name__ == "__main__":

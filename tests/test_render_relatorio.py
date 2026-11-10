@@ -732,11 +732,14 @@ class BlocosDeRotina(unittest.TestCase):
         self.assertEqual(codigo, 2)
         self.assertIn("skill", saida)
 
-    def test_cinco_rotinas_aceitas(self):
+    def test_rotinas_aceitas(self):
         titulos = {
             "briefing-do-dia": "Briefing do dia", "sinais-da-operacao": "Sinais da operação",
             "preparo-de-negociacao": "Preparo de negociação", "ata-de-negociacao": "Ata de negociação",
             "plano-de-ofertas": "Plano de ofertas",
+            "resumo-da-semana": "Resumo da semana", "ficha-do-fornecedor": "Ficha do fornecedor",
+            "cenario-de-custo": "Cenário de custo", "resultado-da-oferta": "Resultado da oferta",
+            "radar-de-concorrencia": "Radar de concorrência", "visita-de-loja": "Visita de loja",
         }
         for skill, titulo in titulos.items():
             rel = ata()
